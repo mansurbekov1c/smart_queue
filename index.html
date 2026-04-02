@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Navbat — Smart Queue Platform</title>
+<link rel="stylesheet" href="/style.css">
+
+<!--
+=======================================================
+  NAVBAT — SMART QUEUE PLATFORM
+  Uzbekiston uchun aqlli navbat tizimi
+  
+  FAYL TUZILMASI:
+  1. <style>   — Barcha CSS (o'zgaruvchilar, komponentlar)
+  2. <body>    — HTML ekranlar (har biri #id bilan)
+  3. <script>  — JavaScript (ma'lumotlar + mantiq)
+
+  EKRANLAR RO'YXATI:
+  - #screen-splash     : Rol tanlash (Mijoz / Admin)
+  - #screen-login      : Mijoz kirish/ro'yxat
+  - #screen-admin-login: Admin kirish (markaz tanlash)
+  - #screen-home       : Mijoz bosh sahifa
+  - #screen-market     : Bozor (barcha xizmatlar)
+  - #screen-detail     : Xizmat joyi batafsil
+  - #screen-myqueue    : Mening navbatim
+  - #screen-profile    : Profil
+  - #screen-admin      : Admin panel
+  - #screen-display    : Katta ekran rejimi
+
+  JAVASCRIPT TUZILMASI:
+  - ADMINS[]    : Admin login/parol ro'yxati
+  - PLACES[]    : Barcha xizmat joylari
+  - STATE{}     : Ilovaning joriy holati
+  - Funksiyalar : showScreen, renderX, eventlar
+=======================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+</head>
+<body>
+<div id="app">
+
+<!-- ==================================================
+     EKRAN 1: SPLASH — Rol tanlash
+     Ilova ochilganda ko'rinadigan birinchi sahifa
+     ================================================== -->
+<div class="screen active" id="screen-splash">
+  <!-- Yuqori o'ng: Kun/Tun tugmasi -->
+  <div style="position:absolute;top:16px;right:16px;z-index:10">
+    <button class="theme-btn" onclick="toggleTheme()" title="Kun/Tun rejimi" id="splash-theme-btn">🌙</button>
+  </div>
+
+  <div class="splash-wrap">
+    <div class="splash-logo">⚡</div>
+    <h1 class="splash-title">Navbat</h1>
+    <p class="splash-sub">O'zbekiston uchun aqlli<br>navbat platformasi</p>
+
+    <!-- Rol tanlash tugmalari -->
+    <p style="font-size:12px;font-weight:700;color:var(--c-text3);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px">Rolni tanlang</p>
+    <div class="role-toggle" id="role-toggle">
+      <button class="role-btn active" onclick="selectRole('customer',this)">👤 Mijoz</button>
+      <button class="role-btn" onclick="selectRole('admin',this)">🏢 Admin</button>
+    </div>
+
+    <!-- Kirish / Demo tugmalari -->
+    <button class="btn btn-primary" onclick="goToLogin()" style="margin-bottom:10px">Kirish / Ro'yxatdan o'tish</button>
+    <button class="btn btn-secondary" onclick="demoLogin()">⚡ Demo rejimida kirish</button>
+
+    <p style="margin-top:24px;font-size:12px;color:var(--c-text3);text-align:center">
+      Navbat v2.5 · Toshkent, O'zbekiston
+    </p>
+  </div>
+</div>
+
+<!-- ==================================================
+     EKRAN 2: MIJOZ LOGIN — Kirish/Ro'yxat
+     ================================================== -->
+<div class="screen" id="screen-login">
+  <!-- Yuqori panel: orqaga + sarlavha + kun/tun -->
+  <div class="topbar">
+    <button class="btn-back" onclick="showScreen('screen-splash')">←</button>
+    <span class="topbar-title" id="login-screen-title">Kirish</span>
+    <button class="theme-btn" onclick="toggleTheme()" id="login-theme-btn">🌙</button>
+  </div>
+
+  <div class="content" style="padding-top:24px">
+    <!-- Logo -->
+    <div class="auth-logo">⚡</div>
+    <h2 class="auth-title">Xush kelibsiz!</h2>
+    <p class="auth-sub">Navbatni onlayn boshqaring</p>
+
+    <!-- Kirish / Ro'yxatdan o'tish tablar -->
+    <div class="auth-tabs" id="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">Kirish</button>
+      <button class="auth-tab" onclick="switchAuthTab('register')">Ro'yxatdan o'tish</button>
+    </div>
+
+    <!-- Kirish formasi -->
+    <div id="form-login">
+      <div class="form-group">
+        <label class="form-label">Telefon raqam</label>
+        <input type="tel" id="inp-phone" placeholder="+998 90 123 45 67">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Parol</label>
+        <input type="password" id="inp-pass" placeholder="••••••••">
+      </div>
+      <button class="btn btn-primary" onclick="doLogin()">Kirish →</button>
+    </div>
+
+    <!-- Ro'yxatdan o'tish formasi -->
+    <div id="form-register" style="display:none">
+      <div class="form-group">
+        <label class="form-label">Ism *</label>
+        <input type="text" id="inp-firstname" placeholder="Ali">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Familiya *</label>
+        <input type="text" id="inp-lastname" placeholder="Valiyev">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Telefon *</label>
+        <input type="tel" id="inp-regphone" placeholder="+998 90 123 45 67">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Parol *</label>
+        <input type="password" id="inp-regpass" placeholder="Kamida 6 ta belgi">
+      </div>
+      <button class="btn btn-primary" onclick="doRegister()">Ro'yxatdan o'tish →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================================================
+     EKRAN 3: ADMIN LOGIN — Markaz tanlash + kirish
+     ================================================== -->
+<div class="screen" id="screen-admin-login">
+  <!-- Yuqori panel -->
+  <div class="topbar">
+    <button class="btn-back" onclick="showScreen('screen-splash')">←</button>
+    <span class="topbar-title">Admin kirish</span>
+    <button class="theme-btn" onclick="toggleTheme()" id="admin-login-theme-btn">🌙</button>
+  </div>
+
+  <div class="content" style="padding-top:20px">
+    <div class="auth-logo">🏢</div>
+    <h2 class="auth-title" style="margin-bottom:4px">Admin paneli</h2>
+    <p class="auth-sub">Markazingizni tanlang va kirish ma'lumotlarini kiriting</p>
+
+    <!-- Markaz tanlash ro'yxati -->
+    <div class="section-hd"><span class="section-title">Markazni tanlang</span></div>
+    <div id="admin-place-list"></div>
+
+    <!-- Login/Parol formasi -->
+    <div id="admin-creds-form" style="display:none;margin-top:16px">
+      <div class="divider"></div>
+      <p style="font-size:13px;font-weight:700;color:var(--c-text2);margin-bottom:14px">
+        Tanlangan markaz: <span id="selected-place-name" style="color:var(--c-accent)">—</span>
+      </p>
+
+      <!-- Login/Parol yordami — har markaz uchun ko'rsatiladi -->
+      <div style="background:var(--c-surface2);border-radius:var(--r-sm);padding:12px;margin-bottom:14px;border:1px dashed var(--c-border2)">
+        <p style="font-size:11px;font-weight:700;color:var(--c-text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Login ma'lumotlari:</p>
+        <p style="font-size:13px;font-family:var(--mono);color:var(--c-text)">
+          Login: <strong id="hint-login">admin1</strong><br>
+          Parol: <strong id="hint-pass">parol1</strong>
+        </p>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Login</label>
+        <input type="text" id="admin-login-inp" placeholder="admin1">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Parol</label>
+        <input type="password" id="admin-pass-inp" placeholder="parol1">
+      </div>
+      <button class="btn btn-primary" onclick="doAdminLogin()">Admin panelga kirish →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================================================
+     EKRAN 4: MIJOZ — Bosh sahifa
+     ================================================== -->
+<div class="screen" id="screen-home">
+  <!-- Yuqori panel -->
+  <div class="topbar">
+    <div style="width:34px"></div>
+    <span class="topbar-title">⚡ Navbat</span>
+    <button class="theme-btn" onclick="toggleTheme()" id="home-theme-btn">🌙</button>
+  </div>
+
+  <div class="content" style="padding:0;padding-bottom:90px">
+    <!-- Qahramonlik banneri -->
+    <div class="hero">
+      <p class="hero-greeting">Assalomu alaykum,</p>
+      <h1 class="hero-name" id="hero-username">Ali Valiyev 👋</h1>
+
+      <!-- Faol navbat bo'lsa — ko'rsatiladi -->
+      <div id="hero-active-queue" style="display:none">
+        <div class="hero-queue-card">
+          <p class="hero-q-label">📋 Faol navbat</p>
+          <p class="hero-q-place" id="hero-q-place">Baraka Sartaroshxona</p>
+          <div class="hero-q-row">
+            <span class="hero-q-num">#<span id="hero-q-num">7</span></span>
+            <span style="opacity:0.5">·</span>
+            <span id="hero-q-wait">~14 daqiqa</span>
+            <span style="margin-left:auto;display:flex;align-items:center;gap:4px">
+              <span class="live-dot"></span>
+              <span style="font-size:12px">Jonli</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Faol navbat yo'q -->
+      <div id="hero-no-queue" style="opacity:0.75;font-size:14px;color:#fff">
+        Hozirda faol navbat yo'q. Quyidan xizmat qidiring ↓
+      </div>
+    </div>
+
+    <div style="padding:0 16px">
+      <!-- Kategoriya filtrlari -->
+      <div class="section-hd">
+        <span class="section-title">Kategoriyalar</span>
+      </div>
+      <div class="chips mb-12" id="home-chips">
+        <div class="chip active" onclick="filterHome('all',this)">Hammasi</div>
+        <div class="chip" onclick="filterHome('barber',this)">✂️ Sartarosh</div>
+        <div class="chip" onclick="filterHome('clinic',this)">🏥 Klinika</div>
+        <div class="chip" onclick="filterHome('bank',this)">🏦 Bank</div>
+        <div class="chip" onclick="filterHome('carwash',this)">🚗 Avtomoyka</div>
+        <div class="chip" onclick="filterHome('gov',this)">🏛 Davlat</div>
+      </div>
+
+      <!-- Joy ro'yxati -->
+      <div class="section-hd">
+        <span class="section-title">Yaqin atrofda</span>
+        <button class="section-link" onclick="showScreen('screen-market')">Barchasi →</button>
+      </div>
+      <div id="home-places-list"></div>
+    </div>
+  </div>
+
+  <!-- Pastki navigatsiya -->
+  <div class="bottomnav">
+    <button class="nav-tab active" onclick="showScreen('screen-home')">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">Bosh sahifa</span>
+    </button>
+    <button class="nav-tab" onclick="showScreen('screen-market')">
+      <span class="nav-icon">🔍</span>
+      <span class="nav-label">Izlash</span>
+    </button>
+    <button class="nav-tab" onclick="showScreen('screen-myqueue')">
+      <span class="nav-icon">📋</span>
+      <span class="nav-label">Navbatim</span>
+    </button>
+    <button class="nav-tab" onclick="showScreen('screen-profile')">
+      <span class="nav-icon">👤</span>
+      <span class="nav-label">Profil</span>
+    </button>
+  </div>
+</div>
+
+<!-- ==================================================
+     EKRAN 5: BOZOR — Barcha xizmatlar
+     ================================================== -->
+<div class="screen" id="screen-market">
+  <div class="topbar">
+    <button class="btn-back" onclick="goBack()">←</button>
+    <span class="topbar-title">Xizmatlar</span>
+    <button class="theme-btn" onclick="toggleTheme()" id="market-theme-btn">🌙</button>
+  </div>
+
+  <div class="content">
+    <!-- Qidiruv -->
+    <div class="search-wrap mb-12">
+      <span class="search-icon">🔍</span>
+      <input type="text" placeholder="Sartarosh, klinika, bank..." id="search-inp"
+             oninput="searchAndRenderMarket(this.value)">
+    </div>
+
+    <!-- Kategoriya filtrlari -->
+    <div class="chips mb-12" id="market-chips">
+      <div class="chip active" onclick="filterMarket('all',this)">Hammasi</div>
+      <div class="chip" onclick="filterMarket('barber',this)">✂️ Sartarosh</div>
+      <div class="chip" onclick="filterMarket('clinic',this)">🏥 Klinika</div>
+      <div class="chip" onclick="filterMarket('bank',this)">🏦 Bank</div>
+      <div class="chip" onclick="filterMarket('carwash',this)">🚗 Avtomoyka</div>
+      <div class="chip" onclick="filterMarket('gov',this)">🏛 Davlat</div>
+    </div>
+
+    <!-- Joy ro'yxati -->
+    <div id="market-places-list"></div>
+  </div>
+
+  <div class="bottomnav">
+    <button class="nav-tab" onclick="showScreen('screen-home')">
+      <span class="nav-icon">🏠</span><span class="nav-label">Bosh sahifa</span>
+    </button>
+    <button class="nav-tab active" onclick="showScreen('screen-market')">
+      <span class="nav-icon">🔍</span><span class="nav-label">Izlash</span>
+    </button>
+    <button class="nav-tab" onclick="showScreen('screen-myqueue')">
+      <span class="nav-icon">📋</span><span class="nav-label">Navbatim</span>
+    </button>
+    <button class="nav-tab" onclick="showScreen('screen-profile')">
+      <span class="nav-icon">👤</span><span class="nav-label">Profil</span>
+    </button>
+  </div>
+</div>
+
+<!-- ==================================================
+     EKRAN 6: JOY BATAFSIL — Xizmat joyi sahifasi
+     ================================================== -->
+<div class="screen" id="screen-detail">
+  <div class="topbar">
+    <button class="btn-back" onclick="goBack()">←</button>
+    <span class="topbar-title" id="detail-topbar-title">—</span>
+    <button class="topbar-action" onclick="openJoinModal()">Navbat olish</button>
+  </div>
+
+  <div class="content">
+    <!-- Rasm/icon bloki -->
+    <div id="detail-thumb" style="height:160px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;margin-bottom:14px;font-size:68px"></div>
+
+    <!-- Asosiy ma'lumotlar -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+        <div>
+          <h2 id="detail-name" style="font-size:18px;font-weight:800;letter-spacing:-0.3px;margin-bottom:3px"></h2>
+          <p id="detail-category" style="font-size:12px;color:var(--c-text3)"></p>
+        </div>
+        <span id="detail-status-badge"></span>
+      </div>
+      <!-- Reyting va vaqt -->
+      <div style="display:flex;gap:16px;font-size:13px;color:var(--c-text2);flex-wrap:wrap">
+        <span id="detail-rating">⭐ —</span>
+        <span id="detail-hours">🕐 —</span>
+      </div>
+    </div>
+
+    <!-- Lokatsiya bloki -->
+    <div class="location-row" id="detail-location-block">
+      <span class="location-icon">📍</span>
+      <div class="location-info">
+        <p class="location-name" id="detail-loc-district">—</p>
+        <p class="location-addr" id="detail-loc-addr">—</p>
+        <a class="location-link" href="#" onclick="showToast('🗺 Xarita ochilmoqda...');return false">
+          Xaritada ko'rish →
+        </a>
+      </div>
+    </div>
+
+    <!-- Jonli navbat holati -->
+    <div class="card" style="background:var(--c-accent-bg);border-color:rgba(0,184,148,0.25)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+        <span class="live-dot"></span>
+        <span style="font-size:13px;font-weight:700;color:var(--c-accent2)">Jonli navbat holati</span>
+        <span id="detail-queue-badge" class="badge" style="margin-left:auto"></span>
+      </div>
+      <div style="display:flex;gap:0">
+        <div style="flex:1;text-align:center">
+          <p style="font-size:11px;color:var(--c-accent2);margin-bottom:4px;font-weight:600">NAVBATDA</p>
+          <p style="font-family:var(--mono);font-size:28px;font-weight:700;color:var(--c-accent)" id="detail-q-count">—</p>
+        </div>
+        <div style="flex:1;text-align:center;border-left:0.5px solid rgba(0,184,148,0.3);border-right:0.5px solid rgba(0,184,148,0.3)">
+          <p style="font-size:11px;color:var(--c-accent2);margin-bottom:4px;font-weight:600">KUTISH</p>
+          <p style="font-family:var(--mono);font-size:28px;font-weight:700;color:var(--c-accent)" id="detail-q-wait">—</p>
+        </div>
+        <div style="flex:1;text-align:center">
+          <p style="font-size:11px;color:var(--c-accent2);margin-bottom:4px;font-weight:600">HOZIRGI</p>
+          <p style="font-family:var(--mono);font-size:28px;font-weight:700;color:var(--c-accent)" id="detail-q-current">—</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navbat ro'yxati -->
+    <div class="section-hd">
+      <span class="section-title">Navbat ro'yxati</span>
+    </div>
+    <div class="card" style="padding:8px 16px">
+      <div id="detail-queue-list"></div>
+    </div>
+
+    <!-- Sharhlar bo'limi -->
+    <div class="section-hd" style="margin-top:4px">
+      <span class="section-title">Sharhlar</span>
+    </div>
+    <div class="card" style="padding:12px 16px">
+      <div id="detail-reviews-list"></div>
+
+      <!-- Izoh yozish formasi -->
+      <div class="divider"></div>
+      <p style="font-size:13px;font-weight:700;margin-bottom:10px">Izoh qoldiring</p>
+
+      <!-- Yulduz baholash -->
+      <div class="star-input" id="star-input">
+        <button class="star-btn" onclick="setRating(1)">⭐</button>
+        <button class="star-btn" onclick="setRating(2)">⭐</button>
+        <button class="star-btn" onclick="setRating(3)">⭐</button>
+        <button class="star-btn" onclick="setRating(4)">⭐</button>
+        <button class="star-btn" onclick="setRating(5)">⭐</button>
+      </div>
+
+      <div class="form-group">
+        <textarea id="review-text-inp" rows="3"
+                  placeholder="Xizmat haqida fikringizni yozing..."></textarea>
+      </div>
+      <button class="btn btn-secondary" style="font-size:13px;padding:10px" onclick="submitReview()">
+        Izoh yuborish
+      </button>
+    </div>
+
+    <!-- Navbatga qo'shilish tugmasi (pastda) -->
+    <div style="height:8px"></div>
+    <button class="btn btn-primary" onclick="openJoinModal()">
+      Navbatga qo'shilish — bepul
+    </button>
+  </div>
+</div>
+
+<!-- ==================================================
+     EKRAN 7: MENING NAVBATIM
+     ================================================== -->
+<div class="screen" id="screen-myqueue">
+  <div class="topbar">
+    <div style="width:34px"></div>
+    <span class="topbar-title">Mening navbatim</span>
+    <button class="theme-btn" onclick="toggleTheme()" id="myq-theme-btn">🌙</button>
+  </div>
+  <div class="content" id="myqueue-content"></div>
+
+  <div class="bottomnav">
+    <button class="nav-tab" onclick="showScreen('screen-home')">
+      <span class="nav-icon">🏠</span><span class="nav-label">Bosh sahifa</span>
+    </button>
+    <button class="nav-tab" onclick="showScreen('screen-market')">
+      <span class="nav-icon">🔍</span><span class="nav-label">Izlash</span>
+    </button>
+    <button class="nav-tab active" onclick="showScreen('screen-myqueue')">
+      <span class="nav-icon">📋</span><span class="nav-label">Navbatim</span>
+    </button>
+    <button class="nav-tab" onclick="showScreen('screen-profile')">
+      <span class="nav-icon">👤</span><span class="nav-label">Profil</span>
+    </button>
+  </div>
+</div>
+
+<!-- ==================================================
+     EKRAN 8: PROFIL
+     ================================================== -->
+<div class="screen" id="screen-profile">
+  <div class="topbar">
+    <div style="width:34px"></div>
+    <span class="topbar-title">Profil</span>
+    <button class="theme-btn" onclick="toggleTheme()" id="profile-theme-btn">🌙</button>
+  </div>
+  <div class="content">
+    <!-- Profil avatari va nomi -->
+    <div style="text-align:center;padding:28px 0 24px">
+      <div class="avatar" id="profile-avatar"
+           style="width:76px;height:76px;font-size:26px;margin:0 auto 12px;background:var(--c-accent-bg)">
+        AV
+      </div>
+      <h2 style="font-size:21px;font-weight:800;letter-spacing:-0.3px" id="profile-fullname">Ali Valiyev</h2>
+      <p style="color:var(--c-text2);font-size:14px;margin-top:3px" id="profile-phone-show">+998 90 123 45 67</p>
+    </div>
+
+    <!-- Statistika -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-val" id="stat-total">24</div>
+        <div class="stat-label">Jami navbat</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="stat-saved">2.4 soat</div>
+        <div class="stat-label">Tejlgan vaqt</div>
+      </div>
+    </div>
+
+    <!-- Sozlamalar -->
+    <div class="card">
+      <p style="font-size:14px;font-weight:700;margin-bottom:12px">Sozlamalar</p>
+
+      <div class="q-row" style="cursor:pointer">
+        <span style="flex:1">🔔 Bildirishnomalar</span>
+        <span style="color:var(--c-text3);font-size:12px">Yoqilgan ›</span>
+      </div>
+      <div class="q-row" style="cursor:pointer" onclick="toggleTheme()">
+        <span style="flex:1">🌙 Tun/kun rejimi</span>
+        <span style="color:var(--c-text3);font-size:12px" id="theme-status-label">Kun rejimi ›</span>
+      </div>
+      <div class="q-row" style="cursor:pointer">
+        <span style="flex:1">🌐 Til</span>
+        <span style="color:var(--c-text3);font-size:12px">O'zbek ›</span>
+      </div>
+      <div class="q-row" style="cursor:pointer">
+        <span style="flex:1">💳 To'lov usuli</span>
+        <span style="color:var(--c-text3);font-size:12px">Sozlash ›</span>
+      </div>
+      <div class="q-row" style="cursor:pointer;border-bottom:none" onclick="logoutUser()">
+        <span style="flex:1;color:var(--c-danger)">🚪 Chiqish</span>
+      </div>
+    </div>
+
+    <div style="text-align:center;padding:12px;font-size:11px;color:var(--c-text3)">
+      Navbat v2.5 · Toshkent, O'zbekiston
+    </div>
+  </div>
+
+  <div class="bottomnav">
+    <button class="nav-tab" onclick="showScreen('screen-home')">
+      <span class="nav-icon">🏠</span><span class="nav-label">Bosh sahifa</span>
+    </button>
+    <button class="nav-tab" onclick="showScreen('screen-market')">
+      <span class="nav-icon">🔍</span><span class="nav-label">Izlash</span>
+    </button>
+    <button class="nav-tab" onclick="showScreen('screen-myqueue')">
+      <span class="nav-icon">📋</span><span class="nav-label">Navbatim</span>
+    </button>
+    <button class="nav-tab active" onclick="showScreen('screen-profile')">
+      <span class="nav-icon">👤</span><span class="nav-label">Profil</span>
+    </button>
+  </div>
+</div>
+
+<!-- ==================================================
+     EKRAN 9: ADMIN PANEL
+     ================================================== -->
+<div class="screen" id="screen-admin">
+  <div class="topbar">
+    <button class="btn-back" onclick="adminLogout()">←</button>
+    <span class="topbar-title" id="admin-panel-title">Admin</span>
+    <button class="topbar-action" onclick="showScreen('screen-display')">📺 Ekran</button>
+  </div>
+
+  <div class="content">
+    <!-- Joriy xizmatdagi kishi -->
+    <div class="admin-current-block">
+      <p class="admin-cur-label">Hozirda xizmatda</p>
+      <div class="admin-cur-num" id="admin-cur-num">#—</div>
+      <p class="admin-cur-name" id="admin-cur-name">Hech kim</p>
+      <p class="admin-cur-next" id="admin-cur-next">Navbat bo'sh</p>
+    </div>
+
+    <!-- Asosiy tugmalar qatori -->
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:10px;margin-bottom:14px">
+      <button class="btn-next" onclick="adminNext()">▶ Keyingi</button>
+      <button class="btn btn-secondary" onclick="openAddModal()"
+              style="padding:0;font-size:14px;font-weight:700;border-radius:var(--r)">
+        + Qo'shish
+      </button>
+    </div>
+
+    <!-- Statistika -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-val" id="adm-stat-today">—</div>
+        <div class="stat-label">Bugungi mijozlar</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="adm-stat-waiting">—</div>
+        <div class="stat-label">Kutayotganlar</div>
+      </div>
+    </div>
+
+    <!-- Navbat ro'yxati -->
+    <div class="section-hd">
+      <span class="section-title">Navbat (<span id="adm-q-count">0</span>)</span>
+      <button class="section-link" style="color:var(--c-danger)" onclick="confirmReset()">Tozalash</button>
+    </div>
+    <div class="card" style="padding:8px 16px">
+      <div id="admin-queue-list"></div>
+    </div>
+
+    <!-- Soatlik tahlil grafigi -->
+    <div class="section-hd">
+      <span class="section-title">Soatlik tahlil</span>
+    </div>
+    <div class="card">
+      <div class="chart-wrap">
+        <div class="chart-bars" id="adm-chart-bars"></div>
+        <div style="display:flex;min-width:280px;gap:5px" id="adm-chart-labels"></div>
+      </div>
+    </div>
+
+    <!-- Admin chiqish -->
+    <button class="btn btn-danger" onclick="adminLogout()" style="margin-top:4px;font-size:13px;padding:12px">
+      Admin paneldan chiqish
+    </button>
+  </div>
+</div>
+
+<!-- ==================================================
+     EKRAN 10: DISPLEJ REJIMI
+     Kutish zalida katta ekranda ko'rsatish uchun
+     ================================================== -->
+<div class="screen" id="screen-display" style="background:#0A1F1A">
+  <!-- Qaytish tugmasi -->
+  <button onclick="showScreen('screen-admin')"
+          style="position:absolute;top:16px;left:16px;background:rgba(255,255,255,0.1);
+                 color:#fff;border:none;border-radius:var(--r-sm);padding:9px 14px;
+                 cursor:pointer;font-family:var(--font);font-size:13px;font-weight:600;z-index:10">
+    ← Qaytish
+  </button>
+
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px">
+    <p class="disp-label">Hozirda xizmatda</p>
+    <div class="disp-num" id="disp-num">—</div>
+    <p class="disp-name" id="disp-name">Kutilmoqda</p>
+    <p class="disp-place" id="disp-place">Navbat platformasi</p>
+    <p class="disp-next" id="disp-next">Keyingi: —</p>
+  </div>
+</div>
+
+<!-- ==================================================
+     MODALLAR
+     ================================================== -->
+
+<!-- Modal 1: Navbatga qo'shilish -->
+<div class="modal-overlay hidden" id="modal-join">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <p class="modal-title" id="modal-join-title">Navbatga qo'shilish</p>
+    <p class="modal-sub" id="modal-join-sub">Siz navbatga qo'shilmoqchisiz</p>
+
+    <!-- Navbat raqami ko'rinishi -->
+    <div style="background:var(--c-surface2);border-radius:var(--r);padding:16px;margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <span style="font-size:13px;color:var(--c-text2)">Sizning raqamingiz</span>
+        <span class="badge badge-green">Bepul</span>
+      </div>
+      <div class="big-queue-num" id="modal-join-num">#—</div>
+      <p style="font-size:13px;color:var(--c-text2);margin-top:4px" id="modal-join-wait">Taxminiy kutish: —</p>
+    </div>
+
+    <button class="btn btn-primary" onclick="confirmJoin()" style="margin-bottom:10px">
+      ✅ Tasdiqlash
+    </button>
+    <button class="btn btn-secondary" onclick="closeModal('modal-join')">Bekor qilish</button>
+  </div>
+</div>
+
+<!-- Modal 2: Offline mijoz qo'shish -->
+<div class="modal-overlay hidden" id="modal-add">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <p class="modal-title">Yangi mijoz qo'shish</p>
+    <p class="modal-sub">Offline (yurgan) mijozni navbatga qo'shing</p>
+
+    <div class="form-group">
+      <label class="form-label">Ism (majburiy)</label>
+      <input type="text" id="walkin-name" placeholder="Ism kiriting">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Telefon (ixtiyoriy)</label>
+      <input type="tel" id="walkin-phone" placeholder="+998 90...">
+    </div>
+
+    <button class="btn btn-primary" onclick="addWalkIn()" style="margin-bottom:10px">
+      + Navbatga qo'shish
+    </button>
+    <button class="btn btn-secondary" onclick="closeModal('modal-add')">Bekor qilish</button>
+  </div>
+</div>
+
+<!-- Modal 3: Navbatni kechiktirish -->
+<div class="modal-overlay hidden" id="modal-delay">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <p class="modal-title">Navbatni kechiktirish</p>
+    <p class="modal-sub">1 marta bepul, undan keyin har kechiktirishda 5,000 so'm to'lanadi. Maksimum 3 o'rin kechiktirishingiz mumkin.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">
+      <!-- +1 o'rin -->
+      <div onclick="doDelay(1)"
+           style="background:var(--c-surface2);border-radius:var(--r-sm);padding:14px;text-align:center;cursor:pointer;border:1.5px solid var(--c-border);transition:all 0.2s">
+        <p style="font-size:18px;font-weight:800;font-family:var(--mono)">+1</p>
+        <p style="font-size:12px;font-weight:700;color:var(--c-text2)">o'rin</p>
+        <p style="font-size:11px;color:var(--c-accent);font-weight:700;margin-top:4px">Bepul</p>
+      </div>
+      <!-- +2 o'rin -->
+      <div onclick="doDelay(2)"
+           style="background:var(--c-surface2);border-radius:var(--r-sm);padding:14px;text-align:center;cursor:pointer;border:1.5px solid var(--c-border);transition:all 0.2s">
+        <p style="font-size:18px;font-weight:800;font-family:var(--mono)">+2</p>
+        <p style="font-size:12px;font-weight:700;color:var(--c-text2)">o'rin</p>
+        <p style="font-size:11px;color:var(--c-amber);font-weight:700;margin-top:4px">5,000 so'm</p>
+      </div>
+      <!-- +3 o'rin -->
+      <div onclick="doDelay(3)"
+           style="background:var(--c-surface2);border-radius:var(--r-sm);padding:14px;text-align:center;cursor:pointer;border:1.5px solid var(--c-border);transition:all 0.2s">
+        <p style="font-size:18px;font-weight:800;font-family:var(--mono)">+3</p>
+        <p style="font-size:12px;font-weight:700;color:var(--c-text2)">o'rin</p>
+        <p style="font-size:11px;color:var(--c-amber);font-weight:700;margin-top:4px">5,000 so'm</p>
+      </div>
+    </div>
+
+    <button class="btn btn-secondary" onclick="closeModal('modal-delay')">Bekor qilish</button>
+  </div>
+</div>
+
+<!-- ==================================================
+     BILDIRISHNOMA TOAST
+     Ekran tepasida chiqadigan qisqa xabar
+     ================================================== -->
+<div class="toast" id="toast-msg"></div>
+
+<!-- ==================================================
+     JAVASCRIPT — BARCHA MANTIQ
+     ================================================== -->
+<script src="/main.js">
+
+</script>
+</body>
+</html>

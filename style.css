@@ -1,0 +1,1425 @@
+/* =====================================================
+   1. DIZAYN O'ZGARUVCHILARI (CSS Custom Properties)
+   Yorug' rejim (light mode) — standart
+   ===================================================== */
+:root {
+  /* --- Asosiy ranglar --- */
+  --c-accent: #00b894; /* To'q yashil — asosiy rang */
+  --c-accent2: #00856d; /* To'q yashil — hover holati */
+  --c-accent-bg: #e6faf6; /* Yashil fon */
+  --c-amber: #e17b2a; /* To'q sariq — ogohlantirish */
+  --c-amber-bg: #fef3e2;
+  --c-danger: #c0392b; /* Qizil — xavf */
+  --c-danger-bg: #fdeceb;
+  --c-info: #2563eb; /* Ko'k — axborot */
+  --c-info-bg: #eff6ff;
+
+  /* --- Fon va yuzalar --- */
+  --c-bg: #f4f2ee; /* Asosiy fon (krema rang) */
+  --c-surface: #ffffff; /* Kartalar foni */
+  --c-surface2: #eeece8; /* Ikkilamchi yuzalar */
+  --c-surface3: #e5e2dc; /* Uchlamchi yuzalar */
+
+  /* --- Matn ranglari --- */
+  --c-text: #1c1a18; /* Asosiy matn */
+  --c-text2: #6a6560; /* Ikkilamchi matn */
+  --c-text3: #a09890; /* Uchinchi matn (hint) */
+
+  /* --- Chegaralar --- */
+  --c-border: rgba(28, 26, 24, 0.1);
+  --c-border2: rgba(28, 26, 24, 0.18);
+
+  /* --- Tipografiya --- */
+  --font: "Sora", sans-serif;
+  --mono: "JetBrains Mono", monospace;
+
+  /* --- Radiuslar --- */
+  --r: 14px; /* Karta */
+  --r-sm: 8px; /* Kichik elementlar */
+  --r-lg: 20px; /* Modal, qahramonlik */
+  --r-full: 999px; /* Pill/yumaloq */
+
+  /* --- Soyalar --- */
+  --shadow: 0 2px 16px rgba(0, 0, 0, 0.07);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+
+  /* --- O'tishlar --- */
+  --transition: all 0.2s ease;
+}
+
+/* =====================================================
+   2. TUN REJIMI (Dark Mode)
+   [data-theme="dark"] atributi body ga qo'shilganda
+   ===================================================== */
+[data-theme="dark"] {
+  --c-accent: #00c9a7;
+  --c-accent2: #00e0bb;
+  --c-accent-bg: #0d2d26;
+  --c-amber: #f5a623;
+  --c-amber-bg: #2d1f08;
+  --c-danger: #e74c3c;
+  --c-danger-bg: #2d100e;
+  --c-info: #60a5fa;
+  --c-info-bg: #0f1e3d;
+
+  --c-bg: #131210;
+  --c-surface: #1e1c19;
+  --c-surface2: #272420;
+  --c-surface3: #302d28;
+
+  --c-text: #f0ede8;
+  --c-text2: #a09890;
+  --c-text3: #6a6560;
+
+  --c-border: rgba(240, 237, 232, 0.08);
+  --c-border2: rgba(240, 237, 232, 0.15);
+
+  --shadow: 0 2px 16px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* =====================================================
+   3. UMUMIY RESET VA ASOSIY USLUBLAR
+   ===================================================== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  font-family: var(--font);
+  background: var(--c-bg);
+  color: var(--c-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition:
+    background 0.3s ease,
+    color 0.3s ease;
+}
+
+/* =====================================================
+   4. ILOVA QOBIG'I (App Shell)
+   Ilovaning asosiy konteyner — mobil formatda
+   ===================================================== */
+#app {
+  max-width: 430px;
+  min-height: 100vh;
+  margin: 0 auto;
+  background: var(--c-bg);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* =====================================================
+   5. EKRANLAR TIZIMI
+   Har bir ekran .screen klassiga ega
+   Faqat .active ekran ko'rinadi
+   ===================================================== */
+.screen {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  min-height: 100vh;
+  animation: screenIn 0.25s ease;
+}
+
+.screen.active {
+  display: flex;
+}
+
+@keyframes screenIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =====================================================
+   6. SKROLL KONTENT MAYDONI
+   Asosiy kontent .content ichida joylashadi
+   ===================================================== */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  padding-bottom: 90px; /* pastki nav uchun joy */
+  -webkit-overflow-scrolling: touch;
+}
+
+.content::-webkit-scrollbar {
+  display: none;
+}
+
+/* =====================================================
+   7. YUQORI PANEL (Top Bar)
+   Ekranlar tepasida joylashgan navigatsiya paneli
+   ===================================================== */
+.topbar {
+  background: var(--c-surface);
+  border-bottom: 0.5px solid var(--c-border);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  transition: background 0.3s ease;
+}
+
+.topbar-title {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: var(--c-text);
+}
+
+/* Orqaga qaytish tugmasi */
+.btn-back {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--c-surface2);
+  border: 0.5px solid var(--c-border);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: var(--c-text);
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+.btn-back:hover {
+  background: var(--c-surface3);
+}
+
+/* Topbar o'ng tomonidagi harakat tugmasi */
+.topbar-action {
+  background: var(--c-accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--r-sm);
+  padding: 7px 13px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font);
+  letter-spacing: 0.2px;
+  transition: var(--transition);
+}
+
+.topbar-action:hover {
+  background: var(--c-accent2);
+}
+
+/* =====================================================
+   8. PASTKI NAVIGATSIYA (Bottom Nav)
+   Mijoz uchun 4 ta tab: Bosh, Izlash, Navbat, Profil
+   ===================================================== */
+.bottomnav {
+  background: var(--c-surface);
+  border-top: 0.5px solid var(--c-border);
+  display: flex;
+  padding: 8px 0 max(12px, env(safe-area-inset-bottom));
+  position: sticky;
+  bottom: 0;
+  z-index: 50;
+  transition: background 0.3s ease;
+}
+
+.nav-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  color: var(--c-text3);
+  transition: var(--transition);
+  font-family: var(--font);
+}
+
+.nav-tab .nav-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+.nav-tab .nav-label {
+  font-size: 10px;
+  font-weight: 600;
+}
+.nav-tab.active {
+  color: var(--c-accent);
+}
+
+/* =====================================================
+   9. KARTALAR (Cards)
+   Asosiy kontent bloklari
+   ===================================================== */
+.card {
+  background: var(--c-surface);
+  border-radius: var(--r);
+  border: 0.5px solid var(--c-border);
+  padding: 16px;
+  margin-bottom: 12px;
+  transition:
+    background 0.3s ease,
+    border-color 0.3s ease;
+}
+
+.card-sm {
+  background: var(--c-surface);
+  border-radius: var(--r-sm);
+  border: 0.5px solid var(--c-border);
+  padding: 12px;
+}
+
+/* Karta ustiga bosilganda */
+.card-hover {
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.card-hover:hover {
+  border-color: var(--c-accent);
+  box-shadow: 0 0 0 1px var(--c-accent);
+}
+
+/* =====================================================
+   10. TUGMALAR (Buttons)
+   Asosiy, ikkilamchi, xavf, kichik variantlar
+   ===================================================== */
+
+/* Asosiy tugma — to'liq kenglik */
+.btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--r);
+  border: none;
+  font-family: var(--font);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  letter-spacing: -0.2px;
+}
+
+.btn-primary {
+  background: var(--c-accent);
+  color: #fff;
+}
+.btn-primary:hover {
+  background: var(--c-accent2);
+}
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-secondary {
+  background: var(--c-surface2);
+  color: var(--c-text);
+}
+.btn-secondary:hover {
+  background: var(--c-surface3);
+}
+
+.btn-danger {
+  background: var(--c-danger-bg);
+  color: var(--c-danger);
+}
+.btn-danger:hover {
+  opacity: 0.85;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1.5px solid var(--c-accent);
+  color: var(--c-accent);
+}
+
+/* Kichik tugma */
+.btn-sm {
+  padding: 9px 16px;
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  width: auto;
+  display: inline-block;
+}
+
+/* Katta "Keyingi" tugmasi — admin uchun */
+.btn-next {
+  width: 100%;
+  padding: 20px;
+  background: var(--c-accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--r);
+  font-family: var(--font);
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: var(--transition);
+  letter-spacing: -0.5px;
+}
+.btn-next:hover {
+  background: var(--c-accent2);
+}
+.btn-next:active {
+  transform: scale(0.97);
+}
+
+/* =====================================================
+   11. NISHONLAR (Badges)
+   Kichik rangli yorliqlar
+   ===================================================== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: var(--r-full);
+  white-space: nowrap;
+}
+
+.badge-green {
+  background: var(--c-accent-bg);
+  color: var(--c-accent2);
+}
+.badge-amber {
+  background: var(--c-amber-bg);
+  color: var(--c-amber);
+}
+.badge-red {
+  background: var(--c-danger-bg);
+  color: var(--c-danger);
+}
+.badge-blue {
+  background: var(--c-info-bg);
+  color: var(--c-info);
+}
+.badge-gray {
+  background: var(--c-surface2);
+  color: var(--c-text2);
+}
+
+/* =====================================================
+   12. FORMALAR (Forms)
+   Input, select, textarea uchun uslublar
+   ===================================================== */
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--c-border2);
+  background: var(--c-surface);
+  font-family: var(--font);
+  font-size: 15px;
+  color: var(--c-text);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--c-accent);
+  box-shadow: 0 0 0 3px rgba(0, 184, 148, 0.12);
+}
+
+/* To'q matnda placeholder */
+input::placeholder,
+textarea::placeholder {
+  color: var(--c-text3);
+}
+
+.form-group {
+  margin-bottom: 14px;
+}
+
+.form-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--c-text2);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+/* =====================================================
+   13. AVATAR (Foydalanuvchi rasmi)
+   Harf bilan ko'rsatiladigan avatar
+   ===================================================== */
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--c-accent-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--c-accent2);
+  flex-shrink: 0;
+  font-family: var(--font);
+}
+
+/* =====================================================
+   14. QATOR BO'LIMCHALAR (Section Headers)
+   ===================================================== */
+.section-hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.section-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--c-text2);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+}
+
+.section-link {
+  font-size: 13px;
+  color: var(--c-accent);
+  font-weight: 600;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font);
+}
+
+/* =====================================================
+   15. JONLI NUQTA (Live Indicator)
+   Yashil miltillovchi nuqta — real vaqt belgisi
+   ===================================================== */
+.live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--c-accent);
+  display: inline-block;
+  animation: pulse 1.8s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.8);
+  }
+}
+
+/* =====================================================
+   16. KATEGORIYA CHIPLAR
+   Gorizontal aylantiriladigan filtr tugmalari
+   ===================================================== */
+.chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.chips::-webkit-scrollbar {
+  display: none;
+}
+
+.chip {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border-radius: var(--r-full);
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  color: var(--c-text2);
+  white-space: nowrap;
+  font-family: var(--font);
+}
+
+.chip.active {
+  background: var(--c-accent);
+  color: #fff;
+  border-color: var(--c-accent);
+}
+
+/* =====================================================
+   17. QIDIRUV SATRI (Search Bar)
+   ===================================================== */
+.search-wrap {
+  position: relative;
+}
+.search-wrap input {
+  padding-left: 42px;
+  border-radius: var(--r-full);
+}
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--c-text3);
+  font-size: 16px;
+  pointer-events: none;
+}
+
+/* =====================================================
+   18. JOY KARTASI (Place Card)
+   Bozorda ko'rsatiladigan xizmat joylari
+   ===================================================== */
+.place-card {
+  background: var(--c-surface);
+  border-radius: var(--r);
+  border: 0.5px solid var(--c-border);
+  overflow: hidden;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.place-card:hover {
+  border-color: var(--c-accent);
+  box-shadow: 0 0 0 1px var(--c-accent);
+}
+
+/* Joy kartasining rasm qismi */
+.place-thumb {
+  height: 130px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  font-size: 52px;
+}
+
+/* Har kategoriyaga o'z rangi */
+.place-thumb.cat-barber {
+  background: linear-gradient(135deg, #e6faf6 0%, #b2eee0 100%);
+}
+.place-thumb.cat-clinic {
+  background: linear-gradient(135deg, #eff6ff 0%, #bfdbfe 100%);
+}
+.place-thumb.cat-bank {
+  background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%);
+}
+.place-thumb.cat-carwash {
+  background: linear-gradient(135deg, #f0fdf4 0%, #bbf7d0 100%);
+}
+.place-thumb.cat-gov {
+  background: linear-gradient(135deg, #fdf4ff 0%, #e9d5ff 100%);
+}
+
+.place-thumb-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.place-info {
+  padding: 14px;
+}
+.place-name {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: var(--c-text);
+}
+.place-addr {
+  font-size: 12px;
+  color: var(--c-text3);
+  margin-bottom: 6px;
+}
+
+.place-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--c-text2);
+  flex-wrap: wrap;
+}
+
+/* =====================================================
+   19. NAVBAT QATORI (Queue Row)
+   Navbat ro'yxatidagi har bir shaxs
+   ===================================================== */
+.q-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 0.5px solid var(--c-border);
+}
+
+.q-row:last-child {
+  border-bottom: none;
+}
+
+/* Navbat raqam nishoni */
+.q-num {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-sm);
+  background: var(--c-surface2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--c-text2);
+  flex-shrink: 0;
+}
+
+/* Joriy xizmatdagi kishi */
+.q-num.is-current {
+  background: var(--c-accent);
+  color: #fff;
+}
+
+/* Foydalanuvchining o'zi */
+.q-num.is-mine {
+  background: var(--c-info-bg);
+  color: var(--c-info);
+}
+
+/* Tugagan raqam */
+.q-num.is-done {
+  opacity: 0.3;
+}
+
+.q-name {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--c-text);
+}
+.q-sub {
+  font-size: 12px;
+  color: var(--c-text3);
+}
+
+/* =====================================================
+   20. QAHRAMONLIK BANNERI (Hero Section)
+   Mijoz bosh sahifasining yuqori qismi
+   ===================================================== */
+.hero {
+  background: var(--c-accent);
+  padding: 28px 20px 32px;
+  border-radius: 0 0 28px 28px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Fon bezagi — soyali doira */
+.hero::before {
+  content: "";
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  bottom: -20px;
+  left: -20px;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.hero-greeting {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.75);
+  margin-bottom: 3px;
+}
+.hero-name {
+  font-size: 24px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 20px;
+  letter-spacing: -0.5px;
+}
+
+/* Qahramonlik ichidagi faol navbat kartasi */
+.hero-queue-card {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: var(--r);
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(4px);
+  position: relative;
+  z-index: 1;
+}
+
+.hero-q-label {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+.hero-q-place {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 10px;
+}
+.hero-q-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.85);
+}
+.hero-q-num {
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* =====================================================
+   21. STATISTIKA KARTASI (Stat Cards)
+   Raqam ko'rsatkichlari uchun
+   ===================================================== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.stat-card {
+  background: var(--c-surface);
+  border-radius: var(--r-sm);
+  border: 0.5px solid var(--c-border);
+  padding: 14px;
+  transition: background 0.3s ease;
+}
+
+.stat-val {
+  font-family: var(--mono);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--c-text);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: var(--c-text2);
+  font-weight: 500;
+}
+
+/* =====================================================
+   22. ADMIN PANELI MAXSUS USLUBLAR
+   ===================================================== */
+
+/* Joriy xizmat ko'rsatilayotgan kishi bloki */
+.admin-current-block {
+  text-align: center;
+  padding: 28px 20px;
+  background: var(--c-surface);
+  border-radius: var(--r);
+  border: 0.5px solid var(--c-border);
+  margin-bottom: 14px;
+}
+
+.admin-cur-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--c-text3);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  margin-bottom: 8px;
+}
+
+.admin-cur-num {
+  font-family: var(--mono);
+  font-size: 64px;
+  font-weight: 700;
+  color: var(--c-accent);
+  line-height: 1;
+  letter-spacing: -3px;
+}
+
+.admin-cur-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--c-text);
+  margin-top: 6px;
+}
+
+.admin-cur-next {
+  font-size: 13px;
+  color: var(--c-text3);
+  margin-top: 6px;
+}
+
+/* =====================================================
+   23. GRAFIK (Bar Chart) — Admin tahlili
+   ===================================================== */
+.chart-wrap {
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.chart-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  height: 80px;
+  min-width: 280px;
+}
+
+.chart-bar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.chart-bar {
+  width: 100%;
+  background: var(--c-surface2);
+  border-radius: 4px 4px 0 0;
+  min-height: 4px;
+  transition: height 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.chart-bar.is-peak {
+  background: var(--c-accent);
+}
+.chart-bar.is-now {
+  background: var(--c-amber);
+}
+
+.chart-bar-label {
+  font-size: 9px;
+  color: var(--c-text3);
+  margin-top: 5px;
+  font-weight: 600;
+}
+
+/* =====================================================
+   24. DISPLEJ REJIMI (Display Mode)
+   Kutish zalida katta ekranda ko'rsatish uchun
+   ===================================================== */
+#screen-display {
+  background: #0a1f1a;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 100vh;
+}
+
+.disp-label {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.disp-num {
+  font-family: var(--mono);
+  font-size: 140px;
+  font-weight: 700;
+  color: var(--c-accent);
+  line-height: 1;
+  letter-spacing: -6px;
+}
+
+.disp-name {
+  font-size: 30px;
+  font-weight: 700;
+  color: #fff;
+  margin-top: 12px;
+}
+.disp-place {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.4);
+  margin-top: 6px;
+}
+.disp-next {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.3);
+  margin-top: 40px;
+}
+
+/* =====================================================
+   25. MODAL (Qalqib chiquvchi oyna)
+   Pastdan chiqadigan bottom-sheet
+   ===================================================== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.modal-overlay.hidden {
+  display: none;
+}
+
+.modal {
+  background: var(--c-surface);
+  border-radius: 24px 24px 0 0;
+  width: 100%;
+  max-width: 430px;
+  padding: 20px 20px 32px;
+  animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* Modal qo'lini (handle) */
+.modal-handle {
+  width: 40px;
+  height: 4px;
+  background: var(--c-border2);
+  border-radius: 2px;
+  margin: 0 auto 20px;
+}
+
+.modal-title {
+  font-size: 19px;
+  font-weight: 800;
+  margin-bottom: 4px;
+  letter-spacing: -0.3px;
+}
+.modal-sub {
+  font-size: 14px;
+  color: var(--c-text2);
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+/* =====================================================
+   26. BILDIRISHNOMA TOAST
+   Ekranning yuqori qismida chiqadigan xabar
+   ===================================================== */
+.toast {
+  position: fixed;
+  top: 72px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-10px);
+  background: var(--c-text);
+  color: var(--c-bg);
+  padding: 10px 20px;
+  border-radius: var(--r-full);
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 500;
+  opacity: 0;
+  transition: all 0.3s ease;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: var(--shadow-lg);
+  max-width: 90%;
+  text-align: center;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* =====================================================
+   27. TUN/KUN REJIMI TUGMASI
+   Topbar o'ng tomonida joylashgan
+   ===================================================== */
+.theme-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--c-surface2);
+  border: 0.5px solid var(--c-border);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+.theme-btn:hover {
+  background: var(--c-surface3);
+}
+
+/* =====================================================
+   28. IZOH YOZISH FORMASI (Review Form)
+   ===================================================== */
+.star-input {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.star-btn {
+  font-size: 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s;
+  padding: 0;
+  line-height: 1;
+  filter: grayscale(1);
+  opacity: 0.4;
+}
+
+.star-btn.active {
+  filter: none;
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* =====================================================
+   29. LOKATSIYA BLOKI (Location Block)
+   Xizmat joyi manzili uchun
+   ===================================================== */
+.location-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  background: var(--c-surface2);
+  border-radius: var(--r-sm);
+  margin-bottom: 12px;
+}
+
+.location-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.location-info {
+  flex: 1;
+}
+.location-name {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.location-addr {
+  font-size: 12px;
+  color: var(--c-text2);
+  line-height: 1.4;
+}
+.location-link {
+  font-size: 12px;
+  color: var(--c-accent);
+  font-weight: 600;
+  margin-top: 4px;
+  display: block;
+}
+
+/* =====================================================
+   30. KIRISH SAHIFASI USLUBLARI (Auth Screen)
+   ===================================================== */
+.auth-logo {
+  width: 68px;
+  height: 68px;
+  background: var(--c-accent);
+  border-radius: 20px;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+}
+
+.auth-title {
+  font-size: 26px;
+  font-weight: 800;
+  text-align: center;
+  letter-spacing: -0.5px;
+  margin-bottom: 6px;
+}
+.auth-sub {
+  font-size: 14px;
+  color: var(--c-text2);
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+/* Tab almashish (Kirish / Ro'yxatdan o'tish) */
+.auth-tabs {
+  display: flex;
+  background: var(--c-surface2);
+  border-radius: var(--r-sm);
+  padding: 3px;
+  margin-bottom: 20px;
+}
+
+.auth-tab {
+  flex: 1;
+  padding: 9px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--c-text2);
+  transition: var(--transition);
+}
+
+.auth-tab.active {
+  background: var(--c-surface);
+  color: var(--c-text);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* =====================================================
+   31. SPLASH EKRANI USLUBLARI (Rol tanlash)
+   ===================================================== */
+.splash-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  gap: 0;
+}
+
+.splash-logo {
+  width: 88px;
+  height: 88px;
+  background: var(--c-accent);
+  border-radius: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 44px;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 32px rgba(0, 184, 148, 0.35);
+}
+
+.splash-title {
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  text-align: center;
+}
+.splash-sub {
+  font-size: 15px;
+  color: var(--c-text2);
+  text-align: center;
+  margin-bottom: 40px;
+  margin-top: 6px;
+}
+
+.role-toggle {
+  display: flex;
+  background: var(--c-surface2);
+  border-radius: var(--r-sm);
+  padding: 4px;
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.role-btn {
+  flex: 1;
+  padding: 11px;
+  border-radius: 6px;
+  border: none;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--c-text2);
+  transition: var(--transition);
+  background: transparent;
+}
+
+.role-btn.active {
+  background: var(--c-surface);
+  color: var(--c-text);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* =====================================================
+   32. ADMIN LOGIN USLUBLARI
+   Har bir markaz uchun alohida karta
+   ===================================================== */
+.admin-card {
+  background: var(--c-surface);
+  border-radius: var(--r);
+  border: 1.5px solid var(--c-border);
+  padding: 16px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.admin-card:hover {
+  border-color: var(--c-accent);
+  box-shadow: 0 0 0 1px var(--c-accent);
+}
+
+.admin-card.selected {
+  border-color: var(--c-accent);
+  background: var(--c-accent-bg);
+}
+
+.admin-card-name {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 3px;
+}
+.admin-card-addr {
+  font-size: 12px;
+  color: var(--c-text2);
+}
+
+/* =====================================================
+   33. BO'SH HOLAT (Empty State)
+   Ma'lumot yo'q bo'lganda
+   ===================================================== */
+.empty-state {
+  text-align: center;
+  padding: 60px 24px;
+  color: var(--c-text2);
+}
+
+.empty-icon {
+  font-size: 52px;
+  margin-bottom: 14px;
+}
+.empty-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--c-text);
+  margin-bottom: 6px;
+}
+.empty-sub {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* =====================================================
+   34. YORDAM: Ajratuvchi chiziq
+   ===================================================== */
+.divider {
+  height: 0.5px;
+  background: var(--c-border);
+  margin: 14px 0;
+}
+
+/* =====================================================
+   35. BOSHQA YORDAMCHI KLASSLAR
+   ===================================================== */
+.flex-row {
+  display: flex;
+  align-items: center;
+}
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.gap-8 {
+  gap: 8px;
+}
+.gap-12 {
+  gap: 12px;
+}
+.mt-8 {
+  margin-top: 8px;
+}
+.mt-12 {
+  margin-top: 12px;
+}
+.mb-12 {
+  margin-bottom: 12px;
+}
+.w-full {
+  width: 100%;
+}
+.text-center {
+  text-align: center;
+}
+.font-mono {
+  font-family: var(--mono);
+}
+
+/* Rang yordam klasslari */
+.text-accent {
+  color: var(--c-accent);
+}
+.text-muted {
+  color: var(--c-text2);
+}
+.text-danger {
+  color: var(--c-danger);
+}
+.text-amber {
+  color: var(--c-amber);
+}
+
+/* Katta navbat raqami ko'rsatgichi */
+.big-queue-num {
+  font-family: var(--mono);
+  font-size: 52px;
+  font-weight: 700;
+  color: var(--c-accent);
+  line-height: 1;
+  letter-spacing: -2px;
+}
