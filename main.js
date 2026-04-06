@@ -63,7 +63,7 @@ const PLACES = [
     id: 1,
     name: "Baraka Sartaroshxona",
     cat: "barber",
-    icon: "✂️",
+    icon: `<i class="ph-fill ph-scissors"></i>`,
     location: {
       city: "Toshkent",
       district: "Chilonzor tumani",
@@ -162,7 +162,7 @@ const PLACES = [
     id: 2,
     name: "Shifa Klinikasi",
     cat: "clinic",
-    icon: "🏥",
+    icon: `<i class="ph-fill ph-hospital"></i>`,
     location: {
       city: "Toshkent",
       district: "Yunusobod tumani",
@@ -227,7 +227,7 @@ const PLACES = [
     id: 3,
     name: "Kapitalbank — Chilonzor",
     cat: "bank",
-    icon: "🏦",
+    icon: `<i class="ph-fill ph-bank"></i>`,
     location: {
       city: "Toshkent",
       district: "Chilonzor tumani",
@@ -285,7 +285,7 @@ const PLACES = [
     id: 4,
     name: "SpeedWash Avtomoyka",
     cat: "carwash",
-    icon: "🚗",
+    icon: `<i class="ph-fill ph-car"></i>`,
     location: {
       city: "Toshkent",
       district: "Sergeli tumani",
@@ -343,7 +343,7 @@ const PLACES = [
     id: 5,
     name: "FUOAV — Pasport bo'limi",
     cat: "gov",
-    icon: "🏛",
+    icon: `<i class="ph-fill ph-bank"></i>`,
     location: {
       city: "Toshkent",
       district: "Mirzo Ulug'bek tumani",
@@ -401,7 +401,7 @@ const PLACES = [
     id: 6,
     name: "Nur Sartaroshxona",
     cat: "barber",
-    icon: "✂️",
+    icon: `<i class="ph-fill ph-scissors"></i>`,
     location: {
       city: "Toshkent",
       district: "Mirzo Ulug'bek tumani",
@@ -430,8 +430,57 @@ const PLACES = [
 ];
 
 /* =====================================================
-   3. ILOVA HOLATI (Application State)
-   Ilovaning joriy holati shu ob'ektda saqlanadi
+   3. TILLAR VA TARJIMALAR (i18n)
+   ===================================================== */
+const I18N = {
+  "uz-latn": {
+    langName: "O'zbek (Lotin) ›",
+    profLang: "🌐 Til",
+    navHome: "Bosh sahifa",
+    navSearch: "Izlash",
+    navQueue: "Navbatim",
+    navProfile: "Profil",
+    splashBtnCustomer: '<i class="ph-fill ph-user"></i> Mijoz',
+    splashBtnAdmin: '<i class="ph-fill ph-buildings"></i> Admin',
+    btnDemo: '<i class="ph-fill ph-lightning"></i> Demo rejimida kirish'
+  },
+  "uz-cyrl": {
+    langName: "Ўзбек (Кирилл) ›",
+    profLang: "🌐 Тил",
+    navHome: "Бош саҳифа",
+    navSearch: "Излаш",
+    navQueue: "Навбатим",
+    navProfile: "Профил",
+    splashBtnCustomer: '<i class="ph-fill ph-user"></i> Мижоз',
+    splashBtnAdmin: '<i class="ph-fill ph-buildings"></i> Админ',
+    btnDemo: '<i class="ph-fill ph-lightning"></i> Демо режимида кириш'
+  },
+  "ru": {
+    langName: "Русский ›",
+    profLang: "🌐 Язык",
+    navHome: "Главная",
+    navSearch: "Поиск",
+    navQueue: "Моя очередь",
+    navProfile: "Профиль",
+    splashBtnCustomer: '<i class="ph-fill ph-user"></i> Клиент',
+    splashBtnAdmin: '<i class="ph-fill ph-buildings"></i> Админ',
+    btnDemo: '<i class="ph-fill ph-lightning"></i> Демо вход'
+  },
+  "en": {
+    langName: "English ›",
+    profLang: "🌐 Language",
+    navHome: "Home",
+    navSearch: "Search",
+    navQueue: "My Queue",
+    navProfile: "Profile",
+    splashBtnCustomer: '<i class="ph-fill ph-user"></i> Customer',
+    splashBtnAdmin: '<i class="ph-fill ph-buildings"></i> Admin',
+    btnDemo: '<i class="ph-fill ph-lightning"></i> Demo login'
+  }
+};
+
+/* =====================================================
+   3.1 ILOVA HOLATI (Application State)
    ===================================================== */
 const STATE = {
   role: "customer" /* 'customer' yoki 'admin' */,
@@ -448,7 +497,42 @@ const STATE = {
   homeFilter: "all" /* Bosh sahifa filtri */,
   marketFilter: "all" /* Bozor sahifa filtri */,
   selectedAdminPlaceId: null /* Admin login: tanlangan joy ID */,
+  lang: "uz-latn" /* Tanlangan til */
 };
+
+/* Til o'zgartirish mantiqi */
+function setLang(langCode) {
+  STATE.lang = langCode;
+  const t = I18N[langCode];
+  
+  const setHTML = (id, html) => {
+    const el = document.getElementById(id);
+    if(el) el.innerHTML = html;
+  };
+  
+  setHTML("ui-prof-lang", t.profLang);
+  setHTML("lang-status-label", t.langName);
+  
+  document.querySelectorAll(".nav-tab:nth-child(1) .nav-label").forEach(el => el.textContent = t.navHome);
+  document.querySelectorAll(".nav-tab:nth-child(2) .nav-label").forEach(el => el.textContent = t.navSearch);
+  document.querySelectorAll(".nav-tab:nth-child(3) .nav-label").forEach(el => el.textContent = t.navQueue);
+  document.querySelectorAll(".nav-tab:nth-child(4) .nav-label").forEach(el => el.textContent = t.navProfile);
+  
+  const pCust = document.querySelector("#role-toggle .role-btn:first-child");
+  if(pCust) pCust.innerHTML = t.splashBtnCustomer;
+  const pAdm = document.querySelector("#role-toggle .role-btn:last-child");
+  if(pAdm) pAdm.innerHTML = t.splashBtnAdmin;
+  
+  closeModal('modal-lang');
+  
+  const toastMsgs = {
+    "uz-latn": "Til o'zgartirildi",
+    "uz-cyrl": "Тил ўзгартирилди",
+    "ru": "Язык изменен",
+    "en": "Language changed"
+  };
+  showToast('✅ ' + toastMsgs[langCode]);
+}
 
 /* =====================================================
    4. NAVIGATSIYA FUNKSIYALARI
@@ -577,13 +661,7 @@ function demoLogin() {
       phone: "+998 90 123 45 67",
       isAdmin: false,
     };
-    STATE.myQueue = {
-      placeId: 1,
-      placeName: "Baraka Sartaroshxona",
-      num: 7,
-      position: 5,
-      waitMin: 14,
-    };
+    STATE.myQueue = null;
     updateUserUI();
     showScreen("screen-home");
     showToast("⚡ Demo rejimida kirdingiz");
@@ -652,7 +730,7 @@ function renderAdminPlaceList() {
         <span style="font-size:28px">${p.icon}</span>
         <div>
           <p class="admin-card-name">${p.name}</p>
-          <p class="admin-card-addr">📍 ${p.location.district}, ${p.location.city}</p>
+          <p class="admin-card-addr"><i class="ph-fill ph-map-pin"></i> ${p.location.district}, ${p.location.city}</p>
           <p class="admin-card-addr" style="margin-top:2px">Login: <strong>admin${p.id}</strong> / Parol: <strong>parol${p.id}</strong></p>
         </div>
       </div>
@@ -727,7 +805,7 @@ function loginAsAdmin(placeId) {
   document.getElementById("admin-panel-title").textContent = place.name;
 
   showScreen("screen-admin");
-  showToast(`✅ ${place.name} — Xush kelibsiz!`);
+  showToast(`<i class="ph-bold ph-check"></i> ${place.name} — Xush kelibsiz!`);
 }
 
 /* Admin paneldan chiqish */
@@ -759,14 +837,14 @@ function renderPlaceCard(place, onclick) {
     <div class="place-card" onclick="${onclick}">
       <div class="place-thumb cat-${place.cat}">
         <span>${place.icon}</span>
-        ${place.isFeatured ? `<span class="badge badge-amber place-thumb-badge">⭐ Top</span>` : ""}
+        ${place.isFeatured ? `<span class="badge badge-amber place-thumb-badge"><i class="ph-fill ph-star"></i> Top</span>` : ""}
         ${!place.isOpen ? `<span class="badge badge-red place-thumb-badge">Yopiq</span>` : ""}
       </div>
       <div class="place-info">
         <p class="place-name">${place.name}</p>
-        <p class="place-addr">📍 ${place.location.district}, ${place.location.city}</p>
+        <p class="place-addr"><i class="ph-fill ph-map-pin"></i> ${place.location.district}, ${place.location.city}</p>
         <div class="place-meta">
-          <span>⭐ ${place.rating}</span>
+          <span><i class="ph-fill ph-star"></i> ${place.rating}</span>
           <span>(${place.reviewCount} sharh)</span>
           ${
             place.isOpen
@@ -793,7 +871,7 @@ function renderHome() {
   if (container) {
     container.innerHTML = filtered.length
       ? filtered.map((p) => renderPlaceCard(p, `openPlace(${p.id})`)).join("")
-      : `<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-title">Bu kategoriyada joy yo'q</div></div>`;
+      : `<div class="empty-state"><div class="empty-icon"><i class="ph-fill ph-magnifying-glass"></i></div><div class="empty-title">Bu kategoriyada joy yo'q</div></div>`;
   }
 }
 
@@ -842,7 +920,7 @@ function searchAndRenderMarket(query) {
   if (container) {
     container.innerHTML = filtered.length
       ? filtered.map((p) => renderPlaceCard(p, `openPlace(${p.id})`)).join("")
-      : `<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-title">Natija topilmadi</div><div class="empty-sub">Boshqa so'z bilan qidiring</div></div>`;
+      : `<div class="empty-state"><div class="empty-icon"><i class="ph-fill ph-magnifying-glass"></i></div><div class="empty-title">Natija topilmadi</div><div class="empty-sub">Boshqa so'z bilan qidiring</div></div>`;
   }
 }
 
@@ -861,8 +939,8 @@ function openPlace(id) {
   document.getElementById("detail-category").textContent =
     `${place.icon} ${catName(place.cat)}`;
   document.getElementById("detail-rating").textContent =
-    `⭐ ${place.rating} (${place.reviewCount} ta sharh)`;
-  document.getElementById("detail-hours").textContent = `🕐 ${place.hours}`;
+    `<i class="ph-fill ph-star"></i> ${place.rating} (${place.reviewCount} ta sharh)`;
+  document.getElementById("detail-hours").textContent = `<i class="ph-fill ph-clock"></i> ${place.hours}`;
 
   /* Holat nishoni */
   const badge = document.getElementById("detail-status-badge");
@@ -939,7 +1017,7 @@ function openPlace(id) {
         <div class="avatar" style="width:32px;height:32px;font-size:11px">${r.name[0]}</div>
         <div>
           <p style="font-size:14px;font-weight:700">${r.name}</p>
-          <p style="font-size:11px;color:var(--c-text3)">${r.date} · ${"⭐".repeat(r.rating)}</p>
+          <p style="font-size:11px;color:var(--c-text3)">${r.date} · ${`<i class="ph-fill ph-star"></i>`.repeat(r.rating)}</p>
         </div>
       </div>
       <p style="font-size:14px;color:var(--c-text2);line-height:1.5">${r.text}</p>
@@ -1009,7 +1087,7 @@ function submitReview() {
 
   document.getElementById("review-text-inp").value = "";
   setRating(0);
-  showToast("✅ Izohingiz qabul qilindi!");
+  showToast('✅ Izohingiz qabul qilindi!');
   openPlace(STATE.currentPlace.id); /* sahifani yangilash */
 }
 
@@ -1068,7 +1146,7 @@ function confirmJoin() {
 
   updateUserUI();
   closeModal("modal-join");
-  showToast(`✅ Navbatga qo'shildingiz! Raqamingiz: #${num}`);
+  showToast(`<i class="ph-bold ph-check"></i> Navbatga qo'shildingiz! Raqamingiz: #${num}`);
   setTimeout(() => showScreen("screen-myqueue"), 500);
 }
 
@@ -1082,7 +1160,7 @@ function renderMyQueue() {
   if (!STATE.myQueue) {
     container.innerHTML = `
       <div class="empty-state" style="padding-top:80px">
-        <div class="empty-icon">📋</div>
+        <div class="empty-icon"><i class="ph-fill ph-clipboard-text"></i></div>
         <div class="empty-title">Faol navbat yo'q</div>
         <div class="empty-sub">Xizmat joyini toping va navbatga qo'shiling</div>
         <br>
@@ -1103,7 +1181,7 @@ function renderMyQueue() {
     <div style="background:var(--c-info-bg);border-radius:var(--r);padding:20px;margin-bottom:12px;border:1px solid rgba(37,99,235,0.2)">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
         <span style="font-size:12px;font-weight:700;color:var(--c-info);text-transform:uppercase;letter-spacing:0.5px">
-          📍 Sizning navbatingiz
+          <i class="ph-fill ph-map-pin"></i> Sizning navbatingiz
         </span>
         <span style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--c-info)">
           <span class="live-dot" style="background:var(--c-info)"></span> Jonli
@@ -1144,7 +1222,7 @@ function renderMyQueue() {
         ⏱ Kechiktirish
       </button>
       <button class="btn btn-danger" style="padding:12px;font-size:13px" onclick="leaveQueue()">
-        🚪 Navbatdan chiqish
+        <i class="ph-bold ph-sign-out"></i> Navbatdan chiqish
       </button>
     </div>
 
@@ -1157,8 +1235,8 @@ function renderMyQueue() {
           <span style="font-size:36px">${place.icon}</span>
           <div style="flex:1">
             <p style="font-weight:700;font-size:15px">${place.name}</p>
-            <p style="font-size:12px;color:var(--c-text2)">📍 ${place.location.district}</p>
-            <p style="font-size:12px;color:var(--c-text2)">🕐 ${place.hours}</p>
+            <p style="font-size:12px;color:var(--c-text2)"><i class="ph-fill ph-map-pin"></i> ${place.location.district}</p>
+            <p style="font-size:12px;color:var(--c-text2)"><i class="ph-fill ph-clock"></i> ${place.hours}</p>
           </div>
           <span style="font-size:20px;color:var(--c-text3)">›</span>
         </div>
@@ -1186,8 +1264,8 @@ function doDelay(positions) {
 
   showToast(
     isFree
-      ? `✅ Bepul kechiktirildi (+${positions} o'rin)`
-      : `💳 5,000 so'm to'landi (+${positions} o'rin)`,
+      ? `<i class="ph-bold ph-check"></i> Bepul kechiktirildi (+${positions} o'rin)`
+      : `<i class="ph-fill ph-credit-card"></i> 5,000 so'm to'landi (+${positions} o'rin)`,
   );
 }
 
@@ -1275,9 +1353,9 @@ function adminNext() {
 
   if (nextIdx >= 0) {
     STATE.adminQueue[nextIdx].current = true;
-    showToast(`▶ Keyingi: ${STATE.adminQueue[nextIdx].name}`);
+    showToast(`<i class="ph-bold ph-play"></i> Keyingi: ${STATE.adminQueue[nextIdx].name}`);
   } else {
-    showToast("✅ Barcha mijozlarga xizmat ko'rsatildi!");
+    showToast('✅ Barcha mijozlarga xizmat ko\'rsatildi!');
   }
 
   renderAdmin();
@@ -1323,7 +1401,7 @@ function addWalkIn() {
 
   closeModal("modal-add");
   renderAdmin();
-  showToast(`✅ ${name} navbatga qo'shildi (#${STATE.adminNextNum - 1})`);
+  showToast(`<i class="ph-bold ph-check"></i> ${name} navbatga qo'shildi (#${STATE.adminNextNum - 1})`);
 }
 
 /* Navbatni tozalash */
@@ -1453,6 +1531,7 @@ function showToast(msg) {
    ===================================================== */
 function toggleTheme() {
   STATE.isDark = !STATE.isDark;
+  document.documentElement.dataset.theme = STATE.isDark ? "dark" : "";
   document.body.dataset.theme = STATE.isDark ? "dark" : "";
   updateThemeButtons();
 
@@ -1463,9 +1542,9 @@ function toggleTheme() {
 
 /* Barcha tema tugmalarini yangilash */
 function updateThemeButtons() {
-  const icon = STATE.isDark ? "☀️" : "🌙";
+  const icon = STATE.isDark ? `<i class="ph-fill ph-sun"></i>` : `<i class="ph-fill ph-moon"></i>`;
   document.querySelectorAll(".theme-btn").forEach((btn) => {
-    btn.textContent = icon;
+    btn.innerHTML = icon;
     btn.title = STATE.isDark ? "Kun rejimiga o'tish" : "Tun rejimiga o'tish";
   });
 }
