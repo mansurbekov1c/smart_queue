@@ -31,10 +31,10 @@
       <i class="ph-fill ph-lightning"></i>
     </div>
     <h1 class="splash-title">Navbat</h1>
-    <p class="splash-sub">O'zbekiston uchun aqlli<br>navbat platformasi</p>
+    <p id="ui-splash-sub" class="splash-sub">O'zbekiston uchun aqlli<br>navbat platformasi</p>
 
     <!-- Rol tanlash tugmalari -->
-    <p style="font-size:12px;font-weight:700;color:var(--c-text3);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px">Rolni tanlang</p>
+    <p id="ui-splash-role-label" style="font-size:12px;font-weight:700;color:var(--c-text3);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px">Rolni tanlang</p>
     <div class="role-toggle" id="role-toggle">
       <button class="role-btn active" onclick="selectRole('customer',this)">
         <i class="ph-fill ph-user"></i> Mijoz
@@ -45,7 +45,7 @@
     </div>
 
     <!-- Kirish / Demo tugmalari -->
-    <button class="btn btn-primary" onclick="goToLogin()" style="margin-bottom:10px">Kirish / Ro'yxatdan o'tish</button>
+    <button class="btn btn-primary" onclick="goToLogin()" style="margin-bottom:10px">Kirish</button>
     <button class="btn btn-secondary" onclick="demoLogin()">
       <i class="ph-fill ph-lightning"></i> Demo rejimida kirish
     </button>
@@ -72,36 +72,36 @@
   <div class="content" style="padding-top:24px">
     <!-- Logo -->
     <div class="auth-logo"><i class="ph-fill ph-lightning"></i></div>
-    <h2 class="auth-title">Xush kelibsiz!</h2>
-    <p class="auth-sub">Navbatni onlayn boshqaring</p>
+    <h2 id="ui-login-title" class="auth-title">Xush kelibsiz!</h2>
+    <p id="ui-login-sub" class="auth-sub">Navbatni onlayn boshqaring</p>
 
     <!-- Kirish / Ro'yxatdan o'tish tablar -->
     <div class="auth-tabs" id="auth-tabs">
-      <button class="auth-tab active" onclick="switchAuthTab('login')">Kirish</button>
-      <button class="auth-tab" onclick="switchAuthTab('register')">Ro'yxatdan o'tish</button>
+      <button id="ui-tab-login" class="auth-tab active" onclick="switchAuthTab('login')">Kirish</button>
+      <button id="ui-tab-register" class="auth-tab" onclick="switchAuthTab('register')">Ro'yxatdan o'tish</button>
     </div>
 
     <!-- Kirish formasi -->
     <div id="form-login">
       <div class="form-group">
-        <label class="form-label">Telefon raqam</label>
+        <label id="ui-label-phone" class="form-label">Telefon raqam</label>
         <input type="tel" id="inp-phone" placeholder="+998 90 123 45 67">
       </div>
       <div class="form-group">
         <label class="form-label">Parol</label>
         <input type="password" id="inp-pass" placeholder="••••••••">
       </div>
-      <button class="btn btn-primary" onclick="doLogin()">Kirish →</button>
+      <button id="ui-btn-login" class="btn btn-primary" onclick="doLogin()">Kirish →</button>
     </div>
 
     <!-- Ro'yxatdan o'tish formasi -->
     <div id="form-register" style="display:none">
       <div class="form-group">
-        <label class="form-label">Ism *</label>
+        <label id="ui-label-firstname" class="form-label">Ism *</label>
         <input type="text" id="inp-firstname" placeholder="Ali">
       </div>
       <div class="form-group">
-        <label class="form-label">Familiya *</label>
+        <label id="ui-label-lastname" class="form-label">Familiya *</label>
         <input type="text" id="inp-lastname" placeholder="Valiyev">
       </div>
       <div class="form-group">
@@ -112,7 +112,7 @@
         <label class="form-label">Parol *</label>
         <input type="password" id="inp-regpass" placeholder="Kamida 6 ta belgi">
       </div>
-      <button class="btn btn-primary" onclick="doRegister()">Ro'yxatdan o'tish →</button>
+      <button id="ui-btn-register" class="btn btn-primary" onclick="doRegister()">Ro'yxatdan o'tish →</button>
     </div>
   </div>
 </div>
@@ -124,7 +124,7 @@
   <!-- Yuqori panel -->
   <div class="topbar">
     <button class="btn-back" onclick="showScreen('screen-splash')">←</button>
-    <span class="topbar-title">Admin kirish</span>
+    <span id="ui-admin-login-title" class="topbar-title">Admin kirish</span>
     <button class="theme-btn" onclick="toggleTheme()" id="admin-login-theme-btn">
       <i class="ph-fill ph-moon"></i>
     </button>
@@ -132,38 +132,32 @@
 
   <div class="content" style="padding-top:20px">
     <div class="auth-logo"><i class="ph-fill ph-buildings"></i></div>
-    <h2 class="auth-title" style="margin-bottom:4px">Admin paneli</h2>
-    <p class="auth-sub">Markazingizni tanlang va kirish ma'lumotlarini kiriting</p>
+    <h2 id="ui-admin-login-sub" class="auth-title" style="margin-bottom:4px">Admin paneli</h2>
+    <p id="ui-admin-login-sub-p" class="auth-sub">Markazingizni tanlang va kirish ma'lumotlarini kiriting</p>
 
     <!-- Markaz tanlash ro'yxati -->
-    <div class="section-hd"><span class="section-title">Markazni tanlang</span></div>
+    <div class="section-hd"><span id="ui-section-place" class="section-title">Markazni tanlang</span></div>
     <div id="admin-place-list"></div>
 
     <!-- Login/Parol formasi -->
     <div id="admin-creds-form" style="display:none;margin-top:16px">
       <div class="divider"></div>
-      <p style="font-size:13px;font-weight:700;color:var(--c-text2);margin-bottom:14px">
-        Tanlangan markaz: <span id="selected-place-name" style="color:var(--c-accent)">—</span>
-      </p>
-
-      <!-- Login/Parol yordami -->
-      <div style="background:var(--c-surface2);border-radius:var(--r-sm);padding:12px;margin-bottom:14px;border:1px dashed var(--c-border2)">
-        <p style="font-size:11px;font-weight:700;color:var(--c-text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Login ma'lumotlari:</p>
-        <p style="font-size:13px;font-family:var(--mono);color:var(--c-text)">
-          Login: <strong id="hint-login">admin1</strong><br>
-          Parol: <strong id="hint-pass">parol1</strong>
-        </p>
+      
+      <!-- Tanlangan markaz nomi -->
+      <div style="background:var(--c-accent-bg);border-radius:var(--r);padding:20px;margin-bottom:16px;border:1px solid rgba(94,96,206,0.25);text-align:center">
+        <p id="ui-selected-place-label" style="font-size:11px;font-weight:700;color:var(--c-accent);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Kirish uchun tanlangan markaz</p>
+        <p id="selected-place-name" style="font-size:22px;font-weight:800;color:var(--c-accent)">—</p>
       </div>
 
       <div class="form-group">
-        <label class="form-label">Login</label>
-        <input type="text" id="admin-login-inp" placeholder="admin1">
+        <label id="ui-label-admin-login" class="form-label">Login</label>
+        <input type="text" id="admin-login-inp" placeholder="loginni kiriting">
       </div>
       <div class="form-group">
         <label class="form-label">Parol</label>
-        <input type="password" id="admin-pass-inp" placeholder="parol1">
+        <input type="password" id="admin-pass-inp" placeholder="parolni kiriting">
       </div>
-      <button class="btn btn-primary" onclick="doAdminLogin()">Admin panelga kirish →</button>
+      <button id="ui-btn-admin-login" class="btn btn-primary" onclick="doAdminLogin()">Admin panelga kirish →</button>
     </div>
   </div>
 </div>
@@ -186,7 +180,7 @@
   <div class="content" style="padding:0;padding-bottom:90px">
     <!-- Hero banner -->
     <div class="hero">
-      <p class="hero-greeting">Assalomu alaykum,</p>
+      <p id="ui-hero-greeting" class="hero-greeting">Assalomu alaykum,</p>
       <h1 class="hero-name" id="hero-username">Ali Valiyev 👋</h1>
 
       <!-- Faol navbat bo'lsa -->
@@ -202,14 +196,14 @@
             <span id="hero-q-wait">~14 daqiqa</span>
             <span style="margin-left:auto;display:flex;align-items:center;gap:4px">
               <span class="live-dot"></span>
-              <span style="font-size:12px">Jonli</span>
+              <span id="ui-live" style="font-size:12px">Jonli</span>
             </span>
           </div>
         </div>
       </div>
 
       <!-- Faol navbat yo'q -->
-      <div id="hero-no-queue" style="opacity:0.75;font-size:14px;color:#fff">
+      <div id="ui-hero-no-queue" style="opacity:0.75;font-size:14px;color:#fff">
         Hozirda faol navbat yo'q. Quyidan xizmat qidiring ↓
       </div>
     </div>
@@ -217,7 +211,7 @@
     <div style="padding:0 16px">
       <!-- Kategoriya filtrlari -->
       <div class="section-hd">
-        <span class="section-title">Kategoriyalar</span>
+        <span id="ui-section-cats" class="section-title">Kategoriyalar</span>
       </div>
       <div class="chips mb-12" id="home-chips">
         <div class="chip active" onclick="filterHome('all',this)">Hammasi</div>
@@ -230,7 +224,7 @@
 
       <!-- Joy ro'yxati -->
       <div class="section-hd">
-        <span class="section-title">Yaqin atrofda</span>
+        <span id="ui-section-nearby" class="section-title">Yaqin atrofda</span>
         <button class="section-link" onclick="showScreen('screen-market')">Barchasi →</button>
       </div>
       <div id="home-places-list"></div>
@@ -264,7 +258,7 @@
 <div class="screen" id="screen-market">
   <div class="topbar">
     <button class="btn-back" onclick="goBack()">←</button>
-    <span class="topbar-title">Xizmatlar</span>
+    <span id="ui-services" class="topbar-title">Xizmatlar</span>
     <button class="theme-btn" onclick="toggleTheme()" id="market-theme-btn">
       <i class="ph-fill ph-moon"></i>
     </button>
@@ -315,7 +309,7 @@
   <div class="topbar">
     <button class="btn-back" onclick="goBack()">←</button>
     <span class="topbar-title" id="detail-topbar-title">—</span>
-    <button class="topbar-action" onclick="openJoinModal()">Navbat olish</button>
+    <button id="ui-btn-get-queue" class="topbar-action" onclick="openJoinModal()">Navbat olish</button>
   </div>
 
   <div class="content">
@@ -344,7 +338,7 @@
         <p class="location-name" id="detail-loc-district">—</p>
         <p class="location-addr" id="detail-loc-addr">—</p>
         <a class="location-link" href="#" onclick="showToast('Xarita ochilmoqda...');return false">
-          Xaritada ko'rish →
+          <span id="ui-view-map">Xaritada ko'rish →</span>
         </a>
       </div>
     </div>
@@ -353,20 +347,20 @@
     <div class="card" style="background:var(--c-accent-bg);border-color:rgba(94,96,206,0.25)">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
         <span class="live-dot"></span>
-        <span style="font-size:13px;font-weight:700;color:var(--c-accent)">Jonli navbat holati</span>
+        <span id="ui-live-queue-status" style="font-size:13px;font-weight:700;color:var(--c-accent)">Jonli navbat holati</span>
         <span id="detail-queue-badge" class="badge" style="margin-left:auto"></span>
       </div>
       <div style="display:flex;gap:0">
         <div style="flex:1;text-align:center">
-          <p style="font-size:11px;color:var(--c-accent);margin-bottom:4px;font-weight:600">NAVBATDA</p>
+          <p id="ui-queue-label" style="font-size:11px;color:var(--c-accent);margin-bottom:4px;font-weight:600">NAVBATDA</p>
           <p style="font-family:var(--mono);font-size:28px;font-weight:700;color:var(--c-accent)" id="detail-q-count">—</p>
         </div>
         <div style="flex:1;text-align:center;border-left:0.5px solid rgba(94,96,206,0.3);border-right:0.5px solid rgba(94,96,206,0.3)">
-          <p style="font-size:11px;color:var(--c-accent);margin-bottom:4px;font-weight:600">KUTISH</p>
+          <p id="ui-wait-label" style="font-size:11px;color:var(--c-accent);margin-bottom:4px;font-weight:600">KUTISH</p>
           <p style="font-family:var(--mono);font-size:28px;font-weight:700;color:var(--c-accent)" id="detail-q-wait">—</p>
         </div>
         <div style="flex:1;text-align:center">
-          <p style="font-size:11px;color:var(--c-accent);margin-bottom:4px;font-weight:600">HOZIRGI</p>
+          <p id="ui-current-label" style="font-size:11px;color:var(--c-accent);margin-bottom:4px;font-weight:600">HOZIRGI</p>
           <p style="font-family:var(--mono);font-size:28px;font-weight:700;color:var(--c-accent)" id="detail-q-current">—</p>
         </div>
       </div>
@@ -374,7 +368,7 @@
 
     <!-- Navbat ro'yxati -->
     <div class="section-hd">
-      <span class="section-title">Navbat ro'yxati</span>
+      <span id="ui-queue-list" class="section-title">Navbat ro'yxati</span>
     </div>
     <div class="card" style="padding:8px 16px">
       <div id="detail-queue-list"></div>
@@ -382,14 +376,14 @@
 
     <!-- Sharhlar bo'limi -->
     <div class="section-hd" style="margin-top:4px">
-      <span class="section-title">Sharhlar</span>
+      <span id="ui-reviews" class="section-title">Sharhlar</span>
     </div>
     <div class="card" style="padding:12px 16px">
       <div id="detail-reviews-list"></div>
 
       <!-- Izoh yozish formasi -->
       <div class="divider"></div>
-      <p style="font-size:13px;font-weight:700;margin-bottom:10px">Izoh qoldiring</p>
+      <p id="ui-leave-review" style="font-size:13px;font-weight:700;margin-bottom:10px">Izoh qoldiring</p>
 
       <!-- Yulduz baholash -->
       <div class="star-input" id="star-input">
@@ -402,17 +396,17 @@
 
       <div class="form-group">
         <textarea id="review-text-inp" rows="3"
-                  placeholder="Xizmat haqida fikringizni yozing..."></textarea>
+                  placeholder="Xizmat haqida fikringizni yozing..." id="ui-review-placeholder"></textarea>
       </div>
       <button class="btn btn-secondary" style="font-size:13px;padding:10px" onclick="submitReview()">
-        Izoh yuborish
+        <span id="ui-btn-submit-review">Izoh yuborish</span>
       </button>
     </div>
 
     <!-- Navbatga qo'shilish tugmasi (pastda) -->
     <div style="height:8px"></div>
     <button class="btn btn-primary" onclick="openJoinModal()">
-      Navbatga qo'shilish — bepul
+      <span id="ui-btn-join-queue">Navbatga qo'shilish — bepul</span>
     </button>
   </div>
 </div>
@@ -423,7 +417,7 @@
 <div class="screen" id="screen-myqueue">
   <div class="topbar">
     <div style="width:34px"></div>
-    <span class="topbar-title">Mening navbatim</span>
+    <span id="ui-myqueue" class="topbar-title">Mening navbatim</span>
     <button class="theme-btn" onclick="toggleTheme()" id="myq-theme-btn">
       <i class="ph-fill ph-moon"></i>
     </button>
@@ -452,7 +446,7 @@
 <div class="screen" id="screen-profile">
   <div class="topbar">
     <div style="width:34px"></div>
-    <span class="topbar-title">Profil</span>
+    <span id="ui-profile" class="topbar-title">Profil</span>
     <button class="theme-btn" onclick="toggleTheme()" id="profile-theme-btn">
       <i class="ph-fill ph-moon"></i>
     </button>
@@ -472,17 +466,17 @@
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-val" id="stat-total">24</div>
-        <div class="stat-label">Jami navbat</div>
+        <div id="ui-stat-total" class="stat-label">Jami navbat</div>
       </div>
       <div class="stat-card">
         <div class="stat-val" id="stat-saved">2.4 soat</div>
-        <div class="stat-label">Tejlgan vaqt</div>
+        <div id="ui-stat-saved" class="stat-label">Tejlgan vaqt</div>
       </div>
     </div>
 
     <!-- Sozlamalar -->
     <div class="card">
-      <p style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--c-text)">Sozlamalar</p>
+      <p id="ui-settings" style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--c-text)">Sozlamalar</p>
 
       <div class="q-row" style="cursor:pointer">
         <span style="flex:1;display:flex;align-items:center;gap:8px"><i class="ph-fill ph-bell"></i> Bildirishnomalar</span>
@@ -501,7 +495,7 @@
         <span style="color:var(--c-text3);font-size:12px">Sozlash ›</span>
       </div>
       <div class="q-row" style="cursor:pointer;border-bottom:none" onclick="logoutUser()">
-        <span style="flex:1;color:var(--c-danger);display:flex;align-items:center;gap:8px"><i class="ph-bold ph-sign-out"></i> Chiqish</span>
+        <span id="ui-logout" style="flex:1;color:var(--c-danger);display:flex;align-items:center;gap:8px"><i class="ph-bold ph-sign-out"></i> Chiqish</span>
       </div>
     </div>
 
@@ -533,24 +527,29 @@
   <div class="topbar">
     <button class="btn-back" onclick="adminLogout()">←</button>
     <span class="topbar-title" id="admin-panel-title">Admin</span>
-    <button class="topbar-action" onclick="showScreen('screen-display')">
-      <i class="ph-fill ph-television"></i> Ekran
-    </button>
+    <div style="display:flex;gap:8px">
+      <button class="topbar-action" onclick="openModal('modal-lang')">
+        <i class="ph-fill ph-globe"></i> Til
+      </button>
+      <button class="topbar-action" onclick="showScreen('screen-display')">
+        <i class="ph-fill ph-television"></i> Ekran
+      </button>
+    </div>
   </div>
 
   <div class="content">
     <!-- Joriy xizmatdagi kishi -->
     <div class="admin-current-block">
-      <p class="admin-cur-label">Hozirda xizmatda</p>
+      <p id="ui-admin-cur-label" class="admin-cur-label">Hozirda xizmatda</p>
       <div class="admin-cur-num" id="admin-cur-num">#—</div>
-      <p class="admin-cur-name" id="admin-cur-name">Hech kim</p>
-      <p class="admin-cur-next" id="admin-cur-next">Navbat bo'sh</p>
+      <p id="ui-admin-cur-name" class="admin-cur-name">Hech kim</p>
+      <p id="ui-admin-cur-next" class="admin-cur-next">Navbat bo'sh</p>
     </div>
 
     <!-- Asosiy tugmalar qatori -->
     <div style="display:grid;grid-template-columns:2fr 1fr;gap:10px;margin-bottom:14px">
-      <button class="btn-next" onclick="adminNext()"><i class="ph-bold ph-play"></i> Keyingi</button>
-      <button class="btn btn-secondary" onclick="openAddModal()"
+      <button id="ui-btn-next" class="btn-next" onclick="adminNext()"><i class="ph-bold ph-play"></i> Keyingi</button>
+      <button id="ui-btn-add" class="btn btn-secondary" onclick="openAddModal()"
               style="padding:0;font-size:14px;font-weight:700;border-radius:var(--r)">
         + Qo'shish
       </button>
@@ -560,18 +559,18 @@
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-val" id="adm-stat-today">—</div>
-        <div class="stat-label">Bugungi mijozlar</div>
+        <div id="ui-stat-today" class="stat-label">Bugungi mijozlar</div>
       </div>
       <div class="stat-card">
         <div class="stat-val" id="adm-stat-waiting">—</div>
-        <div class="stat-label">Kutayotganlar</div>
+        <div id="ui-stat-waiting" class="stat-label">Kutayotganlar</div>
       </div>
     </div>
 
     <!-- Navbat ro'yxati -->
     <div class="section-hd">
-      <span class="section-title">Navbat (<span id="adm-q-count">0</span>)</span>
-      <button class="section-link" style="color:var(--c-danger)" onclick="confirmReset()">Tozalash</button>
+      <span class="section-title"><span id="ui-queue">Navbat</span> (<span id="adm-q-count">0</span>)</span>
+      <button id="ui-btn-clear" class="section-link" style="color:var(--c-danger)" onclick="confirmReset()">Tozalash</button>
     </div>
     <div class="card" style="padding:8px 16px">
       <div id="admin-queue-list"></div>
@@ -579,7 +578,7 @@
 
     <!-- Soatlik tahlil grafigi -->
     <div class="section-hd">
-      <span class="section-title">Soatlik tahlil</span>
+      <span id="ui-hourly-analysis" class="section-title">Soatlik tahlil</span>
     </div>
     <div class="card">
       <div class="chart-wrap">
@@ -589,7 +588,7 @@
     </div>
 
     <!-- Admin chiqish -->
-    <button class="btn btn-danger" onclick="adminLogout()" style="margin-top:4px;font-size:13px;padding:12px">
+    <button id="ui-btn-admin-logout" class="btn btn-danger" onclick="adminLogout()" style="margin-top:4px;font-size:13px;padding:12px">
       Admin paneldan chiqish
     </button>
   </div>
@@ -604,15 +603,15 @@
           style="position:absolute;top:16px;left:16px;background:rgba(255,255,255,0.1);
                  color:#fff;border:none;border-radius:var(--r-sm);padding:9px 14px;
                  cursor:pointer;font-family:var(--font);font-size:13px;font-weight:600;z-index:10">
-    ← Qaytish
+    <span id="ui-btn-back">← Qaytish</span>
   </button>
 
   <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px">
-    <p class="disp-label">Hozirda xizmatda</p>
+    <p id="ui-disp-label" class="disp-label">Hozirda xizmatda</p>
     <div class="disp-num" id="disp-num">—</div>
-    <p class="disp-name" id="disp-name">Kutilmoqda</p>
-    <p class="disp-place" id="disp-place">Navbat platformasi</p>
-    <p class="disp-next" id="disp-next">Keyingi: —</p>
+    <p id="ui-disp-name" class="disp-name">Kutilmoqda</p>
+    <p id="ui-disp-place" class="disp-place">Navbat platformasi</p>
+    <p id="ui-disp-next" class="disp-next">Keyingi: —</p>
   </div>
 </div>
 
@@ -624,22 +623,22 @@
 <div class="modal-overlay hidden" id="modal-join">
   <div class="modal">
     <div class="modal-handle"></div>
-    <p class="modal-title" id="modal-join-title">Navbatga qo'shilish</p>
-    <p class="modal-sub" id="modal-join-sub">Siz navbatga qo'shilmoqchisiz</p>
+    <p id="ui-modal-join-title" class="modal-title">Navbatga qo'shilish</p>
+    <p id="ui-modal-join-sub" class="modal-sub">Siz navbatga qo'shilmoqchisiz</p>
 
     <div style="background:var(--c-surface2);border-radius:var(--r);padding:16px;margin-bottom:16px;border:var(--glass-border)">
       <div style="display:flex;justify-content:space-between;margin-bottom:6px">
-        <span style="font-size:13px;color:var(--c-text2)">Sizning raqamingiz</span>
-        <span class="badge badge-green">Bepul</span>
+        <span id="ui-your-number" style="font-size:13px;color:var(--c-text2)">Sizning raqamingiz</span>
+        <span id="ui-free" class="badge badge-green">Bepul</span>
       </div>
       <div class="big-queue-num" id="modal-join-num">#—</div>
-      <p style="font-size:13px;color:var(--c-text2);margin-top:4px" id="modal-join-wait">Taxminiy kutish: —</p>
+      <p style="font-size:13px;color:var(--c-text2);margin-top:4px" id="modal-join-wait"><span id="ui-est-wait">Taxminiy kutish:</span> —</p>
     </div>
 
     <button class="btn btn-primary" onclick="confirmJoin()" style="margin-bottom:10px">
-      <i class="ph-bold ph-check"></i> Tasdiqlash
+      <i class="ph-bold ph-check"></i> <span id="ui-btn-confirm">Tasdiqlash</span>
     </button>
-    <button class="btn btn-secondary" onclick="closeModal('modal-join')">Bekor qilish</button>
+    <button class="btn btn-secondary" onclick="closeModal('modal-join')"><span id="ui-btn-cancel-join">Bekor qilish</span></button>
   </div>
 </div>
 
@@ -647,22 +646,22 @@
 <div class="modal-overlay hidden" id="modal-add">
   <div class="modal">
     <div class="modal-handle"></div>
-    <p class="modal-title">Yangi mijoz qo'shish</p>
-    <p class="modal-sub">Offline (yurgan) mijozni navbatga qo'shing</p>
+    <p id="ui-modal-add-title" class="modal-title">Yangi mijoz qo'shish</p>
+    <p id="ui-modal-add-sub" class="modal-sub">Offline (yurgan) mijozni navbatga qo'shing</p>
 
     <div class="form-group">
-      <label class="form-label">Ism (majburiy)</label>
+      <label id="ui-label-name" class="form-label">Ism (majburiy)</label>
       <input type="text" id="walkin-name" placeholder="Ism kiriting">
     </div>
     <div class="form-group">
-      <label class="form-label">Telefon (ixtiyoriy)</label>
+      <label id="ui-label-phone-opt" class="form-label">Telefon (ixtiyoriy)</label>
       <input type="tel" id="walkin-phone" placeholder="+998 90...">
     </div>
 
     <button class="btn btn-primary" onclick="addWalkIn()" style="margin-bottom:10px">
-      + Navbatga qo'shish
+      <span id="ui-btn-add-to-queue">+ Navbatga qo'shish</span>
     </button>
-    <button class="btn btn-secondary" onclick="closeModal('modal-add')">Bekor qilish</button>
+    <button class="btn btn-secondary" onclick="closeModal('modal-add')"><span id="ui-btn-cancel-add">Bekor qilish</span></button>
   </div>
 </div>
 
@@ -670,31 +669,31 @@
 <div class="modal-overlay hidden" id="modal-delay">
   <div class="modal">
     <div class="modal-handle"></div>
-    <p class="modal-title">Navbatni kechiktirish</p>
-    <p class="modal-sub">1 marta bepul, undan keyin har kechiktirishda 5,000 so'm to'lanadi. Maksimum 3 o'rin kechiktirishingiz mumkin.</p>
+    <p id="ui-modal-delay-title" class="modal-title">Navbatni kechiktirish</p>
+    <p id="ui-modal-delay-sub" class="modal-sub">1 marta bepul, undan keyin har kechiktirishda 5,000 so'm to'lanadi. Maksimum 3 o'rin kechiktirishingiz mumkin.</p>
 
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">
       <div onclick="doDelay(1)"
            style="background:var(--c-surface2);border-radius:var(--r-sm);padding:14px;text-align:center;cursor:pointer;border:var(--glass-border);transition:all 0.2s">
         <p style="font-size:18px;font-weight:800;font-family:var(--mono)">+1</p>
-        <p style="font-size:12px;font-weight:700;color:var(--c-text2)">o'rin</p>
-        <p style="font-size:11px;color:var(--c-accent);font-weight:700;margin-top:4px">Bepul</p>
+        <p class="delay-slot">o'rin</p>
+        <p id="ui-delay-free-1" style="font-size:11px;color:var(--c-accent);font-weight:700;margin-top:4px">Bepul</p>
       </div>
       <div onclick="doDelay(2)"
            style="background:var(--c-surface2);border-radius:var(--r-sm);padding:14px;text-align:center;cursor:pointer;border:var(--glass-border);transition:all 0.2s">
         <p style="font-size:18px;font-weight:800;font-family:var(--mono)">+2</p>
-        <p style="font-size:12px;font-weight:700;color:var(--c-text2)">o'rin</p>
-        <p style="font-size:11px;color:var(--c-amber);font-weight:700;margin-top:4px">5,000 so'm</p>
+        <p class="delay-slot">o'rin</p>
+        <p class="delay-price" style="font-size:11px;color:var(--c-amber);font-weight:700;margin-top:4px">5,000 so'm</p>
       </div>
       <div onclick="doDelay(3)"
            style="background:var(--c-surface2);border-radius:var(--r-sm);padding:14px;text-align:center;cursor:pointer;border:var(--glass-border);transition:all 0.2s">
         <p style="font-size:18px;font-weight:800;font-family:var(--mono)">+3</p>
-        <p style="font-size:12px;font-weight:700;color:var(--c-text2)">o'rin</p>
-        <p style="font-size:11px;color:var(--c-amber);font-weight:700;margin-top:4px">5,000 so'm</p>
+        <p class="delay-slot">o'rin</p>
+        <p class="delay-price" style="font-size:11px;color:var(--c-amber);font-weight:700;margin-top:4px">5,000 so'm</p>
       </div>
     </div>
 
-    <button class="btn btn-secondary" onclick="closeModal('modal-delay')">Bekor qilish</button>
+    <button class="btn btn-secondary" onclick="closeModal('modal-delay')"><span id="ui-btn-cancel-delay">Bekor qilish</span></button>
   </div>
 </div>
 
@@ -702,7 +701,7 @@
 <div class="modal-overlay hidden" id="modal-lang">
   <div class="modal">
     <div class="modal-handle"></div>
-    <p class="modal-title" id="ui-lang-title">Tilni tanlang / Выберите язык / Select language</p>
+    <p class="modal-title" id="ui-lang-title">Tilni tanlang</p>
 
     <div style="display:flex;flex-direction:column;gap:8px;margin:16px 0">
       <button class="btn btn-secondary" onclick="setLang('uz-latn')">🇺🇿 O'zbek (Lotin)</button>

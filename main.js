@@ -442,7 +442,98 @@ const I18N = {
     navProfile: "Profil",
     splashBtnCustomer: '<i class="ph-fill ph-user"></i> Mijoz',
     splashBtnAdmin: '<i class="ph-fill ph-buildings"></i> Admin',
-    btnDemo: '<i class="ph-fill ph-lightning"></i> Demo rejimida kirish'
+    btnDemo: '<i class="ph-fill ph-lightning"></i> Demo rejimida kirish',
+    langTitle: "Tilni tanlang",
+    langCancel: "Bekor qilish",
+    btnLogin: "Kirish",
+    splashSub: "O'zbekiston uchun aqlli<br>navbat platformasi",
+    roleLabel: "Rolni tanlang",
+    loginTitle: "Xush kelibsiz!",
+    loginSub: "Navbatni onlayn boshqaring",
+    tabLogin: "Kirish",
+    tabRegister: "Ro'yxatdan o'tish",
+    labelPhone: "Telefon raqam",
+    labelPass: "Parol",
+    labelFirstname: "Ism",
+    labelLastname: "Familiya",
+    btnLoginSubmit: "Kirish →",
+    btnRegisterSubmit: "Ro'yxatdan o'tish →",
+    adminLoginTitle: "Admin paneli",
+    adminLoginSub: "Markazingizni tanlang va kirish ma'lumotlarini kiriting",
+    sectionPlace: "Markazni tanlang",
+    selectedPlace: "Kirish uchun tanlangan markaz",
+    labelLogin: "Login",
+    btnAdminLogin: "Admin panelga kirish →",
+    heroGreeting: "Assalomu alaykum,",
+    heroNoQueue: "Hozirda faol navbat yo'q. Quyidan xizmat qidiring ↓",
+    activeQueue: "Faol navbat",
+    live: "Jonli",
+    sectionCats: "Kategoriyalar",
+    catAll: "Hammasi",
+    catBarber: "Sartarosh",
+    catClinic: "Klinika",
+    catBank: "Bank",
+    catCarwash: "Avtomoyka",
+    catGov: "Davlat",
+    sectionNearby: "Yaqin atrofda",
+    btnAll: "Barchasi →",
+    services: "Xizmatlar",
+    searchPlaceholder: "Sartarosh, klinika, bank...",
+    myQueue: "Mening navbatim",
+    profile: "Profil",
+    statTotal: "Jami navbat",
+    statSaved: "Tejlgan vaqt",
+    settings: "Sozlamalar",
+    notifications: "Bildirishnomalar",
+    enabled: "Yoqilgan",
+    darkMode: "Tun/kun rejimi",
+    paymentMethod: "To'lov usuli",
+    configure: "Sozlash",
+    logout: "Chiqish",
+    adminCurLabel: "Hozirda xizmatda",
+    adminCurName: "Hech kim",
+    adminCurNext: "Navbat bo'sh",
+    btnNext: "Keyingi",
+    btnAdd: "+ Qo'shish",
+    statToday: "Bugungi mijozlar",
+    statWaiting: "Kutayotganlar",
+    queue: "Navbat",
+    btnClear: "Tozalash",
+    hourlyAnalysis: "Soatlik tahlil",
+    btnAdminLogout: "Admin paneldan chiqish",
+    btnBack: "← Qaytish",
+    dispLabel: "Hozirda xizmatda",
+    dispName: "Kutilmoqda",
+    dispPlace: "Navbat platformasi",
+    dispNext: "Keyingi:",
+    modalJoinTitle: "Navbatga qo'shilish",
+    modalJoinSub: "Siz navbatga qo'shilmoqchisiz",
+    yourNumber: "Sizning raqamingiz",
+    free: "Bepul",
+    estWait: "Taxminiy kutish:",
+    btnConfirm: "Tasdiqlash",
+    btnCancel: "Bekor qilish",
+    modalAddTitle: "Yangi mijoz qo'shish",
+    modalAddSub: "Offline (yurgan) mijozni navbatga qo'shing",
+    labelName: "Ism (majburiy)",
+    labelPhoneOpt: "Telefon (ixtiyoriy)",
+    btnAddToQueue: "+ Navbatga qo'shish",
+    modalDelayTitle: "Navbatni kechiktirish",
+    modalDelaySub: "1 marta bepul, undan keyin har kechiktirishda 5,000 so'm to'lanadi. Maksimum 3 o'rin kechiktirishingiz mumkin.",
+    slot: "o'rin",
+    price: "5,000 so'm",
+    btnJoinQueue: "Navbatga qo'shilish — bepul",
+    queueLabel: "NAVBATDA",
+    waitLabel: "KUTISH",
+    currentLabel: "HOZIRGI",
+    queueList: "Navbat ro'yxati",
+    reviews: "Sharhlar",
+    leaveReview: "Izoh qoldiring",
+    reviewPlaceholder: "Xizmat haqida fikringizni yozing...",
+    btnSubmitReview: "Izoh yuborish",
+    btnGetQueue: "Navbat olish",
+    viewMap: "Xaritada ko'rish →",
+    mapOpening: "Xarita ochilmoqda..."
   },
   "uz-cyrl": {
     langName: "Ўзбек (Кирилл) ›",
@@ -453,7 +544,98 @@ const I18N = {
     navProfile: "Профил",
     splashBtnCustomer: '<i class="ph-fill ph-user"></i> Мижоз',
     splashBtnAdmin: '<i class="ph-fill ph-buildings"></i> Админ',
-    btnDemo: '<i class="ph-fill ph-lightning"></i> Демо режимида кириш'
+    btnDemo: '<i class="ph-fill ph-lightning"></i> Демо режимида кириш',
+    langTitle: "Тилни танланг",
+    langCancel: "Бекор қилиш",
+    btnLogin: "Кириш",
+    splashSub: "Ўзбекистон учун ақлли<br>навбат платформаси",
+    roleLabel: "Ролни танланг",
+    loginTitle: "Хуш келибсиз!",
+    loginSub: "Навбатни онлайн бошқаринг",
+    tabLogin: "Кириш",
+    tabRegister: "Рўйхатдан ўтиш",
+    labelPhone: "Телефон рақами",
+    labelPass: "Парол",
+    labelFirstname: "Исм",
+    labelLastname: "Фамилия",
+    btnLoginSubmit: "Кириш →",
+    btnRegisterSubmit: "Рўйхатдан ўтиш →",
+    adminLoginTitle: "Админ панели",
+    adminLoginSub: "Марказингизни танланг ва кириш маълумотларини киритинг",
+    sectionPlace: "Марказни танланг",
+    selectedPlace: "Кириш учун танланган марказ",
+    labelLogin: "Логин",
+    btnAdminLogin: "Админ панелга кириш →",
+    heroGreeting: "Ассалому алайкум,",
+    heroNoQueue: "Ҳозирда фаол навбат йўқ. Қуйидан хизмат қидиринг ↓",
+    activeQueue: "Фаол навбат",
+    live: "Жонли",
+    sectionCats: "Категориялар",
+    catAll: "Ҳаммаси",
+    catBarber: "Сартарош",
+    catClinic: "Клиника",
+    catBank: "Банк",
+    catCarwash: "Автомойка",
+    catGov: "Давлат",
+    sectionNearby: "Яқин атрофда",
+    btnAll: "Ҳаммаси →",
+    services: "Хизматлар",
+    searchPlaceholder: "Сартарош, клиника, банк...",
+    myQueue: "Менинг навбатим",
+    profile: "Профил",
+    statTotal: "Жами навбат",
+    statSaved: "Тежлаган вақт",
+    settings: "Созламалар",
+    notifications: "Билдиришномалар",
+    enabled: "Ёқилган",
+    darkMode: "Тун/кун режими",
+    paymentMethod: "Тўлов усули",
+    configure: "Созлаш",
+    logout: "Чиқиш",
+    adminCurLabel: "Ҳозирда хизматда",
+    adminCurName: "Ҳеч ким",
+    adminCurNext: "Навбат бўш",
+    btnNext: "Кейинги",
+    btnAdd: "+ Қўшиш",
+    statToday: "Бугунги mijozлар",
+    statWaiting: "Кутайотганлар",
+    queue: "Навбат",
+    btnClear: "Тозалаш",
+    hourlyAnalysis: "Соатлик таҳлил",
+    btnAdminLogout: "Админ панелдан чиқиш",
+    btnBack: "← Қайтish",
+    dispLabel: "Ҳозирда хизматда",
+    dispName: "Кутмоқда",
+    dispPlace: "Навбат платформаси",
+    dispNext: "Кейинги:",
+    modalJoinTitle: "Навбатга қўшилиш",
+    modalJoinSub: "Сиз навбатга қўшилмоқчисиз",
+    yourNumber: "Сизнинг рақамингиз",
+    free: "Бепул",
+    estWait: "Тахминий кутиш:",
+    btnConfirm: "Тасдиқлаш",
+    btnCancel: "Бекор қилиш",
+    modalAddTitle: "Янги mijoz қўшиш",
+    modalAddSub: "Offline (юрган) mijozни навбатга қўшинг",
+    labelName: "Исм (мажбурий)",
+    labelPhoneOpt: "Телефон (ихтиёрий)",
+    btnAddToQueue: "+ Навбатга қўшиш",
+    modalDelayTitle: "Навбатни кечиктириш",
+    modalDelaySub: "1 мартa бепул, ундан кейин ҳар кечиктиришда 5,000 сўм тўланади. Максимум 3 орин кечиктиришингиз мумкин.",
+    slot: "орин",
+    price: "5,000 сўм",
+    btnJoinQueue: "Навбатга қўшилиш — бепул",
+    queueLabel: "НАВБАТДА",
+    waitLabel: "КУТИШ",
+    currentLabel: "ҲОЗИРГИ",
+    queueList: "Навбат рўйхати",
+    reviews: "Шарҳлар",
+    leaveReview: "Изоҳ қолдириш",
+    reviewPlaceholder: "Хизмат ҳақида фикрингизни ёзинг...",
+    btnSubmitReview: "Изоҳ юбориш",
+    btnGetQueue: "Навбат олиш",
+    viewMap: "Харитада кўриш →",
+    mapOpening: "Харита очилмоқда..."
   },
   "ru": {
     langName: "Русский ›",
@@ -464,7 +646,98 @@ const I18N = {
     navProfile: "Профиль",
     splashBtnCustomer: '<i class="ph-fill ph-user"></i> Клиент',
     splashBtnAdmin: '<i class="ph-fill ph-buildings"></i> Админ',
-    btnDemo: '<i class="ph-fill ph-lightning"></i> Демо вход'
+    btnDemo: '<i class="ph-fill ph-lightning"></i> Демо вход',
+    langTitle: "Выберите язык",
+    langCancel: "Отмена",
+    btnLogin: "Войти",
+    splashSub: "Умная платформа очереди<br>для Узбекистана",
+    roleLabel: "Выберите роль",
+    loginTitle: "Добро пожаловать!",
+    loginSub: "Управляйте очередью онлайн",
+    tabLogin: "Войти",
+    tabRegister: "Регистрация",
+    labelPhone: "Номер телефона",
+    labelPass: "Пароль",
+    labelFirstname: "Имя",
+    labelLastname: "Фамилия",
+    btnLoginSubmit: "Войти →",
+    btnRegisterSubmit: "Регистрация →",
+    adminLoginTitle: "Админ панель",
+    adminLoginSub: "Выберите ваш центр и введите данные для входа",
+    sectionPlace: "Выберите центр",
+    selectedPlace: "Выбранный центр для входа",
+    labelLogin: "Логин",
+    btnAdminLogin: "Войти в админ панель →",
+    heroGreeting: "Здравствуйте,",
+    heroNoQueue: "В настоящее время нет активной очереди. Ищите услуги ниже ↓",
+    activeQueue: "Активная очередь",
+    live: "В прямом эфире",
+    sectionCats: "Категории",
+    catAll: "Все",
+    catBarber: "Парикмахерская",
+    catClinic: "Клиника",
+    catBank: "Банк",
+    catCarwash: "Автомойка",
+    catGov: "Государство",
+    sectionNearby: "Поблизости",
+    btnAll: "Все →",
+    services: "Услуги",
+    searchPlaceholder: "Парикмахерская, клиника, банк...",
+    myQueue: "Моя очередь",
+    profile: "Профиль",
+    statTotal: "Всего очередей",
+    statSaved: "Сэкономлено времени",
+    settings: "Настройки",
+    notifications: "Уведомления",
+    enabled: "Включено",
+    darkMode: "Темный/светлый режим",
+    paymentMethod: "Способ оплаты",
+    configure: "Настроить",
+    logout: "Выйти",
+    adminCurLabel: "Сейчас на обслуживании",
+    adminCurName: "Никто",
+    adminCurNext: "Очередь пуста",
+    btnNext: "Следующий",
+    btnAdd: "+ Добавить",
+    statToday: "Клиентов сегодня",
+    statWaiting: "Ожидающих",
+    queue: "Очередь",
+    btnClear: "Очистить",
+    hourlyAnalysis: "Почасовой анализ",
+    btnAdminLogout: "Выйти из админ панели",
+    btnBack: "← Назад",
+    dispLabel: "Сейчас на обслуживании",
+    dispName: "Ожидается",
+    dispPlace: "Платформа очереди",
+    dispNext: "Следующий:",
+    modalJoinTitle: "Присоединиться к очереди",
+    modalJoinSub: "Вы хотите присоединиться к очереди",
+    yourNumber: "Ваш номер",
+    free: "Бесплатно",
+    estWait: "Ожидаемое ожидание:",
+    btnConfirm: "Подтвердить",
+    btnCancel: "Отмена",
+    modalAddTitle: "Добавить нового клиента",
+    modalAddSub: "Добавить офлайн клиента в очередь",
+    labelName: "Имя (обязательно)",
+    labelPhoneOpt: "Телефон (опционально)",
+    btnAddToQueue: "+ Добавить в очередь",
+    modalDelayTitle: "Отложить очередь",
+    modalDelaySub: "1 раз бесплатно, затем 5,000 сум за каждое отложение. Максимум 3 места.",
+    slot: "место",
+    price: "5,000 сум",
+    btnJoinQueue: "Присоединиться к очереди — бесплатно",
+    queueLabel: "В ОЧЕРЕДИ",
+    waitLabel: "ОЖИДАНИЕ",
+    currentLabel: "ТЕКУЩИЙ",
+    queueList: "Список очереди",
+    reviews: "Отзывы",
+    leaveReview: "Оставить отзыв",
+    reviewPlaceholder: "Напишите ваше мнение об услуге...",
+    btnSubmitReview: "Отправить отзыв",
+    btnGetQueue: "Взять очередь",
+    viewMap: "Посмотреть на карте →",
+    mapOpening: "Карта открывается..."
   },
   "en": {
     langName: "English ›",
@@ -475,7 +748,98 @@ const I18N = {
     navProfile: "Profile",
     splashBtnCustomer: '<i class="ph-fill ph-user"></i> Customer',
     splashBtnAdmin: '<i class="ph-fill ph-buildings"></i> Admin',
-    btnDemo: '<i class="ph-fill ph-lightning"></i> Demo login'
+    btnDemo: '<i class="ph-fill ph-lightning"></i> Demo login',
+    langTitle: "Select language",
+    langCancel: "Cancel",
+    btnLogin: "Login",
+    splashSub: "Smart queue platform<br>for Uzbekistan",
+    roleLabel: "Select your role",
+    loginTitle: "Welcome!",
+    loginSub: "Manage your queue online",
+    tabLogin: "Login",
+    tabRegister: "Register",
+    labelPhone: "Phone number",
+    labelPass: "Password",
+    labelFirstname: "First name",
+    labelLastname: "Last name",
+    btnLoginSubmit: "Login →",
+    btnRegisterSubmit: "Register →",
+    adminLoginTitle: "Admin panel",
+    adminLoginSub: "Select your center and enter login details",
+    sectionPlace: "Select center",
+    selectedPlace: "Selected center for login",
+    labelLogin: "Login",
+    btnAdminLogin: "Login to admin panel →",
+    heroGreeting: "Hello,",
+    heroNoQueue: "No active queue right now. Search for services below ↓",
+    activeQueue: "Active queue",
+    live: "Live",
+    sectionCats: "Categories",
+    catAll: "All",
+    catBarber: "Barber",
+    catClinic: "Clinic",
+    catBank: "Bank",
+    catCarwash: "Car wash",
+    catGov: "Government",
+    sectionNearby: "Nearby",
+    btnAll: "All →",
+    services: "Services",
+    searchPlaceholder: "Barber, clinic, bank...",
+    myQueue: "My Queue",
+    profile: "Profile",
+    statTotal: "Total queues",
+    statSaved: "Time saved",
+    settings: "Settings",
+    notifications: "Notifications",
+    enabled: "Enabled",
+    darkMode: "Dark/Light mode",
+    paymentMethod: "Payment method",
+    configure: "Configure",
+    logout: "Logout",
+    adminCurLabel: "Currently serving",
+    adminCurName: "No one",
+    adminCurNext: "Queue empty",
+    btnNext: "Next",
+    btnAdd: "+ Add",
+    statToday: "Today's customers",
+    statWaiting: "Waiting",
+    queue: "Queue",
+    btnClear: "Clear",
+    hourlyAnalysis: "Hourly analysis",
+    btnAdminLogout: "Logout from admin panel",
+    btnBack: "← Back",
+    dispLabel: "Currently serving",
+    dispName: "Waiting",
+    dispPlace: "Queue platform",
+    dispNext: "Next:",
+    modalJoinTitle: "Join queue",
+    modalJoinSub: "You are about to join the queue",
+    yourNumber: "Your number",
+    free: "Free",
+    estWait: "Estimated wait:",
+    btnConfirm: "Confirm",
+    btnCancel: "Cancel",
+    modalAddTitle: "Add new customer",
+    modalAddSub: "Add offline customer to queue",
+    labelName: "Name (required)",
+    labelPhoneOpt: "Phone (optional)",
+    btnAddToQueue: "+ Add to queue",
+    modalDelayTitle: "Delay queue",
+    modalDelaySub: "1 time free, then 5,000 sum per delay. Maximum 3 spots.",
+    slot: "spot",
+    price: "5,000 sum",
+    btnJoinQueue: "Join queue — free",
+    queueLabel: "IN QUEUE",
+    waitLabel: "WAIT",
+    currentLabel: "CURRENT",
+    queueList: "Queue list",
+    reviews: "Reviews",
+    leaveReview: "Leave a review",
+    reviewPlaceholder: "Write your opinion about the service...",
+    btnSubmitReview: "Submit review",
+    btnGetQueue: "Get queue",
+    viewMap: "View on map →",
+    mapOpening: "Opening map..."
   }
 };
 
@@ -510,18 +874,170 @@ function setLang(langCode) {
     if(el) el.innerHTML = html;
   };
   
+  const setText = (id, text) => {
+    const el = document.getElementById(id);
+    if(el) el.textContent = text;
+  };
+  
+  const setPlaceholder = (id, text) => {
+    const el = document.getElementById(id);
+    if(el) el.placeholder = text;
+  };
+  
+  // Splash screen
+  setText("ui-splash-sub", t.splashSub);
+  setText("ui-splash-role-label", t.roleLabel);
   setHTML("ui-prof-lang", t.profLang);
   setHTML("lang-status-label", t.langName);
   
+  // Navigation labels
   document.querySelectorAll(".nav-tab:nth-child(1) .nav-label").forEach(el => el.textContent = t.navHome);
   document.querySelectorAll(".nav-tab:nth-child(2) .nav-label").forEach(el => el.textContent = t.navSearch);
   document.querySelectorAll(".nav-tab:nth-child(3) .nav-label").forEach(el => el.textContent = t.navQueue);
   document.querySelectorAll(".nav-tab:nth-child(4) .nav-label").forEach(el => el.textContent = t.navProfile);
   
+  // Role buttons
   const pCust = document.querySelector("#role-toggle .role-btn:first-child");
   if(pCust) pCust.innerHTML = t.splashBtnCustomer;
   const pAdm = document.querySelector("#role-toggle .role-btn:last-child");
   if(pAdm) pAdm.innerHTML = t.splashBtnAdmin;
+  
+  // Demo tugmasini yangilash
+  const demoBtn = document.querySelector("#screen-splash .btn-secondary");
+  if(demoBtn) demoBtn.innerHTML = t.btnDemo;
+  
+  // Kirish tugmasi
+  const loginBtn = document.querySelector("#screen-splash .btn-primary");
+  if(loginBtn) loginBtn.textContent = t.btnLogin;
+  
+  // Login screen
+  setText("ui-login-title", t.loginTitle);
+  setText("ui-login-sub", t.loginSub);
+  setText("ui-tab-login", t.tabLogin);
+  setText("ui-tab-register", t.tabRegister);
+  setText("ui-label-phone", t.labelPhone);
+  setText("ui-label-pass", t.labelPass);
+  setText("ui-label-firstname", t.labelFirstname);
+  setText("ui-label-lastname", t.labelLastname);
+  setText("ui-btn-login", t.btnLoginSubmit);
+  setText("ui-btn-register", t.btnRegisterSubmit);
+  setText("login-screen-title", t.tabLogin);
+  
+  // Admin login screen
+  setText("ui-admin-login-title", t.adminLoginTitle);
+  setText("ui-admin-login-sub", t.adminLoginSub);
+  setText("ui-section-place", t.sectionPlace);
+  setText("ui-selected-place-label", t.selectedPlace);
+  setText("ui-label-admin-login", t.labelLogin);
+  setText("ui-btn-admin-login", t.btnAdminLogin);
+  
+  // Home screen
+  setText("ui-hero-greeting", t.heroGreeting);
+  setText("ui-hero-no-queue", t.heroNoQueue);
+  setText("ui-section-cats", t.sectionCats);
+  setText("ui-section-nearby", t.sectionNearby);
+  
+  // Kategoriya chips
+  const homeChips = document.querySelectorAll("#home-chips .chip");
+  if(homeChips.length >= 6) {
+    homeChips[0].textContent = t.catAll;
+    homeChips[1].innerHTML = `<i class="ph-fill ph-scissors"></i> ${t.catBarber}`;
+    homeChips[2].innerHTML = `<i class="ph-fill ph-hospital"></i> ${t.catClinic}`;
+    homeChips[3].innerHTML = `<i class="ph-fill ph-bank"></i> ${t.catBank}`;
+    homeChips[4].innerHTML = `<i class="ph-fill ph-car"></i> ${t.catCarwash}`;
+    homeChips[5].innerHTML = `<i class="ph-fill ph-buildings"></i> ${t.catGov}`;
+  }
+  
+  const marketChips = document.querySelectorAll("#market-chips .chip");
+  if(marketChips.length >= 6) {
+    marketChips[0].textContent = t.catAll;
+    marketChips[1].innerHTML = `<i class="ph-fill ph-scissors"></i> ${t.catBarber}`;
+    marketChips[2].innerHTML = `<i class="ph-fill ph-hospital"></i> ${t.catClinic}`;
+    marketChips[3].innerHTML = `<i class="ph-fill ph-bank"></i> ${t.catBank}`;
+    marketChips[4].innerHTML = `<i class="ph-fill ph-car"></i> ${t.catCarwash}`;
+    marketChips[5].innerHTML = `<i class="ph-fill ph-buildings"></i> ${t.catGov}`;
+  }
+  
+  // Market screen
+  setText("ui-services", t.services);
+  setPlaceholder("search-inp", t.searchPlaceholder);
+  
+  // Profile screen
+  setText("ui-profile", t.profile);
+  setText("ui-stat-total", t.statTotal);
+  setText("ui-stat-saved", t.statSaved);
+  setText("ui-settings", t.settings);
+  setText("ui-logout", t.logout);
+  
+  // Admin panel
+  setText("ui-admin-cur-label", t.adminCurLabel);
+  setText("ui-admin-cur-name", t.adminCurName);
+  setText("ui-admin-cur-next", t.adminCurNext);
+  setText("ui-btn-next", t.btnNext);
+  setText("ui-btn-add", t.btnAdd);
+  setText("ui-stat-today", t.statToday);
+  setText("ui-stat-waiting", t.statWaiting);
+  setText("ui-queue", t.queue);
+  setText("ui-btn-clear", t.btnClear);
+  setText("ui-hourly-analysis", t.hourlyAnalysis);
+  setText("ui-btn-admin-logout", t.btnAdminLogout);
+  
+  // Admin panel til tugmasi yangilash
+  const adminLangBtn = document.querySelector("#screen-admin .topbar-action:first-child");
+  if(adminLangBtn && adminLangBtn.querySelector('.ph-globe')) {
+    adminLangBtn.innerHTML = `<i class="ph-fill ph-globe"></i> ${t.profLang.replace('🌐 ', '')}`;
+  }
+  
+  // Display screen
+  setText("ui-disp-label", t.dispLabel);
+  setText("ui-disp-name", t.dispName);
+  setText("ui-disp-place", t.dispPlace);
+  setText("ui-disp-next", t.dispNext);
+  setText("ui-btn-back", t.btnBack);
+  
+  // My queue screen
+  setText("ui-myqueue", t.myQueue);
+  
+  // Modal tarjimalari
+  setText("ui-lang-title", t.langTitle);
+  setText("ui-lang-cancel", t.langCancel);
+  setText("ui-modal-join-title", t.modalJoinTitle);
+  setText("ui-modal-join-sub", t.modalJoinSub);
+  setText("ui-your-number", t.yourNumber);
+  setText("ui-free", t.free);
+  setText("ui-est-wait", t.estWait);
+  setText("ui-btn-confirm", t.btnConfirm);
+  setText("ui-btn-cancel-join", t.btnCancel);
+  setText("ui-modal-add-title", t.modalAddTitle);
+  setText("ui-modal-add-sub", t.modalAddSub);
+  setText("ui-label-name", t.labelName);
+  setText("ui-label-phone-opt", t.labelPhoneOpt);
+  setText("ui-btn-add-to-queue", t.btnAddToQueue);
+  setText("ui-btn-cancel-add", t.btnCancel);
+  setText("ui-modal-delay-title", t.modalDelayTitle);
+  setText("ui-modal-delay-sub", t.modalDelaySub);
+  setText("ui-slot", t.slot);
+  setText("ui-price", t.price);
+  setText("ui-btn-cancel-delay", t.btnCancel);
+  
+  // Delay modal slot/price class lari
+  document.querySelectorAll(".delay-slot").forEach(el => el.textContent = t.slot);
+  document.querySelectorAll(".delay-price").forEach(el => el.textContent = t.price);
+  setText("ui-delay-free-1", t.free);
+  
+  // Detail screen
+  setText("ui-btn-get-queue", t.btnGetQueue);
+  setText("ui-live-queue-status", t.activeQueue + " " + t.live);
+  setText("ui-live", t.live);
+  setText("ui-queue-label", t.queueLabel);
+  setText("ui-wait-label", t.waitLabel);
+  setText("ui-current-label", t.currentLabel);
+  setText("ui-queue-list", t.queueList);
+  setText("ui-reviews", t.reviews);
+  setText("ui-leave-review", t.leaveReview);
+  setText("ui-btn-submit-review", t.btnSubmitReview);
+  setText("ui-btn-join-queue", t.btnJoinQueue);
+  setText("ui-view-map", t.viewMap);
   
   closeModal('modal-lang');
   
@@ -751,20 +1267,16 @@ function selectAdminPlace(placeId) {
   if (selected) selected.classList.add("selected");
 
   /* Login ma'lumotlari formani ko'rsatish */
-  const creds = ADMINS.find((a) => a.placeId === placeId);
   const form = document.getElementById("admin-creds-form");
   if (form) {
     form.style.display = "block";
     document.getElementById("selected-place-name").textContent =
       PLACES.find((p) => p.id === placeId)?.name || "—";
-    document.getElementById("hint-login").textContent = creds
-      ? creds.login
-      : "—";
-    document.getElementById("hint-pass").textContent = creds
-      ? creds.parol
-      : "—";
     document.getElementById("admin-login-inp").value = "";
     document.getElementById("admin-pass-inp").value = "";
+    
+    // Formaga scroll qilish
+    form.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 }
 
@@ -800,6 +1312,17 @@ function loginAsAdmin(placeId) {
   STATE.adminPlace = place;
   /* Admin uchun navbat nusxasi (o'zgartirish uchun) */
   STATE.adminQueue = place.queue.map((q) => ({ ...q }));
+  
+  // Hozirgi xizmatdagi mijozni to'g'ri aniqlash
+  // Avval barcha current flaglarni olib tashlaymiz
+  STATE.adminQueue.forEach(q => q.current = false);
+  
+  // currentNum ga mos keladigan mijozni current: true qilamiz
+  const currentPerson = STATE.adminQueue.find(q => q.num === place.currentNum && !q.done);
+  if (currentPerson) {
+    currentPerson.current = true;
+  }
+  
   STATE.adminNextNum = Math.max(...place.queue.map((q) => q.num), 0) + 1;
 
   document.getElementById("admin-panel-title").textContent = place.name;
