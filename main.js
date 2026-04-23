@@ -519,7 +519,8 @@ const I18N = {
     labelPhoneOpt: "Telefon (ixtiyoriy)",
     btnAddToQueue: "+ Navbatga qo'shish",
     modalDelayTitle: "Navbatni kechiktirish",
-    modalDelaySub: "1 marta bepul, undan keyin har kechiktirishda 5,000 so'm to'lanadi. Maksimum 3 o'rin kechiktirishingiz mumkin.",
+    modalDelaySub:
+      "1 marta bepul, undan keyin har kechiktirishda 5,000 so'm to'lanadi. Maksimum 3 o'rin kechiktirishingiz mumkin.",
     slot: "o'rin",
     price: "5,000 so'm",
     btnJoinQueue: "Navbatga qo'shilish — bepul",
@@ -533,7 +534,7 @@ const I18N = {
     btnSubmitReview: "Izoh yuborish",
     btnGetQueue: "Navbat olish",
     viewMap: "Xaritada ko'rish →",
-    mapOpening: "Xarita ochilmoqda..."
+    mapOpening: "Xarita ochilmoqda...",
   },
   "uz-cyrl": {
     langName: "Ўзбек (Кирилл) ›",
@@ -621,7 +622,8 @@ const I18N = {
     labelPhoneOpt: "Телефон (ихтиёрий)",
     btnAddToQueue: "+ Навбатга қўшиш",
     modalDelayTitle: "Навбатни кечиктириш",
-    modalDelaySub: "1 мартa бепул, ундан кейин ҳар кечиктиришда 5,000 сўм тўланади. Максимум 3 орин кечиктиришингиз мумкин.",
+    modalDelaySub:
+      "1 мартa бепул, ундан кейин ҳар кечиктиришда 5,000 сўм тўланади. Максимум 3 орин кечиктиришингиз мумкин.",
     slot: "орин",
     price: "5,000 сўм",
     btnJoinQueue: "Навбатга қўшилиш — бепул",
@@ -635,9 +637,9 @@ const I18N = {
     btnSubmitReview: "Изоҳ юбориш",
     btnGetQueue: "Навбат олиш",
     viewMap: "Харитада кўриш →",
-    mapOpening: "Харита очилмоқда..."
+    mapOpening: "Харита очилмоқда...",
   },
-  "ru": {
+  ru: {
     langName: "Русский ›",
     profLang: "🌐 Язык",
     navHome: "Главная",
@@ -723,7 +725,8 @@ const I18N = {
     labelPhoneOpt: "Телефон (опционально)",
     btnAddToQueue: "+ Добавить в очередь",
     modalDelayTitle: "Отложить очередь",
-    modalDelaySub: "1 раз бесплатно, затем 5,000 сум за каждое отложение. Максимум 3 места.",
+    modalDelaySub:
+      "1 раз бесплатно, затем 5,000 сум за каждое отложение. Максимум 3 места.",
     slot: "место",
     price: "5,000 сум",
     btnJoinQueue: "Присоединиться к очереди — бесплатно",
@@ -737,9 +740,9 @@ const I18N = {
     btnSubmitReview: "Отправить отзыв",
     btnGetQueue: "Взять очередь",
     viewMap: "Посмотреть на карте →",
-    mapOpening: "Карта открывается..."
+    mapOpening: "Карта открывается...",
   },
-  "en": {
+  en: {
     langName: "English ›",
     profLang: "🌐 Language",
     navHome: "Home",
@@ -839,8 +842,8 @@ const I18N = {
     btnSubmitReview: "Submit review",
     btnGetQueue: "Get queue",
     viewMap: "View on map →",
-    mapOpening: "Opening map..."
-  }
+    mapOpening: "Opening map...",
+  },
 };
 
 /* =====================================================
@@ -861,55 +864,63 @@ const STATE = {
   homeFilter: "all" /* Bosh sahifa filtri */,
   marketFilter: "all" /* Bozor sahifa filtri */,
   selectedAdminPlaceId: null /* Admin login: tanlangan joy ID */,
-  lang: "uz-latn" /* Tanlangan til */
+  lang: "uz-latn" /* Tanlangan til */,
 };
 
 /* Til o'zgartirish mantiqi */
 function setLang(langCode) {
   STATE.lang = langCode;
   const t = I18N[langCode];
-  
+
   const setHTML = (id, html) => {
     const el = document.getElementById(id);
-    if(el) el.innerHTML = html;
+    if (el) el.innerHTML = html;
   };
-  
+
   const setText = (id, text) => {
     const el = document.getElementById(id);
-    if(el) el.textContent = text;
+    if (el) el.textContent = text;
   };
-  
+
   const setPlaceholder = (id, text) => {
     const el = document.getElementById(id);
-    if(el) el.placeholder = text;
+    if (el) el.placeholder = text;
   };
-  
+
   // Splash screen
   setText("ui-splash-sub", t.splashSub);
   setText("ui-splash-role-label", t.roleLabel);
   setHTML("ui-prof-lang", t.profLang);
   setHTML("lang-status-label", t.langName);
-  
+
   // Navigation labels
-  document.querySelectorAll(".nav-tab:nth-child(1) .nav-label").forEach(el => el.textContent = t.navHome);
-  document.querySelectorAll(".nav-tab:nth-child(2) .nav-label").forEach(el => el.textContent = t.navSearch);
-  document.querySelectorAll(".nav-tab:nth-child(3) .nav-label").forEach(el => el.textContent = t.navQueue);
-  document.querySelectorAll(".nav-tab:nth-child(4) .nav-label").forEach(el => el.textContent = t.navProfile);
-  
+  document
+    .querySelectorAll(".nav-tab:nth-child(1) .nav-label")
+    .forEach((el) => (el.textContent = t.navHome));
+  document
+    .querySelectorAll(".nav-tab:nth-child(2) .nav-label")
+    .forEach((el) => (el.textContent = t.navSearch));
+  document
+    .querySelectorAll(".nav-tab:nth-child(3) .nav-label")
+    .forEach((el) => (el.textContent = t.navQueue));
+  document
+    .querySelectorAll(".nav-tab:nth-child(4) .nav-label")
+    .forEach((el) => (el.textContent = t.navProfile));
+
   // Role buttons
   const pCust = document.querySelector("#role-toggle .role-btn:first-child");
-  if(pCust) pCust.innerHTML = t.splashBtnCustomer;
+  if (pCust) pCust.innerHTML = t.splashBtnCustomer;
   const pAdm = document.querySelector("#role-toggle .role-btn:last-child");
-  if(pAdm) pAdm.innerHTML = t.splashBtnAdmin;
-  
+  if (pAdm) pAdm.innerHTML = t.splashBtnAdmin;
+
   // Demo tugmasini yangilash
   const demoBtn = document.querySelector("#screen-splash .btn-secondary");
-  if(demoBtn) demoBtn.innerHTML = t.btnDemo;
-  
+  if (demoBtn) demoBtn.innerHTML = t.btnDemo;
+
   // Kirish tugmasi
   const loginBtn = document.querySelector("#screen-splash .btn-primary");
-  if(loginBtn) loginBtn.textContent = t.btnLogin;
-  
+  if (loginBtn) loginBtn.textContent = t.btnLogin;
+
   // Login screen
   setText("ui-login-title", t.loginTitle);
   setText("ui-login-sub", t.loginSub);
@@ -922,7 +933,7 @@ function setLang(langCode) {
   setText("ui-btn-login", t.btnLoginSubmit);
   setText("ui-btn-register", t.btnRegisterSubmit);
   setText("login-screen-title", t.tabLogin);
-  
+
   // Admin login screen
   setText("ui-admin-login-title", t.adminLoginTitle);
   setText("ui-admin-login-sub", t.adminLoginSub);
@@ -930,16 +941,16 @@ function setLang(langCode) {
   setText("ui-selected-place-label", t.selectedPlace);
   setText("ui-label-admin-login", t.labelLogin);
   setText("ui-btn-admin-login", t.btnAdminLogin);
-  
+
   // Home screen
   setText("ui-hero-greeting", t.heroGreeting);
   setText("ui-hero-no-queue", t.heroNoQueue);
   setText("ui-section-cats", t.sectionCats);
   setText("ui-section-nearby", t.sectionNearby);
-  
+
   // Kategoriya chips
   const homeChips = document.querySelectorAll("#home-chips .chip");
-  if(homeChips.length >= 6) {
+  if (homeChips.length >= 6) {
     homeChips[0].textContent = t.catAll;
     homeChips[1].innerHTML = `<i class="ph-fill ph-scissors"></i> ${t.catBarber}`;
     homeChips[2].innerHTML = `<i class="ph-fill ph-hospital"></i> ${t.catClinic}`;
@@ -947,9 +958,9 @@ function setLang(langCode) {
     homeChips[4].innerHTML = `<i class="ph-fill ph-car"></i> ${t.catCarwash}`;
     homeChips[5].innerHTML = `<i class="ph-fill ph-buildings"></i> ${t.catGov}`;
   }
-  
+
   const marketChips = document.querySelectorAll("#market-chips .chip");
-  if(marketChips.length >= 6) {
+  if (marketChips.length >= 6) {
     marketChips[0].textContent = t.catAll;
     marketChips[1].innerHTML = `<i class="ph-fill ph-scissors"></i> ${t.catBarber}`;
     marketChips[2].innerHTML = `<i class="ph-fill ph-hospital"></i> ${t.catClinic}`;
@@ -957,18 +968,18 @@ function setLang(langCode) {
     marketChips[4].innerHTML = `<i class="ph-fill ph-car"></i> ${t.catCarwash}`;
     marketChips[5].innerHTML = `<i class="ph-fill ph-buildings"></i> ${t.catGov}`;
   }
-  
+
   // Market screen
   setText("ui-services", t.services);
   setPlaceholder("search-inp", t.searchPlaceholder);
-  
+
   // Profile screen
   setText("ui-profile", t.profile);
   setText("ui-stat-total", t.statTotal);
   setText("ui-stat-saved", t.statSaved);
   setText("ui-settings", t.settings);
   setText("ui-logout", t.logout);
-  
+
   // Admin panel
   setText("ui-admin-cur-label", t.adminCurLabel);
   setText("ui-admin-cur-name", t.adminCurName);
@@ -981,23 +992,25 @@ function setLang(langCode) {
   setText("ui-btn-clear", t.btnClear);
   setText("ui-hourly-analysis", t.hourlyAnalysis);
   setText("ui-btn-admin-logout", t.btnAdminLogout);
-  
+
   // Admin panel til tugmasi yangilash
-  const adminLangBtn = document.querySelector("#screen-admin .topbar-action:first-child");
-  if(adminLangBtn && adminLangBtn.querySelector('.ph-globe')) {
-    adminLangBtn.innerHTML = `<i class="ph-fill ph-globe"></i> ${t.profLang.replace('🌐 ', '')}`;
+  const adminLangBtn = document.querySelector(
+    "#screen-admin .topbar-action:first-child",
+  );
+  if (adminLangBtn && adminLangBtn.querySelector(".ph-globe")) {
+    adminLangBtn.innerHTML = `<i class="ph-fill ph-globe"></i> ${t.profLang.replace("🌐 ", "")}`;
   }
-  
+
   // Display screen
   setText("ui-disp-label", t.dispLabel);
   setText("ui-disp-name", t.dispName);
   setText("ui-disp-place", t.dispPlace);
   setText("ui-disp-next", t.dispNext);
   setText("ui-btn-back", t.btnBack);
-  
+
   // My queue screen
   setText("ui-myqueue", t.myQueue);
-  
+
   // Modal tarjimalari
   setText("ui-lang-title", t.langTitle);
   setText("ui-lang-cancel", t.langCancel);
@@ -1019,12 +1032,16 @@ function setLang(langCode) {
   setText("ui-slot", t.slot);
   setText("ui-price", t.price);
   setText("ui-btn-cancel-delay", t.btnCancel);
-  
+
   // Delay modal slot/price class lari
-  document.querySelectorAll(".delay-slot").forEach(el => el.textContent = t.slot);
-  document.querySelectorAll(".delay-price").forEach(el => el.textContent = t.price);
+  document
+    .querySelectorAll(".delay-slot")
+    .forEach((el) => (el.textContent = t.slot));
+  document
+    .querySelectorAll(".delay-price")
+    .forEach((el) => (el.textContent = t.price));
   setText("ui-delay-free-1", t.free);
-  
+
   // Detail screen
   setText("ui-btn-get-queue", t.btnGetQueue);
   setText("ui-live-queue-status", t.activeQueue + " " + t.live);
@@ -1038,16 +1055,16 @@ function setLang(langCode) {
   setText("ui-btn-submit-review", t.btnSubmitReview);
   setText("ui-btn-join-queue", t.btnJoinQueue);
   setText("ui-view-map", t.viewMap);
-  
-  closeModal('modal-lang');
-  
+
+  closeModal("modal-lang");
+
   const toastMsgs = {
     "uz-latn": "Til o'zgartirildi",
     "uz-cyrl": "Тил ўзгартирилди",
-    "ru": "Язык изменен",
-    "en": "Language changed"
+    ru: "Язык изменен",
+    en: "Language changed",
   };
-  showToast('✅ ' + toastMsgs[langCode]);
+  showToast("✅ " + toastMsgs[langCode]);
 }
 
 /* =====================================================
@@ -1274,9 +1291,9 @@ function selectAdminPlace(placeId) {
       PLACES.find((p) => p.id === placeId)?.name || "—";
     document.getElementById("admin-login-inp").value = "";
     document.getElementById("admin-pass-inp").value = "";
-    
+
     // Formaga scroll qilish
-    form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    form.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 }
 
@@ -1312,17 +1329,19 @@ function loginAsAdmin(placeId) {
   STATE.adminPlace = place;
   /* Admin uchun navbat nusxasi (o'zgartirish uchun) */
   STATE.adminQueue = place.queue.map((q) => ({ ...q }));
-  
+
   // Hozirgi xizmatdagi mijozni to'g'ri aniqlash
   // Avval barcha current flaglarni olib tashlaymiz
-  STATE.adminQueue.forEach(q => q.current = false);
-  
+  STATE.adminQueue.forEach((q) => (q.current = false));
+
   // currentNum ga mos keladigan mijozni current: true qilamiz
-  const currentPerson = STATE.adminQueue.find(q => q.num === place.currentNum && !q.done);
+  const currentPerson = STATE.adminQueue.find(
+    (q) => q.num === place.currentNum && !q.done,
+  );
   if (currentPerson) {
     currentPerson.current = true;
   }
-  
+
   STATE.adminNextNum = Math.max(...place.queue.map((q) => q.num), 0) + 1;
 
   document.getElementById("admin-panel-title").textContent = place.name;
@@ -1463,7 +1482,8 @@ function openPlace(id) {
     `${place.icon} ${catName(place.cat)}`;
   document.getElementById("detail-rating").textContent =
     `<i class="ph-fill ph-star"></i> ${place.rating} (${place.reviewCount} ta sharh)`;
-  document.getElementById("detail-hours").textContent = `<i class="ph-fill ph-clock"></i> ${place.hours}`;
+  document.getElementById("detail-hours").textContent =
+    `<i class="ph-fill ph-clock"></i> ${place.hours}`;
 
   /* Holat nishoni */
   const badge = document.getElementById("detail-status-badge");
@@ -1610,7 +1630,7 @@ function submitReview() {
 
   document.getElementById("review-text-inp").value = "";
   setRating(0);
-  showToast('✅ Izohingiz qabul qilindi!');
+  showToast("✅ Izohingiz qabul qilindi!");
   openPlace(STATE.currentPlace.id); /* sahifani yangilash */
 }
 
@@ -1669,7 +1689,9 @@ function confirmJoin() {
 
   updateUserUI();
   closeModal("modal-join");
-  showToast(`<i class="ph-bold ph-check"></i> Navbatga qo'shildingiz! Raqamingiz: #${num}`);
+  showToast(
+    `<i class="ph-bold ph-check"></i> Navbatga qo'shildingiz! Raqamingiz: #${num}`,
+  );
   setTimeout(() => showScreen("screen-myqueue"), 500);
 }
 
@@ -1876,9 +1898,11 @@ function adminNext() {
 
   if (nextIdx >= 0) {
     STATE.adminQueue[nextIdx].current = true;
-    showToast(`<i class="ph-bold ph-play"></i> Keyingi: ${STATE.adminQueue[nextIdx].name}`);
+    showToast(
+      `<i class="ph-bold ph-play"></i> Keyingi: ${STATE.adminQueue[nextIdx].name}`,
+    );
   } else {
-    showToast('✅ Barcha mijozlarga xizmat ko\'rsatildi!');
+    showToast("✅ Barcha mijozlarga xizmat ko'rsatildi!");
   }
 
   renderAdmin();
@@ -1924,7 +1948,9 @@ function addWalkIn() {
 
   closeModal("modal-add");
   renderAdmin();
-  showToast(`<i class="ph-bold ph-check"></i> ${name} navbatga qo'shildi (#${STATE.adminNextNum - 1})`);
+  showToast(
+    `<i class="ph-bold ph-check"></i> ${name} navbatga qo'shildi (#${STATE.adminNextNum - 1})`,
+  );
 }
 
 /* Navbatni tozalash */
@@ -2065,7 +2091,9 @@ function toggleTheme() {
 
 /* Barcha tema tugmalarini yangilash */
 function updateThemeButtons() {
-  const icon = STATE.isDark ? `<i class="ph-fill ph-sun"></i>` : `<i class="ph-fill ph-moon"></i>`;
+  const icon = STATE.isDark
+    ? `<i class="ph-fill ph-sun"></i>`
+    : `<i class="ph-fill ph-moon"></i>`;
   document.querySelectorAll(".theme-btn").forEach((btn) => {
     btn.innerHTML = icon;
     btn.title = STATE.isDark ? "Kun rejimiga o'tish" : "Tun rejimiga o'tish";
