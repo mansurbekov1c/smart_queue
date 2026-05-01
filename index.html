@@ -45,13 +45,13 @@
     </div>
 
     <!-- Kirish / Demo tugmalari -->
-    <button class="btn btn-primary" onclick="goToLogin()" style="margin-bottom:10px">Kirish</button>
-    <button class="btn btn-secondary" onclick="demoLogin()">
-      <i class="ph-fill ph-lightning"></i> Demo rejimida kirish
+    <button class="btn btn-primary" onclick="goToLogin()" id="ui-btn-login" style="margin-bottom:10px">Kirish</button>
+    <button class="btn btn-secondary" onclick="demoLogin()" id="ui-btn-demo">
+      <i class="ph-fill ph-lightning"></i> <span id="ui-btn-demo-text">Demo rejimida kirish</span>
     </button>
 
     <p style="margin-top:24px;font-size:12px;color:var(--c-text3);text-align:center">
-      Navbat v2.5 · Toshkent, O'zbekiston
+      Navbat v2.5 · <span id="ui-app-footer">Toshkent, O'zbekiston</span>
     </p>
   </div>
 </div>
@@ -88,7 +88,7 @@
         <input type="tel" id="inp-phone" placeholder="+998 90 123 45 67">
       </div>
       <div class="form-group">
-        <label class="form-label">Parol</label>
+        <label id="ui-label-pass" class="form-label">Parol</label>
         <input type="password" id="inp-pass" placeholder="••••••••">
       </div>
       <button id="ui-btn-login" class="btn btn-primary" onclick="doLogin()">Kirish →</button>
@@ -105,11 +105,11 @@
         <input type="text" id="inp-lastname" placeholder="Valiyev">
       </div>
       <div class="form-group">
-        <label class="form-label">Telefon *</label>
+        <label id="ui-reg-label-phone" class="form-label">Telefon *</label>
         <input type="tel" id="inp-regphone" placeholder="+998 90 123 45 67">
       </div>
       <div class="form-group">
-        <label class="form-label">Parol *</label>
+        <label id="ui-reg-label-pass" class="form-label">Parol *</label>
         <input type="password" id="inp-regpass" placeholder="Kamida 6 ta belgi">
       </div>
       <button id="ui-btn-register" class="btn btn-primary" onclick="doRegister()">Ro'yxatdan o'tish →</button>
@@ -154,7 +154,7 @@
         <input type="text" id="admin-login-inp" placeholder="loginni kiriting">
       </div>
       <div class="form-group">
-        <label class="form-label">Parol</label>
+        <label id="ui-label-admin-pass" class="form-label">Parol</label>
         <input type="password" id="admin-pass-inp" placeholder="parolni kiriting">
       </div>
       <button id="ui-btn-admin-login" class="btn btn-primary" onclick="doAdminLogin()">Admin panelga kirish →</button>
@@ -168,7 +168,7 @@
 <div class="screen" id="screen-home">
   <!-- Yuqori panel -->
   <div class="topbar">
-    <div style="width:34px"></div>
+    <button class="btn-back" onclick="goBack()" title="Orqaga" id="home-back-btn">←</button>
     <span class="topbar-title">
       <i class="ph-fill ph-lightning"></i> Navbat
     </span>
@@ -231,7 +231,6 @@
     </div>
   </div>
 
-  <!-- Pastki navigatsiya -->
   <div class="bottomnav">
     <button class="nav-tab active" onclick="showScreen('screen-home')">
       <span class="nav-icon"><i class="ph-fill ph-house"></i></span>
@@ -288,16 +287,20 @@
 
   <div class="bottomnav">
     <button class="nav-tab" onclick="showScreen('screen-home')">
-      <span class="nav-icon"><i class="ph-fill ph-house"></i></span><span class="nav-label">Bosh sahifa</span>
+      <span class="nav-icon"><i class="ph-fill ph-house"></i></span>
+      <span class="nav-label">Bosh sahifa</span>
     </button>
     <button class="nav-tab active" onclick="showScreen('screen-market')">
-      <span class="nav-icon"><i class="ph-fill ph-magnifying-glass"></i></span><span class="nav-label">Izlash</span>
+      <span class="nav-icon"><i class="ph-fill ph-magnifying-glass"></i></span>
+      <span class="nav-label">Izlash</span>
     </button>
     <button class="nav-tab" onclick="showScreen('screen-myqueue')">
-      <span class="nav-icon"><i class="ph-fill ph-clipboard-text"></i></span><span class="nav-label">Navbatim</span>
+      <span class="nav-icon"><i class="ph-fill ph-clipboard-text"></i></span>
+      <span class="nav-label">Navbatim</span>
     </button>
     <button class="nav-tab" onclick="showScreen('screen-profile')">
-      <span class="nav-icon"><i class="ph-fill ph-user"></i></span><span class="nav-label">Profil</span>
+      <span class="nav-icon"><i class="ph-fill ph-user"></i></span>
+      <span class="nav-label">Profil</span>
     </button>
   </div>
 </div>
@@ -337,7 +340,7 @@
       <div class="location-info">
         <p class="location-name" id="detail-loc-district">—</p>
         <p class="location-addr" id="detail-loc-addr">—</p>
-        <a class="location-link" href="#" onclick="showToast('Xarita ochilmoqda...');return false">
+        <a class="location-link" href="#" onclick="showToast(t('mapOpening'));return false">
           <span id="ui-view-map">Xaritada ko'rish →</span>
         </a>
       </div>
@@ -347,7 +350,7 @@
     <div class="card" style="background:var(--c-accent-bg);border-color:rgba(94,96,206,0.25)">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
         <span class="live-dot"></span>
-        <span id="ui-live-queue-status" style="font-size:13px;font-weight:700;color:var(--c-accent)">Jonli navbat holati</span>
+        <span id="ui-live-queue-status" style="font-size:13px;font-weight:700;color:var(--c-accent)"></span>
         <span id="detail-queue-badge" class="badge" style="margin-left:auto"></span>
       </div>
       <div style="display:flex;gap:0">
@@ -409,6 +412,25 @@
       <span id="ui-btn-join-queue">Navbatga qo'shilish — bepul</span>
     </button>
   </div>
+
+  <div class="bottomnav">
+    <button class="nav-tab" onclick="showScreen('screen-home')">
+      <span class="nav-icon"><i class="ph-fill ph-house"></i></span>
+      <span class="nav-label">Bosh sahifa</span>
+    </button>
+    <button class="nav-tab active" onclick="showScreen('screen-market')">
+      <span class="nav-icon"><i class="ph-fill ph-magnifying-glass"></i></span>
+      <span class="nav-label">Izlash</span>
+    </button>
+    <button class="nav-tab" onclick="showScreen('screen-myqueue')">
+      <span class="nav-icon"><i class="ph-fill ph-clipboard-text"></i></span>
+      <span class="nav-label">Navbatim</span>
+    </button>
+    <button class="nav-tab" onclick="showScreen('screen-profile')">
+      <span class="nav-icon"><i class="ph-fill ph-user"></i></span>
+      <span class="nav-label">Profil</span>
+    </button>
+  </div>
 </div>
 
 <!-- ==================================================
@@ -426,16 +448,20 @@
 
   <div class="bottomnav">
     <button class="nav-tab" onclick="showScreen('screen-home')">
-      <span class="nav-icon"><i class="ph-fill ph-house"></i></span><span class="nav-label">Bosh sahifa</span>
+      <span class="nav-icon"><i class="ph-fill ph-house"></i></span>
+      <span class="nav-label">Bosh sahifa</span>
     </button>
     <button class="nav-tab" onclick="showScreen('screen-market')">
-      <span class="nav-icon"><i class="ph-fill ph-magnifying-glass"></i></span><span class="nav-label">Izlash</span>
+      <span class="nav-icon"><i class="ph-fill ph-magnifying-glass"></i></span>
+      <span class="nav-label">Izlash</span>
     </button>
     <button class="nav-tab active" onclick="showScreen('screen-myqueue')">
-      <span class="nav-icon"><i class="ph-fill ph-clipboard-text"></i></span><span class="nav-label">Navbatim</span>
+      <span class="nav-icon"><i class="ph-fill ph-clipboard-text"></i></span>
+      <span class="nav-label">Navbatim</span>
     </button>
     <button class="nav-tab" onclick="showScreen('screen-profile')">
-      <span class="nav-icon"><i class="ph-fill ph-user"></i></span><span class="nav-label">Profil</span>
+      <span class="nav-icon"><i class="ph-fill ph-user"></i></span>
+      <span class="nav-label">Profil</span>
     </button>
   </div>
 </div>
@@ -469,7 +495,7 @@
         <div id="ui-stat-total" class="stat-label">Jami navbat</div>
       </div>
       <div class="stat-card">
-        <div class="stat-val" id="stat-saved">2.4 soat</div>
+        <div class="stat-val" id="stat-saved">2.4 <span id="ui-stat-saved-unit">soat</span></div>
         <div id="ui-stat-saved" class="stat-label">Tejlgan vaqt</div>
       </div>
     </div>
@@ -479,11 +505,11 @@
       <p id="ui-settings" style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--c-text)">Sozlamalar</p>
 
       <div class="q-row" style="cursor:pointer">
-        <span style="flex:1;display:flex;align-items:center;gap:8px"><i class="ph-fill ph-bell"></i> Bildirishnomalar</span>
-        <span style="color:var(--c-text3);font-size:12px">Yoqilgan ›</span>
+        <span style="flex:1;display:flex;align-items:center;gap:8px"><i class="ph-fill ph-bell"></i> <span id="ui-notifications">Bildirishnomalar</span></span>
+        <span style="color:var(--c-text3);font-size:12px" id="ui-enabled">Yoqilgan ›</span>
       </div>
       <div class="q-row" style="cursor:pointer" onclick="toggleTheme()">
-        <span style="flex:1;display:flex;align-items:center;gap:8px"><i class="ph-fill ph-moon"></i> Tun/kun rejimi</span>
+        <span style="flex:1;display:flex;align-items:center;gap:8px"><i class="ph-fill ph-moon"></i> <span id="ui-dark-mode">Tun/kun rejimi</span></span>
         <span style="color:var(--c-text3);font-size:12px" id="theme-status-label">Kun rejimi ›</span>
       </div>
       <div class="q-row" style="cursor:pointer" onclick="openModal('modal-lang')">
@@ -491,8 +517,8 @@
         <span style="color:var(--c-text3);font-size:12px" id="lang-status-label">O'zbek ›</span>
       </div>
       <div class="q-row" style="cursor:pointer">
-        <span style="flex:1;display:flex;align-items:center;gap:8px"><i class="ph-fill ph-credit-card"></i> To'lov usuli</span>
-        <span style="color:var(--c-text3);font-size:12px">Sozlash ›</span>
+        <span style="flex:1;display:flex;align-items:center;gap:8px"><i class="ph-fill ph-credit-card"></i> <span id="ui-payment-method">To'lov usuli</span></span>
+        <span style="color:var(--c-text3);font-size:12px" id="ui-configure">Sozlash ›</span>
       </div>
       <div class="q-row" style="cursor:pointer;border-bottom:none" onclick="logoutUser()">
         <span id="ui-logout" style="flex:1;color:var(--c-danger);display:flex;align-items:center;gap:8px"><i class="ph-bold ph-sign-out"></i> Chiqish</span>
@@ -500,22 +526,26 @@
     </div>
 
     <div style="text-align:center;padding:12px;font-size:11px;color:var(--c-text3)">
-      Navbat v2.5 · Toshkent, O'zbekiston
+      Navbat v2.5 · <span id="ui-app-footer-2">Toshkent, O'zbekiston</span>
     </div>
   </div>
 
   <div class="bottomnav">
     <button class="nav-tab" onclick="showScreen('screen-home')">
-      <span class="nav-icon"><i class="ph-fill ph-house"></i></span><span class="nav-label">Bosh sahifa</span>
+      <span class="nav-icon"><i class="ph-fill ph-house"></i></span>
+      <span class="nav-label">Bosh sahifa</span>
     </button>
     <button class="nav-tab" onclick="showScreen('screen-market')">
-      <span class="nav-icon"><i class="ph-fill ph-magnifying-glass"></i></span><span class="nav-label">Izlash</span>
+      <span class="nav-icon"><i class="ph-fill ph-magnifying-glass"></i></span>
+      <span class="nav-label">Izlash</span>
     </button>
     <button class="nav-tab" onclick="showScreen('screen-myqueue')">
-      <span class="nav-icon"><i class="ph-fill ph-clipboard-text"></i></span><span class="nav-label">Navbatim</span>
+      <span class="nav-icon"><i class="ph-fill ph-clipboard-text"></i></span>
+      <span class="nav-label">Navbatim</span>
     </button>
     <button class="nav-tab active" onclick="showScreen('screen-profile')">
-      <span class="nav-icon"><i class="ph-fill ph-user"></i></span><span class="nav-label">Profil</span>
+      <span class="nav-icon"><i class="ph-fill ph-user"></i></span>
+      <span class="nav-label">Profil</span>
     </button>
   </div>
 </div>
@@ -529,10 +559,10 @@
     <span class="topbar-title" id="admin-panel-title">Admin</span>
     <div style="display:flex;gap:8px">
       <button class="topbar-action" onclick="openModal('modal-lang')">
-        <i class="ph-fill ph-globe"></i> Til
+        <i class="ph-fill ph-globe"></i> <span id="ui-admin-lang-btn">Til</span>
       </button>
       <button class="topbar-action" onclick="showScreen('screen-display')">
-        <i class="ph-fill ph-television"></i> Ekran
+        <i class="ph-fill ph-television"></i> <span id="ui-admin-display-btn">Ekran</span>
       </button>
     </div>
   </div>
@@ -718,6 +748,7 @@
 <div class="toast" id="toast-msg"></div>
 
 <!-- JAVASCRIPT -->
+<script src="/i18n.js"></script>
 <script src="/main.js"></script>
 </body>
 </html>

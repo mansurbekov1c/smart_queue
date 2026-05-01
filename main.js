@@ -430,421 +430,9 @@ const PLACES = [
 ];
 
 /* =====================================================
-   3. TILLAR VA TARJIMALAR (i18n)
+   3. TILLAR VA TARJIMALAR — i18n.js ga ko'chirildi
+   I18N obyekti va setLang() funksiyasi i18n.js da
    ===================================================== */
-const I18N = {
-  "uz-latn": {
-    langName: "O'zbek (Lotin) ›",
-    profLang: "🌐 Til",
-    navHome: "Bosh sahifa",
-    navSearch: "Izlash",
-    navQueue: "Navbatim",
-    navProfile: "Profil",
-    splashBtnCustomer: '<i class="ph-fill ph-user"></i> Mijoz',
-    splashBtnAdmin: '<i class="ph-fill ph-buildings"></i> Admin',
-    btnDemo: '<i class="ph-fill ph-lightning"></i> Demo rejimida kirish',
-    langTitle: "Tilni tanlang",
-    langCancel: "Bekor qilish",
-    btnLogin: "Kirish",
-    splashSub: "O'zbekiston uchun aqlli<br>navbat platformasi",
-    roleLabel: "Rolni tanlang",
-    loginTitle: "Xush kelibsiz!",
-    loginSub: "Navbatni onlayn boshqaring",
-    tabLogin: "Kirish",
-    tabRegister: "Ro'yxatdan o'tish",
-    labelPhone: "Telefon raqam",
-    labelPass: "Parol",
-    labelFirstname: "Ism",
-    labelLastname: "Familiya",
-    btnLoginSubmit: "Kirish →",
-    btnRegisterSubmit: "Ro'yxatdan o'tish →",
-    adminLoginTitle: "Admin paneli",
-    adminLoginSub: "Markazingizni tanlang va kirish ma'lumotlarini kiriting",
-    sectionPlace: "Markazni tanlang",
-    selectedPlace: "Kirish uchun tanlangan markaz",
-    labelLogin: "Login",
-    btnAdminLogin: "Admin panelga kirish →",
-    heroGreeting: "Assalomu alaykum,",
-    heroNoQueue: "Hozirda faol navbat yo'q. Quyidan xizmat qidiring ↓",
-    activeQueue: "Faol navbat",
-    live: "Jonli",
-    sectionCats: "Kategoriyalar",
-    catAll: "Hammasi",
-    catBarber: "Sartarosh",
-    catClinic: "Klinika",
-    catBank: "Bank",
-    catCarwash: "Avtomoyka",
-    catGov: "Davlat",
-    sectionNearby: "Yaqin atrofda",
-    btnAll: "Barchasi →",
-    services: "Xizmatlar",
-    searchPlaceholder: "Sartarosh, klinika, bank...",
-    myQueue: "Mening navbatim",
-    profile: "Profil",
-    statTotal: "Jami navbat",
-    statSaved: "Tejlgan vaqt",
-    settings: "Sozlamalar",
-    notifications: "Bildirishnomalar",
-    enabled: "Yoqilgan",
-    darkMode: "Tun/kun rejimi",
-    paymentMethod: "To'lov usuli",
-    configure: "Sozlash",
-    logout: "Chiqish",
-    adminCurLabel: "Hozirda xizmatda",
-    adminCurName: "Hech kim",
-    adminCurNext: "Navbat bo'sh",
-    btnNext: "Keyingi",
-    btnAdd: "+ Qo'shish",
-    statToday: "Bugungi mijozlar",
-    statWaiting: "Kutayotganlar",
-    queue: "Navbat",
-    btnClear: "Tozalash",
-    hourlyAnalysis: "Soatlik tahlil",
-    btnAdminLogout: "Admin paneldan chiqish",
-    btnBack: "← Qaytish",
-    dispLabel: "Hozirda xizmatda",
-    dispName: "Kutilmoqda",
-    dispPlace: "Navbat platformasi",
-    dispNext: "Keyingi:",
-    modalJoinTitle: "Navbatga qo'shilish",
-    modalJoinSub: "Siz navbatga qo'shilmoqchisiz",
-    yourNumber: "Sizning raqamingiz",
-    free: "Bepul",
-    estWait: "Taxminiy kutish:",
-    btnConfirm: "Tasdiqlash",
-    btnCancel: "Bekor qilish",
-    modalAddTitle: "Yangi mijoz qo'shish",
-    modalAddSub: "Offline (yurgan) mijozni navbatga qo'shing",
-    labelName: "Ism (majburiy)",
-    labelPhoneOpt: "Telefon (ixtiyoriy)",
-    btnAddToQueue: "+ Navbatga qo'shish",
-    modalDelayTitle: "Navbatni kechiktirish",
-    modalDelaySub:
-      "1 marta bepul, undan keyin har kechiktirishda 5,000 so'm to'lanadi. Maksimum 3 o'rin kechiktirishingiz mumkin.",
-    slot: "o'rin",
-    price: "5,000 so'm",
-    btnJoinQueue: "Navbatga qo'shilish — bepul",
-    queueLabel: "NAVBATDA",
-    waitLabel: "KUTISH",
-    currentLabel: "HOZIRGI",
-    queueList: "Navbat ro'yxati",
-    reviews: "Sharhlar",
-    leaveReview: "Izoh qoldiring",
-    reviewPlaceholder: "Xizmat haqida fikringizni yozing...",
-    btnSubmitReview: "Izoh yuborish",
-    btnGetQueue: "Navbat olish",
-    viewMap: "Xaritada ko'rish →",
-    mapOpening: "Xarita ochilmoqda...",
-  },
-  "uz-cyrl": {
-    langName: "Ўзбек (Кирилл) ›",
-    profLang: "🌐 Тил",
-    navHome: "Бош саҳифа",
-    navSearch: "Излаш",
-    navQueue: "Навбатим",
-    navProfile: "Профил",
-    splashBtnCustomer: '<i class="ph-fill ph-user"></i> Мижоз',
-    splashBtnAdmin: '<i class="ph-fill ph-buildings"></i> Админ',
-    btnDemo: '<i class="ph-fill ph-lightning"></i> Демо режимида кириш',
-    langTitle: "Тилни танланг",
-    langCancel: "Бекор қилиш",
-    btnLogin: "Кириш",
-    splashSub: "Ўзбекистон учун ақлли<br>навбат платформаси",
-    roleLabel: "Ролни танланг",
-    loginTitle: "Хуш келибсиз!",
-    loginSub: "Навбатни онлайн бошқаринг",
-    tabLogin: "Кириш",
-    tabRegister: "Рўйхатдан ўтиш",
-    labelPhone: "Телефон рақами",
-    labelPass: "Парол",
-    labelFirstname: "Исм",
-    labelLastname: "Фамилия",
-    btnLoginSubmit: "Кириш →",
-    btnRegisterSubmit: "Рўйхатдан ўтиш →",
-    adminLoginTitle: "Админ панели",
-    adminLoginSub: "Марказингизни танланг ва кириш маълумотларини киритинг",
-    sectionPlace: "Марказни танланг",
-    selectedPlace: "Кириш учун танланган марказ",
-    labelLogin: "Логин",
-    btnAdminLogin: "Админ панелга кириш →",
-    heroGreeting: "Ассалому алайкум,",
-    heroNoQueue: "Ҳозирда фаол навбат йўқ. Қуйидан хизмат қидиринг ↓",
-    activeQueue: "Фаол навбат",
-    live: "Жонли",
-    sectionCats: "Категориялар",
-    catAll: "Ҳаммаси",
-    catBarber: "Сартарош",
-    catClinic: "Клиника",
-    catBank: "Банк",
-    catCarwash: "Автомойка",
-    catGov: "Давлат",
-    sectionNearby: "Яқин атрофда",
-    btnAll: "Ҳаммаси →",
-    services: "Хизматлар",
-    searchPlaceholder: "Сартарош, клиника, банк...",
-    myQueue: "Менинг навбатим",
-    profile: "Профил",
-    statTotal: "Жами навбат",
-    statSaved: "Тежлаган вақт",
-    settings: "Созламалар",
-    notifications: "Билдиришномалар",
-    enabled: "Ёқилган",
-    darkMode: "Тун/кун режими",
-    paymentMethod: "Тўлов усули",
-    configure: "Созлаш",
-    logout: "Чиқиш",
-    adminCurLabel: "Ҳозирда хизматда",
-    adminCurName: "Ҳеч ким",
-    adminCurNext: "Навбат бўш",
-    btnNext: "Кейинги",
-    btnAdd: "+ Қўшиш",
-    statToday: "Бугунги mijozлар",
-    statWaiting: "Кутайотганлар",
-    queue: "Навбат",
-    btnClear: "Тозалаш",
-    hourlyAnalysis: "Соатлик таҳлил",
-    btnAdminLogout: "Админ панелдан чиқиш",
-    btnBack: "← Қайтish",
-    dispLabel: "Ҳозирда хизматда",
-    dispName: "Кутмоқда",
-    dispPlace: "Навбат платформаси",
-    dispNext: "Кейинги:",
-    modalJoinTitle: "Навбатга қўшилиш",
-    modalJoinSub: "Сиз навбатга қўшилмоқчисиз",
-    yourNumber: "Сизнинг рақамингиз",
-    free: "Бепул",
-    estWait: "Тахминий кутиш:",
-    btnConfirm: "Тасдиқлаш",
-    btnCancel: "Бекор қилиш",
-    modalAddTitle: "Янги mijoz қўшиш",
-    modalAddSub: "Offline (юрган) mijozни навбатга қўшинг",
-    labelName: "Исм (мажбурий)",
-    labelPhoneOpt: "Телефон (ихтиёрий)",
-    btnAddToQueue: "+ Навбатга қўшиш",
-    modalDelayTitle: "Навбатни кечиктириш",
-    modalDelaySub:
-      "1 мартa бепул, ундан кейин ҳар кечиктиришда 5,000 сўм тўланади. Максимум 3 орин кечиктиришингиз мумкин.",
-    slot: "орин",
-    price: "5,000 сўм",
-    btnJoinQueue: "Навбатга қўшилиш — бепул",
-    queueLabel: "НАВБАТДА",
-    waitLabel: "КУТИШ",
-    currentLabel: "ҲОЗИРГИ",
-    queueList: "Навбат рўйхати",
-    reviews: "Шарҳлар",
-    leaveReview: "Изоҳ қолдириш",
-    reviewPlaceholder: "Хизмат ҳақида фикрингизни ёзинг...",
-    btnSubmitReview: "Изоҳ юбориш",
-    btnGetQueue: "Навбат олиш",
-    viewMap: "Харитада кўриш →",
-    mapOpening: "Харита очилмоқда...",
-  },
-  ru: {
-    langName: "Русский ›",
-    profLang: "🌐 Язык",
-    navHome: "Главная",
-    navSearch: "Поиск",
-    navQueue: "Моя очередь",
-    navProfile: "Профиль",
-    splashBtnCustomer: '<i class="ph-fill ph-user"></i> Клиент',
-    splashBtnAdmin: '<i class="ph-fill ph-buildings"></i> Админ',
-    btnDemo: '<i class="ph-fill ph-lightning"></i> Демо вход',
-    langTitle: "Выберите язык",
-    langCancel: "Отмена",
-    btnLogin: "Войти",
-    splashSub: "Умная платформа очереди<br>для Узбекистана",
-    roleLabel: "Выберите роль",
-    loginTitle: "Добро пожаловать!",
-    loginSub: "Управляйте очередью онлайн",
-    tabLogin: "Войти",
-    tabRegister: "Регистрация",
-    labelPhone: "Номер телефона",
-    labelPass: "Пароль",
-    labelFirstname: "Имя",
-    labelLastname: "Фамилия",
-    btnLoginSubmit: "Войти →",
-    btnRegisterSubmit: "Регистрация →",
-    adminLoginTitle: "Админ панель",
-    adminLoginSub: "Выберите ваш центр и введите данные для входа",
-    sectionPlace: "Выберите центр",
-    selectedPlace: "Выбранный центр для входа",
-    labelLogin: "Логин",
-    btnAdminLogin: "Войти в админ панель →",
-    heroGreeting: "Здравствуйте,",
-    heroNoQueue: "В настоящее время нет активной очереди. Ищите услуги ниже ↓",
-    activeQueue: "Активная очередь",
-    live: "В прямом эфире",
-    sectionCats: "Категории",
-    catAll: "Все",
-    catBarber: "Парикмахерская",
-    catClinic: "Клиника",
-    catBank: "Банк",
-    catCarwash: "Автомойка",
-    catGov: "Государство",
-    sectionNearby: "Поблизости",
-    btnAll: "Все →",
-    services: "Услуги",
-    searchPlaceholder: "Парикмахерская, клиника, банк...",
-    myQueue: "Моя очередь",
-    profile: "Профиль",
-    statTotal: "Всего очередей",
-    statSaved: "Сэкономлено времени",
-    settings: "Настройки",
-    notifications: "Уведомления",
-    enabled: "Включено",
-    darkMode: "Темный/светлый режим",
-    paymentMethod: "Способ оплаты",
-    configure: "Настроить",
-    logout: "Выйти",
-    adminCurLabel: "Сейчас на обслуживании",
-    adminCurName: "Никто",
-    adminCurNext: "Очередь пуста",
-    btnNext: "Следующий",
-    btnAdd: "+ Добавить",
-    statToday: "Клиентов сегодня",
-    statWaiting: "Ожидающих",
-    queue: "Очередь",
-    btnClear: "Очистить",
-    hourlyAnalysis: "Почасовой анализ",
-    btnAdminLogout: "Выйти из админ панели",
-    btnBack: "← Назад",
-    dispLabel: "Сейчас на обслуживании",
-    dispName: "Ожидается",
-    dispPlace: "Платформа очереди",
-    dispNext: "Следующий:",
-    modalJoinTitle: "Присоединиться к очереди",
-    modalJoinSub: "Вы хотите присоединиться к очереди",
-    yourNumber: "Ваш номер",
-    free: "Бесплатно",
-    estWait: "Ожидаемое ожидание:",
-    btnConfirm: "Подтвердить",
-    btnCancel: "Отмена",
-    modalAddTitle: "Добавить нового клиента",
-    modalAddSub: "Добавить офлайн клиента в очередь",
-    labelName: "Имя (обязательно)",
-    labelPhoneOpt: "Телефон (опционально)",
-    btnAddToQueue: "+ Добавить в очередь",
-    modalDelayTitle: "Отложить очередь",
-    modalDelaySub:
-      "1 раз бесплатно, затем 5,000 сум за каждое отложение. Максимум 3 места.",
-    slot: "место",
-    price: "5,000 сум",
-    btnJoinQueue: "Присоединиться к очереди — бесплатно",
-    queueLabel: "В ОЧЕРЕДИ",
-    waitLabel: "ОЖИДАНИЕ",
-    currentLabel: "ТЕКУЩИЙ",
-    queueList: "Список очереди",
-    reviews: "Отзывы",
-    leaveReview: "Оставить отзыв",
-    reviewPlaceholder: "Напишите ваше мнение об услуге...",
-    btnSubmitReview: "Отправить отзыв",
-    btnGetQueue: "Взять очередь",
-    viewMap: "Посмотреть на карте →",
-    mapOpening: "Карта открывается...",
-  },
-  en: {
-    langName: "English ›",
-    profLang: "🌐 Language",
-    navHome: "Home",
-    navSearch: "Search",
-    navQueue: "My Queue",
-    navProfile: "Profile",
-    splashBtnCustomer: '<i class="ph-fill ph-user"></i> Customer',
-    splashBtnAdmin: '<i class="ph-fill ph-buildings"></i> Admin',
-    btnDemo: '<i class="ph-fill ph-lightning"></i> Demo login',
-    langTitle: "Select language",
-    langCancel: "Cancel",
-    btnLogin: "Login",
-    splashSub: "Smart queue platform<br>for Uzbekistan",
-    roleLabel: "Select your role",
-    loginTitle: "Welcome!",
-    loginSub: "Manage your queue online",
-    tabLogin: "Login",
-    tabRegister: "Register",
-    labelPhone: "Phone number",
-    labelPass: "Password",
-    labelFirstname: "First name",
-    labelLastname: "Last name",
-    btnLoginSubmit: "Login →",
-    btnRegisterSubmit: "Register →",
-    adminLoginTitle: "Admin panel",
-    adminLoginSub: "Select your center and enter login details",
-    sectionPlace: "Select center",
-    selectedPlace: "Selected center for login",
-    labelLogin: "Login",
-    btnAdminLogin: "Login to admin panel →",
-    heroGreeting: "Hello,",
-    heroNoQueue: "No active queue right now. Search for services below ↓",
-    activeQueue: "Active queue",
-    live: "Live",
-    sectionCats: "Categories",
-    catAll: "All",
-    catBarber: "Barber",
-    catClinic: "Clinic",
-    catBank: "Bank",
-    catCarwash: "Car wash",
-    catGov: "Government",
-    sectionNearby: "Nearby",
-    btnAll: "All →",
-    services: "Services",
-    searchPlaceholder: "Barber, clinic, bank...",
-    myQueue: "My Queue",
-    profile: "Profile",
-    statTotal: "Total queues",
-    statSaved: "Time saved",
-    settings: "Settings",
-    notifications: "Notifications",
-    enabled: "Enabled",
-    darkMode: "Dark/Light mode",
-    paymentMethod: "Payment method",
-    configure: "Configure",
-    logout: "Logout",
-    adminCurLabel: "Currently serving",
-    adminCurName: "No one",
-    adminCurNext: "Queue empty",
-    btnNext: "Next",
-    btnAdd: "+ Add",
-    statToday: "Today's customers",
-    statWaiting: "Waiting",
-    queue: "Queue",
-    btnClear: "Clear",
-    hourlyAnalysis: "Hourly analysis",
-    btnAdminLogout: "Logout from admin panel",
-    btnBack: "← Back",
-    dispLabel: "Currently serving",
-    dispName: "Waiting",
-    dispPlace: "Queue platform",
-    dispNext: "Next:",
-    modalJoinTitle: "Join queue",
-    modalJoinSub: "You are about to join the queue",
-    yourNumber: "Your number",
-    free: "Free",
-    estWait: "Estimated wait:",
-    btnConfirm: "Confirm",
-    btnCancel: "Cancel",
-    modalAddTitle: "Add new customer",
-    modalAddSub: "Add offline customer to queue",
-    labelName: "Name (required)",
-    labelPhoneOpt: "Phone (optional)",
-    btnAddToQueue: "+ Add to queue",
-    modalDelayTitle: "Delay queue",
-    modalDelaySub: "1 time free, then 5,000 sum per delay. Maximum 3 spots.",
-    slot: "spot",
-    price: "5,000 sum",
-    btnJoinQueue: "Join queue — free",
-    queueLabel: "IN QUEUE",
-    waitLabel: "WAIT",
-    currentLabel: "CURRENT",
-    queueList: "Queue list",
-    reviews: "Reviews",
-    leaveReview: "Leave a review",
-    reviewPlaceholder: "Write your opinion about the service...",
-    btnSubmitReview: "Submit review",
-    btnGetQueue: "Get queue",
-    viewMap: "View on map →",
-    mapOpening: "Opening map...",
-  },
-};
 
 /* =====================================================
    3.1 ILOVA HOLATI (Application State)
@@ -864,207 +452,13 @@ const STATE = {
   homeFilter: "all" /* Bosh sahifa filtri */,
   marketFilter: "all" /* Bozor sahifa filtri */,
   selectedAdminPlaceId: null /* Admin login: tanlangan joy ID */,
-  lang: "uz-latn" /* Tanlangan til */,
+  lang: "uz-latn" /* Tanlangan til */
 };
 
-/* Til o'zgartirish mantiqi */
-function setLang(langCode) {
-  STATE.lang = langCode;
-  const t = I18N[langCode];
-
-  const setHTML = (id, html) => {
-    const el = document.getElementById(id);
-    if (el) el.innerHTML = html;
-  };
-
-  const setText = (id, text) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = text;
-  };
-
-  const setPlaceholder = (id, text) => {
-    const el = document.getElementById(id);
-    if (el) el.placeholder = text;
-  };
-
-  // Splash screen
-  setText("ui-splash-sub", t.splashSub);
-  setText("ui-splash-role-label", t.roleLabel);
-  setHTML("ui-prof-lang", t.profLang);
-  setHTML("lang-status-label", t.langName);
-
-  // Navigation labels
-  document
-    .querySelectorAll(".nav-tab:nth-child(1) .nav-label")
-    .forEach((el) => (el.textContent = t.navHome));
-  document
-    .querySelectorAll(".nav-tab:nth-child(2) .nav-label")
-    .forEach((el) => (el.textContent = t.navSearch));
-  document
-    .querySelectorAll(".nav-tab:nth-child(3) .nav-label")
-    .forEach((el) => (el.textContent = t.navQueue));
-  document
-    .querySelectorAll(".nav-tab:nth-child(4) .nav-label")
-    .forEach((el) => (el.textContent = t.navProfile));
-
-  // Role buttons
-  const pCust = document.querySelector("#role-toggle .role-btn:first-child");
-  if (pCust) pCust.innerHTML = t.splashBtnCustomer;
-  const pAdm = document.querySelector("#role-toggle .role-btn:last-child");
-  if (pAdm) pAdm.innerHTML = t.splashBtnAdmin;
-
-  // Demo tugmasini yangilash
-  const demoBtn = document.querySelector("#screen-splash .btn-secondary");
-  if (demoBtn) demoBtn.innerHTML = t.btnDemo;
-
-  // Kirish tugmasi
-  const loginBtn = document.querySelector("#screen-splash .btn-primary");
-  if (loginBtn) loginBtn.textContent = t.btnLogin;
-
-  // Login screen
-  setText("ui-login-title", t.loginTitle);
-  setText("ui-login-sub", t.loginSub);
-  setText("ui-tab-login", t.tabLogin);
-  setText("ui-tab-register", t.tabRegister);
-  setText("ui-label-phone", t.labelPhone);
-  setText("ui-label-pass", t.labelPass);
-  setText("ui-label-firstname", t.labelFirstname);
-  setText("ui-label-lastname", t.labelLastname);
-  setText("ui-btn-login", t.btnLoginSubmit);
-  setText("ui-btn-register", t.btnRegisterSubmit);
-  setText("login-screen-title", t.tabLogin);
-
-  // Admin login screen
-  setText("ui-admin-login-title", t.adminLoginTitle);
-  setText("ui-admin-login-sub", t.adminLoginSub);
-  setText("ui-section-place", t.sectionPlace);
-  setText("ui-selected-place-label", t.selectedPlace);
-  setText("ui-label-admin-login", t.labelLogin);
-  setText("ui-btn-admin-login", t.btnAdminLogin);
-
-  // Home screen
-  setText("ui-hero-greeting", t.heroGreeting);
-  setText("ui-hero-no-queue", t.heroNoQueue);
-  setText("ui-section-cats", t.sectionCats);
-  setText("ui-section-nearby", t.sectionNearby);
-
-  // Kategoriya chips
-  const homeChips = document.querySelectorAll("#home-chips .chip");
-  if (homeChips.length >= 6) {
-    homeChips[0].textContent = t.catAll;
-    homeChips[1].innerHTML = `<i class="ph-fill ph-scissors"></i> ${t.catBarber}`;
-    homeChips[2].innerHTML = `<i class="ph-fill ph-hospital"></i> ${t.catClinic}`;
-    homeChips[3].innerHTML = `<i class="ph-fill ph-bank"></i> ${t.catBank}`;
-    homeChips[4].innerHTML = `<i class="ph-fill ph-car"></i> ${t.catCarwash}`;
-    homeChips[5].innerHTML = `<i class="ph-fill ph-buildings"></i> ${t.catGov}`;
-  }
-
-  const marketChips = document.querySelectorAll("#market-chips .chip");
-  if (marketChips.length >= 6) {
-    marketChips[0].textContent = t.catAll;
-    marketChips[1].innerHTML = `<i class="ph-fill ph-scissors"></i> ${t.catBarber}`;
-    marketChips[2].innerHTML = `<i class="ph-fill ph-hospital"></i> ${t.catClinic}`;
-    marketChips[3].innerHTML = `<i class="ph-fill ph-bank"></i> ${t.catBank}`;
-    marketChips[4].innerHTML = `<i class="ph-fill ph-car"></i> ${t.catCarwash}`;
-    marketChips[5].innerHTML = `<i class="ph-fill ph-buildings"></i> ${t.catGov}`;
-  }
-
-  // Market screen
-  setText("ui-services", t.services);
-  setPlaceholder("search-inp", t.searchPlaceholder);
-
-  // Profile screen
-  setText("ui-profile", t.profile);
-  setText("ui-stat-total", t.statTotal);
-  setText("ui-stat-saved", t.statSaved);
-  setText("ui-settings", t.settings);
-  setText("ui-logout", t.logout);
-
-  // Admin panel
-  setText("ui-admin-cur-label", t.adminCurLabel);
-  setText("ui-admin-cur-name", t.adminCurName);
-  setText("ui-admin-cur-next", t.adminCurNext);
-  setText("ui-btn-next", t.btnNext);
-  setText("ui-btn-add", t.btnAdd);
-  setText("ui-stat-today", t.statToday);
-  setText("ui-stat-waiting", t.statWaiting);
-  setText("ui-queue", t.queue);
-  setText("ui-btn-clear", t.btnClear);
-  setText("ui-hourly-analysis", t.hourlyAnalysis);
-  setText("ui-btn-admin-logout", t.btnAdminLogout);
-
-  // Admin panel til tugmasi yangilash
-  const adminLangBtn = document.querySelector(
-    "#screen-admin .topbar-action:first-child",
-  );
-  if (adminLangBtn && adminLangBtn.querySelector(".ph-globe")) {
-    adminLangBtn.innerHTML = `<i class="ph-fill ph-globe"></i> ${t.profLang.replace("🌐 ", "")}`;
-  }
-
-  // Display screen
-  setText("ui-disp-label", t.dispLabel);
-  setText("ui-disp-name", t.dispName);
-  setText("ui-disp-place", t.dispPlace);
-  setText("ui-disp-next", t.dispNext);
-  setText("ui-btn-back", t.btnBack);
-
-  // My queue screen
-  setText("ui-myqueue", t.myQueue);
-
-  // Modal tarjimalari
-  setText("ui-lang-title", t.langTitle);
-  setText("ui-lang-cancel", t.langCancel);
-  setText("ui-modal-join-title", t.modalJoinTitle);
-  setText("ui-modal-join-sub", t.modalJoinSub);
-  setText("ui-your-number", t.yourNumber);
-  setText("ui-free", t.free);
-  setText("ui-est-wait", t.estWait);
-  setText("ui-btn-confirm", t.btnConfirm);
-  setText("ui-btn-cancel-join", t.btnCancel);
-  setText("ui-modal-add-title", t.modalAddTitle);
-  setText("ui-modal-add-sub", t.modalAddSub);
-  setText("ui-label-name", t.labelName);
-  setText("ui-label-phone-opt", t.labelPhoneOpt);
-  setText("ui-btn-add-to-queue", t.btnAddToQueue);
-  setText("ui-btn-cancel-add", t.btnCancel);
-  setText("ui-modal-delay-title", t.modalDelayTitle);
-  setText("ui-modal-delay-sub", t.modalDelaySub);
-  setText("ui-slot", t.slot);
-  setText("ui-price", t.price);
-  setText("ui-btn-cancel-delay", t.btnCancel);
-
-  // Delay modal slot/price class lari
-  document
-    .querySelectorAll(".delay-slot")
-    .forEach((el) => (el.textContent = t.slot));
-  document
-    .querySelectorAll(".delay-price")
-    .forEach((el) => (el.textContent = t.price));
-  setText("ui-delay-free-1", t.free);
-
-  // Detail screen
-  setText("ui-btn-get-queue", t.btnGetQueue);
-  setText("ui-live-queue-status", t.activeQueue + " " + t.live);
-  setText("ui-live", t.live);
-  setText("ui-queue-label", t.queueLabel);
-  setText("ui-wait-label", t.waitLabel);
-  setText("ui-current-label", t.currentLabel);
-  setText("ui-queue-list", t.queueList);
-  setText("ui-reviews", t.reviews);
-  setText("ui-leave-review", t.leaveReview);
-  setText("ui-btn-submit-review", t.btnSubmitReview);
-  setText("ui-btn-join-queue", t.btnJoinQueue);
-  setText("ui-view-map", t.viewMap);
-
-  closeModal("modal-lang");
-
-  const toastMsgs = {
-    "uz-latn": "Til o'zgartirildi",
-    "uz-cyrl": "Тил ўзгартирилди",
-    ru: "Язык изменен",
-    en: "Language changed",
-  };
-  showToast("✅ " + toastMsgs[langCode]);
+/* Tarjima helperi — I18N[STATE.lang] dan kalit bo'yicha matn oladi */
+function t(key, fallback) {
+  const dict = (typeof I18N !== "undefined" && I18N[STATE.lang]) || {};
+  return dict[key] !== undefined ? dict[key] : (fallback !== undefined ? fallback : key);
 }
 
 /* =====================================================
@@ -1101,14 +495,9 @@ function goBack() {
   if (STATE.screenHistory.length > 1) {
     STATE.screenHistory.pop();
     const prev = STATE.screenHistory[STATE.screenHistory.length - 1];
-    const screens = document.querySelectorAll(".screen");
-    screens.forEach((s) => s.classList.remove("active"));
-    const target = document.getElementById(prev);
-    if (target) target.classList.add("active");
-    if (prev === "screen-home") renderHome();
-    if (prev === "screen-market") renderMarket();
-    if (prev === "screen-admin") renderAdmin();
-    updateThemeButtons();
+    /* showScreen orqali chaqiramiz — nav va render avtomatik yangilanadi */
+    STATE.screenHistory.pop(); /* showScreen qayta push qilmasligi uchun */
+    showScreen(prev);
   } else {
     showScreen("screen-splash");
   }
@@ -1157,7 +546,7 @@ function doLogin() {
   STATE.user = { first: "Ali", last: "Valiyev", phone, isAdmin: false };
   updateUserUI();
   showScreen("screen-home");
-  showToast("✅ Xush kelibsiz, Ali!");
+  showToast(t("toastLoginWelcome"));
 }
 
 /* Mijoz ro'yxatdan o'tishi */
@@ -1167,19 +556,19 @@ function doRegister() {
   const phone = document.getElementById("inp-regphone").value.trim();
 
   if (!first || !last) {
-    showToast("❌ Ism va familiyani kiriting");
+    showToast(t("toastRegisterNameRequired"));
     return;
   }
 
   STATE.user = {
-    first: first || "Ali",
-    last: last || "Valiyev",
+    first,
+    last,
     phone: phone || "+998 90 123 45 67",
     isAdmin: false,
   };
   updateUserUI();
   showScreen("screen-home");
-  showToast("✅ Muvaffaqiyatli ro'yxatdan o'tdingiz!");
+  showToast(t("toastRegisterSuccess"));
 }
 
 /* Demo kirish — rol bo'yicha */
@@ -1197,7 +586,7 @@ function demoLogin() {
     STATE.myQueue = null;
     updateUserUI();
     showScreen("screen-home");
-    showToast("⚡ Demo rejimida kirdingiz");
+    showToast(t("toastDemoLogin"));
   }
 }
 
@@ -1234,7 +623,7 @@ function updateUserUI() {
     const qWait = document.getElementById("hero-q-wait");
     if (qPlace) qPlace.textContent = STATE.myQueue.placeName;
     if (qNum) qNum.textContent = STATE.myQueue.num;
-    if (qWait) qWait.textContent = `~${STATE.myQueue.waitMin} daqiqa`;
+    if (qWait) qWait.textContent = `~${STATE.myQueue.waitMin} ${t("minutesFull")}`;
   }
 }
 
@@ -1243,7 +632,7 @@ function logoutUser() {
   STATE.user = null;
   STATE.myQueue = null;
   showScreen("screen-splash");
-  showToast("👋 Chiqildi");
+  showToast(t("toastLogout"));
 }
 
 /* =====================================================
@@ -1264,7 +653,7 @@ function renderAdminPlaceList() {
         <div>
           <p class="admin-card-name">${p.name}</p>
           <p class="admin-card-addr"><i class="ph-fill ph-map-pin"></i> ${p.location.district}, ${p.location.city}</p>
-          <p class="admin-card-addr" style="margin-top:2px">Login: <strong>admin${p.id}</strong> / Parol: <strong>parol${p.id}</strong></p>
+          <p class="admin-card-addr" style="margin-top:2px">${t("labelLogin")}: <strong>admin${p.id}</strong> / ${t("labelPass")}: <strong>parol${p.id}</strong></p>
         </div>
       </div>
     </div>
@@ -1291,9 +680,9 @@ function selectAdminPlace(placeId) {
       PLACES.find((p) => p.id === placeId)?.name || "—";
     document.getElementById("admin-login-inp").value = "";
     document.getElementById("admin-pass-inp").value = "";
-
+    
     // Formaga scroll qilish
-    form.scrollIntoView({ behavior: "smooth", block: "center" });
+    form.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 }
 
@@ -1301,7 +690,7 @@ function selectAdminPlace(placeId) {
 function doAdminLogin() {
   const placeId = STATE.selectedAdminPlaceId;
   if (!placeId) {
-    showToast("❌ Avval markazni tanlang");
+    showToast(t("toastAdminSelectPlace"));
     return;
   }
 
@@ -1314,7 +703,7 @@ function doAdminLogin() {
   );
 
   if (!cred) {
-    showToast("❌ Login yoki parol noto'g'ri");
+    showToast(t("toastAdminCredInvalid"));
     return;
   }
 
@@ -1329,25 +718,24 @@ function loginAsAdmin(placeId) {
   STATE.adminPlace = place;
   /* Admin uchun navbat nusxasi (o'zgartirish uchun) */
   STATE.adminQueue = place.queue.map((q) => ({ ...q }));
-
+  
   // Hozirgi xizmatdagi mijozni to'g'ri aniqlash
   // Avval barcha current flaglarni olib tashlaymiz
-  STATE.adminQueue.forEach((q) => (q.current = false));
-
+  STATE.adminQueue.forEach(q => q.current = false);
+  
   // currentNum ga mos keladigan mijozni current: true qilamiz
-  const currentPerson = STATE.adminQueue.find(
-    (q) => q.num === place.currentNum && !q.done,
-  );
+  const currentPerson = STATE.adminQueue.find(q => q.num === place.currentNum && !q.done);
   if (currentPerson) {
     currentPerson.current = true;
   }
-
-  STATE.adminNextNum = Math.max(...place.queue.map((q) => q.num), 0) + 1;
+  
+  const qNums = place.queue.map((q) => q.num);
+  STATE.adminNextNum = (qNums.length > 0 ? Math.max(...qNums) : 0) + 1;
 
   document.getElementById("admin-panel-title").textContent = place.name;
 
   showScreen("screen-admin");
-  showToast(`<i class="ph-bold ph-check"></i> ${place.name} — Xush kelibsiz!`);
+  showToast(`<i class="ph-bold ph-check"></i> ${place.name} — ${t("toastAdminLoginSuccess")}`);
 }
 
 /* Admin paneldan chiqish */
@@ -1355,7 +743,7 @@ function adminLogout() {
   STATE.adminPlace = null;
   STATE.adminQueue = [];
   showScreen("screen-splash");
-  showToast("Admin paneldan chiqildi");
+  showToast(t("toastAdminLogout"));
 }
 
 /* =====================================================
@@ -1370,28 +758,28 @@ function renderPlaceCard(place, onclick) {
         : "badge-green";
   const busyText =
     place.queueCount > 10
-      ? "Juda band"
+      ? t("statusBusy")
       : place.queueCount > 5
-        ? "O'rtacha"
-        : "Qulay";
+        ? t("statusModerate")
+        : t("statusQuiet");
 
   return `
     <div class="place-card" onclick="${onclick}">
       <div class="place-thumb cat-${place.cat}">
         <span>${place.icon}</span>
         ${place.isFeatured ? `<span class="badge badge-amber place-thumb-badge"><i class="ph-fill ph-star"></i> Top</span>` : ""}
-        ${!place.isOpen ? `<span class="badge badge-red place-thumb-badge">Yopiq</span>` : ""}
+        ${!place.isOpen ? `<span class="badge badge-red place-thumb-badge">${t("statusClosed")}</span>` : ""}
       </div>
       <div class="place-info">
         <p class="place-name">${place.name}</p>
         <p class="place-addr"><i class="ph-fill ph-map-pin"></i> ${place.location.district}, ${place.location.city}</p>
         <div class="place-meta">
           <span><i class="ph-fill ph-star"></i> ${place.rating}</span>
-          <span>(${place.reviewCount} sharh)</span>
+          <span>(${place.reviewCount} ${t("reviews").toLowerCase()})</span>
           ${
             place.isOpen
-              ? `<span class="badge ${busy}">${busyText} · ${place.queueCount} kishi</span>`
-              : `<span class="badge badge-gray">Bugun yopiq</span>`
+              ? `<span class="badge ${busy}">${busyText} · ${place.queueCount} ${t("peopleWord")}</span>`
+              : `<span class="badge badge-gray">${t("statusClosed")}</span>`
           }
         </div>
       </div>
@@ -1413,7 +801,7 @@ function renderHome() {
   if (container) {
     container.innerHTML = filtered.length
       ? filtered.map((p) => renderPlaceCard(p, `openPlace(${p.id})`)).join("")
-      : `<div class="empty-state"><div class="empty-icon"><i class="ph-fill ph-magnifying-glass"></i></div><div class="empty-title">Bu kategoriyada joy yo'q</div></div>`;
+      : `<div class="empty-state"><div class="empty-icon"><i class="ph-fill ph-magnifying-glass"></i></div><div class="empty-title">${t("emptyCategory", "Bu kategoriyada joy yo'q")}</div></div>`;
   }
 }
 
@@ -1462,7 +850,7 @@ function searchAndRenderMarket(query) {
   if (container) {
     container.innerHTML = filtered.length
       ? filtered.map((p) => renderPlaceCard(p, `openPlace(${p.id})`)).join("")
-      : `<div class="empty-state"><div class="empty-icon"><i class="ph-fill ph-magnifying-glass"></i></div><div class="empty-title">Natija topilmadi</div><div class="empty-sub">Boshqa so'z bilan qidiring</div></div>`;
+      : `<div class="empty-state"><div class="empty-icon"><i class="ph-fill ph-magnifying-glass"></i></div><div class="empty-title">${t("emptyNoResults", "Natija topilmadi")}</div><div class="empty-sub">${t("emptySearchOther", "Boshqa so'z bilan qidiring")}</div></div>`;
   }
 }
 
@@ -1481,15 +869,14 @@ function openPlace(id) {
   document.getElementById("detail-category").textContent =
     `${place.icon} ${catName(place.cat)}`;
   document.getElementById("detail-rating").textContent =
-    `<i class="ph-fill ph-star"></i> ${place.rating} (${place.reviewCount} ta sharh)`;
-  document.getElementById("detail-hours").textContent =
-    `<i class="ph-fill ph-clock"></i> ${place.hours}`;
+    `<i class="ph-fill ph-star"></i> ${place.rating} (${place.reviewCount} ${t("reviews").toLowerCase()})`;
+  document.getElementById("detail-hours").textContent = `<i class="ph-fill ph-clock"></i> ${place.hours}`;
 
   /* Holat nishoni */
   const badge = document.getElementById("detail-status-badge");
   badge.innerHTML = place.isOpen
-    ? `<span class="badge badge-green">Ochiq</span>`
-    : `<span class="badge badge-red">Yopiq</span>`;
+    ? `<span class="badge badge-green">${t("statusOpen")}</span>`
+    : `<span class="badge badge-red">${t("statusClosed")}</span>`;
 
   /* Rasm */
   const thumb = document.getElementById("detail-thumb");
@@ -1509,10 +896,10 @@ function openPlace(id) {
   document.getElementById("detail-queue-badge").className =
     "badge " + (place.isOpen ? "badge-green" : "badge-red");
   document.getElementById("detail-queue-badge").textContent = place.isOpen
-    ? "Ochiq"
-    : "Yopiq";
+    ? t("statusOpen")
+    : t("statusClosed");
   document.getElementById("detail-q-count").textContent = place.queueCount;
-  document.getElementById("detail-q-wait").textContent = `${place.waitMin}daq`;
+  document.getElementById("detail-q-wait").textContent = `${place.waitMin}${t("minutesShort")}`;
   document.getElementById("detail-q-current").textContent =
     `#${place.currentNum}`;
 
@@ -1520,7 +907,7 @@ function openPlace(id) {
   const qList = document.getElementById("detail-queue-list");
   if (place.queue.length === 0) {
     qList.innerHTML =
-      '<p style="font-size:14px;color:var(--c-text3);text-align:center;padding:12px">Navbat bo\'sh</p>';
+      `<p style="font-size:14px;color:var(--c-text3);text-align:center;padding:12px">${t("emptyQueue")}</p>`;
   } else {
     qList.innerHTML = place.queue
       .slice(0, 8)
@@ -1538,11 +925,11 @@ function openPlace(id) {
         return `
         <div class="q-row">
           <div class="${cls}">#${q.num}</div>
-          <div class="q-name">${q.name}${isMe ? ' <span style="color:var(--c-info);font-size:11px;font-weight:700">(Siz)</span>' : ""}</div>
+          <div class="q-name">${q.name}${isMe ? ` <span style="color:var(--c-info);font-size:11px;font-weight:700">(${t("detailYou")})</span>` : ""}</div>
           <div>
-            ${q.current ? `<span class="badge badge-green">Hozir</span>` : ""}
+            ${q.current ? `<span class="badge badge-green">${t("statusCurrent")}</span>` : ""}
             ${q.done ? `<span style="font-size:12px;color:var(--c-text3)">✓</span>` : ""}
-            ${!q.current && !q.done ? `<span class="badge ${q.type === "online" ? "badge-blue" : "badge-gray"}">${q.type === "online" ? "Online" : "Offline"}</span>` : ""}
+            ${!q.current && !q.done ? `<span class="badge ${q.type === "online" ? "badge-blue" : "badge-gray"}">${q.type === "online" ? t("statusOnline") : t("statusOffline")}</span>` : ""}
           </div>
         </div>
       `;
@@ -1563,7 +950,7 @@ function openPlace(id) {
           <p style="font-size:11px;color:var(--c-text3)">${r.date} · ${`<i class="ph-fill ph-star"></i>`.repeat(r.rating)}</p>
         </div>
       </div>
-      <p style="font-size:14px;color:var(--c-text2);line-height:1.5">${r.text}</p>
+      <p style="font-size:14px;color:var(--c-text2);line-height:1.5">${escHtml(r.text)}</p>
     </div>
   `,
     )
@@ -1577,14 +964,14 @@ function openPlace(id) {
 
 /* Kategoriya nomini olish */
 function catName(cat) {
-  const names = {
-    barber: "Sartaroshxona",
-    clinic: "Klinika",
-    bank: "Bank",
-    carwash: "Avtomoyka",
-    gov: "Davlat muassasasi",
+  const map = {
+    barber: "categoryBarber",
+    clinic: "categoryClinic",
+    bank: "categoryBank",
+    carwash: "categoryCarwash",
+    gov: "categoryGov",
   };
-  return names[cat] || cat;
+  return map[cat] ? t(map[cat]) : cat;
 }
 
 /* =====================================================
@@ -1604,16 +991,16 @@ function updateStarUI(n) {
 /* Izoh yuborish */
 function submitReview() {
   if (!STATE.selectedRating) {
-    showToast("❌ Avval yulduz bering");
+    showToast(t("toastReviewRatingRequired"));
     return;
   }
   const text = document.getElementById("review-text-inp").value.trim();
   if (!text) {
-    showToast("❌ Izoh matnini yozing");
+    showToast(t("toastReviewTextRequired"));
     return;
   }
   if (!STATE.user) {
-    showToast("❌ Avval kirishingiz kerak");
+    showToast(t("toastMustLogin"));
     return;
   }
 
@@ -1621,7 +1008,7 @@ function submitReview() {
   if (STATE.currentPlace) {
     STATE.currentPlace.reviews.unshift({
       name: `${STATE.user.first} ${STATE.user.last[0]}.`,
-      date: "Hozir",
+      date: t("dateNow"),
       rating: STATE.selectedRating,
       text: text,
     });
@@ -1630,7 +1017,7 @@ function submitReview() {
 
   document.getElementById("review-text-inp").value = "";
   setRating(0);
-  showToast("✅ Izohingiz qabul qilindi!");
+  showToast(t("toastReviewSubmitted"));
   openPlace(STATE.currentPlace.id); /* sahifani yangilash */
 }
 
@@ -1640,16 +1027,16 @@ function submitReview() {
 function openJoinModal() {
   if (!STATE.currentPlace) return;
   if (!STATE.user) {
-    showToast("❌ Avval kirishingiz kerak");
+    showToast(t("toastMustLogin"));
     showScreen("screen-login");
     return;
   }
   if (!STATE.currentPlace.isOpen) {
-    showToast("❌ Bu joy hozir yopiq");
+    showToast(t("toastPlaceClosed"));
     return;
   }
   if (STATE.myQueue) {
-    showToast("❌ Sizda allaqachon faol navbat bor");
+    showToast(t("toastQueueAlreadyActive"));
     return;
   }
 
@@ -1658,10 +1045,10 @@ function openJoinModal() {
 
   document.getElementById("modal-join-title").textContent = p.name;
   document.getElementById("modal-join-sub").textContent =
-    `${p.location.district} · ~${p.waitMin + 2} daqiqa kutish`;
+    `${p.location.district} · ~${p.waitMin + 2} ${t("minutesFull")} ${t("waiting").replace("...", "").toLowerCase()}`;
   document.getElementById("modal-join-num").textContent = `#${num}`;
   document.getElementById("modal-join-wait").textContent =
-    `Taxminiy kutish: ~${(p.queueCount + 1) * 2} daqiqa`;
+    `${t("waitApprox")}: ~${(p.queueCount + 1) * 2} ${t("minutesFull")}`;
 
   openModal("modal-join");
 }
@@ -1689,9 +1076,7 @@ function confirmJoin() {
 
   updateUserUI();
   closeModal("modal-join");
-  showToast(
-    `<i class="ph-bold ph-check"></i> Navbatga qo'shildingiz! Raqamingiz: #${num}`,
-  );
+  showToast(`<i class="ph-bold ph-check"></i> ${t("toastJoinQueueSuccess")}: #${num}`);
   setTimeout(() => showScreen("screen-myqueue"), 500);
 }
 
@@ -1706,12 +1091,12 @@ function renderMyQueue() {
     container.innerHTML = `
       <div class="empty-state" style="padding-top:80px">
         <div class="empty-icon"><i class="ph-fill ph-clipboard-text"></i></div>
-        <div class="empty-title">Faol navbat yo'q</div>
-        <div class="empty-sub">Xizmat joyini toping va navbatga qo'shiling</div>
+        <div class="empty-title">${t("myQueueNoActive")}</div>
+        <div class="empty-sub">${t("myQueueFind")}</div>
         <br>
         <button class="btn btn-primary" style="width:auto;margin:0 auto;padding:12px 32px"
                 onclick="showScreen('screen-market')">
-          Xizmat izlash →
+          ${t("myQueueSearchBtn")}
         </button>
       </div>
     `;
@@ -1726,10 +1111,10 @@ function renderMyQueue() {
     <div style="background:var(--c-info-bg);border-radius:var(--r);padding:20px;margin-bottom:12px;border:1px solid rgba(37,99,235,0.2)">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
         <span style="font-size:12px;font-weight:700;color:var(--c-info);text-transform:uppercase;letter-spacing:0.5px">
-          <i class="ph-fill ph-map-pin"></i> Sizning navbatingiz
+          <i class="ph-fill ph-map-pin"></i> ${t("myQueueYour")}
         </span>
         <span style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--c-info)">
-          <span class="live-dot" style="background:var(--c-info)"></span> Jonli
+          <span class="live-dot" style="background:var(--c-info)"></span> ${t("liveBadge")}
         </span>
       </div>
       <div style="display:flex;align-items:baseline;gap:14px">
@@ -1738,7 +1123,7 @@ function renderMyQueue() {
         </span>
         <div>
           <p style="font-size:15px;font-weight:700;color:var(--c-info)">${q.placeName}</p>
-          <p style="font-size:13px;color:var(--c-text2)">~${q.waitMin} daqiqa kutish</p>
+          <p style="font-size:13px;color:var(--c-text2)">~${q.waitMin} ${t("minutesFull")}</p>
         </div>
       </div>
     </div>
@@ -1747,16 +1132,16 @@ function renderMyQueue() {
     <div class="card" style="margin-bottom:12px">
       <div style="display:flex;gap:0">
         <div style="flex:1;text-align:center">
-          <p style="font-size:11px;color:var(--c-text2);margin-bottom:4px;font-weight:600">HOLATI</p>
-          <p style="font-size:13px;font-weight:700;color:var(--c-accent)">Navbatda</p>
+          <p style="font-size:11px;color:var(--c-text2);margin-bottom:4px;font-weight:600">${t("myQueueStatus")}</p>
+          <p style="font-size:13px;font-weight:700;color:var(--c-accent)">${t("myQueueInQueue")}</p>
         </div>
         <div style="flex:1;text-align:center;border-left:0.5px solid var(--c-border);border-right:0.5px solid var(--c-border)">
-          <p style="font-size:11px;color:var(--c-text2);margin-bottom:4px;font-weight:600">OLDINGIZDA</p>
-          <p style="font-family:var(--mono);font-size:22px;font-weight:700">${Math.max(0, q.position - 1)}</p>
+          <p style="font-size:11px;color:var(--c-text2);margin-bottom:4px;font-weight:600">${t("myQueueAhead")}</p>
+          <p style="font-family:var(--mono);font-size:22px;font-weight:700">${Math.max(0, q.position)}</p>
         </div>
         <div style="flex:1;text-align:center">
-          <p style="font-size:11px;color:var(--c-text2);margin-bottom:4px;font-weight:600">KUTISH</p>
-          <p style="font-family:var(--mono);font-size:22px;font-weight:700">${q.waitMin} daq</p>
+          <p style="font-size:11px;color:var(--c-text2);margin-bottom:4px;font-weight:600">${t("myQueueWaitLabel")}</p>
+          <p style="font-family:var(--mono);font-size:22px;font-weight:700">${q.waitMin} ${t("minutesShort")}</p>
         </div>
       </div>
     </div>
@@ -1764,10 +1149,10 @@ function renderMyQueue() {
     <!-- Amallar tugmalari -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
       <button class="btn btn-secondary" style="padding:12px;font-size:13px" onclick="openModal('modal-delay')">
-        ⏱ Kechiktirish
+        ${t("myQueueDelay")}
       </button>
       <button class="btn btn-danger" style="padding:12px;font-size:13px" onclick="leaveQueue()">
-        <i class="ph-bold ph-sign-out"></i> Navbatdan chiqish
+        <i class="ph-bold ph-sign-out"></i> ${t("myQueueLeave")}
       </button>
     </div>
 
@@ -1809,8 +1194,8 @@ function doDelay(positions) {
 
   showToast(
     isFree
-      ? `<i class="ph-bold ph-check"></i> Bepul kechiktirildi (+${positions} o'rin)`
-      : `<i class="ph-fill ph-credit-card"></i> 5,000 so'm to'landi (+${positions} o'rin)`,
+      ? `<i class="ph-bold ph-check"></i> ${t("toastDelayFree")} (+${positions} ${t("slot")})`
+      : `<i class="ph-fill ph-credit-card"></i> ${t("toastDelayPaid")} (+${positions} ${t("slot")})`,
   );
 }
 
@@ -1825,7 +1210,7 @@ function leaveQueue() {
   if (noQueue) noQueue.style.display = "block";
 
   renderMyQueue();
-  showToast("Navbatdan chiqildi");
+  showToast(t("toastLeaveQueue"));
 }
 
 /* =====================================================
@@ -1846,11 +1231,11 @@ function renderAdmin() {
   const curNextEl = document.getElementById("admin-cur-next");
 
   if (curNumEl) curNumEl.textContent = current ? `#${current.num}` : "#—";
-  if (curNameEl) curNameEl.textContent = current ? current.name : "Hech kim";
+  if (curNameEl) curNameEl.textContent = current ? current.name : t("adminNoOne");
   if (curNextEl)
     curNextEl.textContent = next
-      ? `Keyingi: ${next.name} (#${next.num})`
-      : "Navbat tugadi";
+      ? `${t("adminNextLabel")}: ${next.name} (#${next.num})`
+      : t("adminQueueEnded");
 
   /* Statistika */
   const todayEl = document.getElementById("adm-stat-today");
@@ -1865,7 +1250,7 @@ function renderAdmin() {
   if (listEl) {
     if (waiting.length === 0) {
       listEl.innerHTML =
-        '<p style="text-align:center;color:var(--c-text3);padding:16px;font-size:14px">Navbat bo\'sh</p>';
+        `<p style="text-align:center;color:var(--c-text3);padding:16px;font-size:14px">${t("emptyQueue")}</p>`;
     } else {
       listEl.innerHTML = waiting
         .map(
@@ -1874,9 +1259,9 @@ function renderAdmin() {
           <div class="q-num ${q.current ? "is-current" : ""}">#${q.num}</div>
           <div class="q-name">${q.name}</div>
           <span class="badge ${q.type === "online" ? "badge-blue" : "badge-gray"}">
-            ${q.type === "online" ? "Online" : "Offline"}
+            ${q.type === "online" ? t("statusOnline") : t("statusOffline")}
           </span>
-          ${q.current ? '<span class="badge badge-green">Hozir</span>' : ""}
+          ${q.current ? `<span class="badge badge-green">${t("statusCurrent")}</span>` : ""}
         </div>
       `,
         )
@@ -1898,12 +1283,13 @@ function adminNext() {
 
   if (nextIdx >= 0) {
     STATE.adminQueue[nextIdx].current = true;
-    showToast(
-      `<i class="ph-bold ph-play"></i> Keyingi: ${STATE.adminQueue[nextIdx].name}`,
-    );
+    if (STATE.adminPlace) STATE.adminPlace.currentNum = STATE.adminQueue[nextIdx].num;
+    showToast(`<i class="ph-bold ph-play"></i> ${t("toastAdminNext")}: ${STATE.adminQueue[nextIdx].name}`);
   } else {
-    showToast("✅ Barcha mijozlarga xizmat ko'rsatildi!");
+    showToast(t("toastAllServed"));
   }
+
+  if (STATE.adminPlace) STATE.adminPlace.queue = STATE.adminQueue.map((q) => ({ ...q }));
 
   renderAdmin();
 }
@@ -1921,7 +1307,7 @@ function openAddModal() {
 function addWalkIn() {
   const name = document.getElementById("walkin-name")?.value.trim();
   if (!name) {
-    showToast("❌ Ism kiriting");
+    showToast(t("toastNameRequired"));
     return;
   }
 
@@ -1948,18 +1334,16 @@ function addWalkIn() {
 
   closeModal("modal-add");
   renderAdmin();
-  showToast(
-    `<i class="ph-bold ph-check"></i> ${name} navbatga qo'shildi (#${STATE.adminNextNum - 1})`,
-  );
+  showToast(`<i class="ph-bold ph-check"></i> ${name} ${t("toastCustomerAdded")} (#${STATE.adminNextNum - 1})`);
 }
 
 /* Navbatni tozalash */
 function confirmReset() {
-  if (confirm("Bugungi navbatni tozalashni tasdiqlaysizmi?")) {
+  if (confirm(t("confirmClearQueue"))) {
     STATE.adminQueue = [];
     STATE.adminNextNum = 1;
     renderAdmin();
-    showToast("🔄 Navbat tozalandi");
+    showToast(t("toastQueueCleared"));
   }
 }
 
@@ -1984,7 +1368,7 @@ function renderAdminChart() {
     "18",
     "19",
   ];
-  const max = Math.max(...data);
+  const max = Math.max(...data) || 1;
   const nowH = new Date().getHours() - 8;
 
   const barsEl = document.getElementById("adm-chart-bars");
@@ -1997,7 +1381,7 @@ function renderAdminChart() {
         const cls = i === nowH ? "is-now" : v === max ? "is-peak" : "";
         return `
         <div class="chart-bar-col">
-          <div class="chart-bar ${cls}" style="height:${h}px" title="${hours[i]}:00 — ${v} kishi"></div>
+          <div class="chart-bar ${cls}" style="height:${h}px" title="${hours[i]}:00 — ${v} ${t("peopleWord")}"></div>
         </div>
       `;
       })
@@ -2028,13 +1412,13 @@ function updateDisplay() {
   const nextEl = document.getElementById("disp-next");
 
   if (numEl) numEl.textContent = current ? current.num : "—";
-  if (nameEl) nameEl.textContent = current ? current.name : "Kutilmoqda...";
+  if (nameEl) nameEl.textContent = current ? current.name : t("waiting");
   if (placeEl)
-    placeEl.textContent = STATE.adminPlace?.name || "Navbat platformasi";
+    placeEl.textContent = STATE.adminPlace?.name || t("navPlatform");
   if (nextEl)
     nextEl.textContent = next
-      ? `Keyingi: ${next.name} (#${next.num})`
-      : "Navbat tugadi";
+      ? `${t("adminNextLabel")}: ${next.name} (#${next.num})`
+      : t("adminQueueEnded");
 }
 
 /* =====================================================
@@ -2062,13 +1446,23 @@ document.querySelectorAll(".modal-overlay").forEach((overlay) => {
 /* =====================================================
    18. BILDIRISHNOMA TOAST
    ===================================================== */
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 let toastTimer = null;
 
 function showToast(msg) {
   const el = document.getElementById("toast-msg");
   if (!el) return;
 
-  el.textContent = msg;
+  el.innerHTML = msg;
   el.classList.add("show");
 
   if (toastTimer) clearTimeout(toastTimer);
@@ -2086,17 +1480,17 @@ function toggleTheme() {
 
   /* Profil sahifasidagi matnni yangilash */
   const label = document.getElementById("theme-status-label");
-  if (label) label.textContent = STATE.isDark ? "Tun rejimi ›" : "Kun rejimi ›";
+  if (label) {
+    label.textContent = STATE.isDark ? t("themeNightMode") : t("themeDayMode");
+  }
 }
 
 /* Barcha tema tugmalarini yangilash */
 function updateThemeButtons() {
-  const icon = STATE.isDark
-    ? `<i class="ph-fill ph-sun"></i>`
-    : `<i class="ph-fill ph-moon"></i>`;
+  const icon = STATE.isDark ? `<i class="ph-fill ph-sun"></i>` : `<i class="ph-fill ph-moon"></i>`;
   document.querySelectorAll(".theme-btn").forEach((btn) => {
     btn.innerHTML = icon;
-    btn.title = STATE.isDark ? "Kun rejimiga o'tish" : "Tun rejimiga o'tish";
+    btn.title = STATE.isDark ? t("themeSwitchToDay") : t("themeSwitchToNight");
   });
 }
 
