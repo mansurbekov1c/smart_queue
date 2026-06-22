@@ -384,26 +384,42 @@
     <div class="card" style="padding:12px 16px">
       <div id="detail-reviews-list"></div>
 
-      <!-- Izoh yozish formasi -->
+      <!-- Izoh yozish: tugma -->
       <div class="divider"></div>
-      <p id="ui-leave-review" style="font-size:13px;font-weight:700;margin-bottom:10px">Izoh qoldiring</p>
-
-      <!-- Yulduz baholash -->
-      <div class="star-input" id="star-input">
-        <button class="star-btn" onclick="setRating(1)">★</button>
-        <button class="star-btn" onclick="setRating(2)">★</button>
-        <button class="star-btn" onclick="setRating(3)">★</button>
-        <button class="star-btn" onclick="setRating(4)">★</button>
-        <button class="star-btn" onclick="setRating(5)">★</button>
-      </div>
-
-      <div class="form-group">
-        <textarea id="review-text-inp" rows="3"
-                  placeholder="Xizmat haqida fikringizni yozing..." id="ui-review-placeholder"></textarea>
-      </div>
-      <button class="btn btn-secondary" style="font-size:13px;padding:10px" onclick="submitReview()">
-        <span id="ui-btn-submit-review">Izoh yuborish</span>
+      <button id="btn-toggle-review" class="btn btn-secondary"
+              style="font-size:13px;padding:10px"
+              onclick="toggleReviewForm()">
+        <i class="ph-bold ph-pencil-simple-line"></i>
+        <span id="ui-btn-toggle-review">Izoh yozish</span>
       </button>
+
+      <!-- Izoh yozish formasi (boshida yashirin) -->
+      <div id="review-form" style="display:none;margin-top:14px">
+        <p id="ui-leave-review" style="font-size:13px;font-weight:700;margin-bottom:10px">Izoh qoldiring</p>
+
+        <!-- Yulduz baholash -->
+        <div class="star-input" id="star-input">
+          <button class="star-btn" onclick="setRating(1)">★</button>
+          <button class="star-btn" onclick="setRating(2)">★</button>
+          <button class="star-btn" onclick="setRating(3)">★</button>
+          <button class="star-btn" onclick="setRating(4)">★</button>
+          <button class="star-btn" onclick="setRating(5)">★</button>
+        </div>
+
+        <div class="form-group">
+          <textarea id="review-text-inp" rows="3"
+                    placeholder="Xizmat haqida fikringizni yozing..."
+                    style="resize:none;width:100%;height:96px;box-sizing:border-box"></textarea>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <button class="btn btn-secondary" style="font-size:13px;padding:10px" onclick="toggleReviewForm()">
+            <span id="ui-btn-cancel-review">Bekor qilish</span>
+          </button>
+          <button class="btn btn-primary" style="font-size:13px;padding:10px" onclick="submitReview()">
+            <span id="ui-btn-submit-review">Izoh yuborish</span>
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Navbatga qo'shilish tugmasi (pastda) -->
@@ -573,7 +589,15 @@
       <p id="ui-admin-cur-label" class="admin-cur-label">Hozirda xizmatda</p>
       <div class="admin-cur-num" id="admin-cur-num">#—</div>
       <p id="ui-admin-cur-name" class="admin-cur-name">Hech kim</p>
-      <p id="ui-admin-cur-next" class="admin-cur-next">Navbat bo'sh</p>
+
+      <!-- Keyingi mijoz: raqam + ism -->
+      <div class="admin-next-block" id="admin-next-wrap"
+           style="margin-top:14px;padding-top:14px;border-top:0.5px solid var(--c-border);display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap">
+        <span id="ui-admin-next-label" style="font-size:11px;font-weight:700;color:var(--c-text3);text-transform:uppercase;letter-spacing:0.5px">Keyingi</span>
+        <span id="admin-next-num" style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--c-accent)">#—</span>
+        <span id="admin-next-name" style="font-size:14px;font-weight:600;color:var(--c-text)">—</span>
+      </div>
+      <p id="admin-next-empty" class="admin-cur-next" style="display:none;margin-top:8px">Navbat bo'sh</p>
     </div>
 
     <!-- Asosiy tugmalar qatori -->
@@ -587,7 +611,7 @@
 
     <!-- Statistika -->
     <div class="stats-grid">
-      <div class="stat-card">
+      <div class="stat-card" onclick="openServedToday()" style="cursor:pointer">
         <div class="stat-val" id="adm-stat-today">—</div>
         <div id="ui-stat-today" class="stat-label">Bugungi mijozlar</div>
       </div>
@@ -724,6 +748,24 @@
     </div>
 
     <button class="btn btn-secondary" onclick="closeModal('modal-delay')"><span id="ui-btn-cancel-delay">Bekor qilish</span></button>
+  </div>
+</div>
+
+<!-- Modal: Bugungi xizmat ko'rsatilgan mijozlar -->
+<div class="modal-overlay hidden" id="modal-served">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <p class="modal-title">
+      <span id="ui-served-title">Bugungi mijozlar</span>
+      <span style="color:var(--c-text3);font-weight:600">(<span id="served-today-count">0</span>)</span>
+    </p>
+    <p class="modal-sub" id="ui-served-sub">Bugun xizmat ko'rsatilgan barcha mijozlar</p>
+
+    <div id="served-today-list" style="max-height:50vh;overflow-y:auto;margin-bottom:14px"></div>
+
+    <button class="btn btn-secondary" onclick="closeModal('modal-served')">
+      <span id="ui-btn-close-served">Yopish</span>
+    </button>
   </div>
 </div>
 

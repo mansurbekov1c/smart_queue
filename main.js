@@ -718,17 +718,24 @@ function loginAsAdmin(placeId) {
   STATE.adminPlace = place;
   /* Admin uchun navbat nusxasi (o'zgartirish uchun) */
   STATE.adminQueue = place.queue.map((q) => ({ ...q }));
-  
-  // Hozirgi xizmatdagi mijozni to'g'ri aniqlash
-  // Avval barcha current flaglarni olib tashlaymiz
-  STATE.adminQueue.forEach(q => q.current = false);
-  
-  // currentNum ga mos keladigan mijozni current: true qilamiz
-  const currentPerson = STATE.adminQueue.find(q => q.num === place.currentNum && !q.done);
+
+  /* Joriy xizmatdagi mijozni to'g'ri aniqlash:
+     1) Barcha current flaglarni tozalaymiz.
+     2) place.currentNum ga mos kelganni current qilamiz.
+     3) Mos kelmasa, birinchi waiting (done bo'lmagan) mijozni current qilamiz. */
+  STATE.adminQueue.forEach((q) => (q.current = false));
+
+  let currentPerson = STATE.adminQueue.find(
+    (q) => q.num === place.currentNum && !q.done,
+  );
+  if (!currentPerson) {
+    currentPerson = STATE.adminQueue.find((q) => !q.done);
+  }
   if (currentPerson) {
     currentPerson.current = true;
+    place.currentNum = currentPerson.num;
   }
-  
+
   const qNums = place.queue.map((q) => q.num);
   STATE.adminNextNum = (qNums.length > 0 ? Math.max(...qNums) : 0) + 1;
 
@@ -866,11 +873,11 @@ function openPlace(id) {
   /* Ma'lumotlarni to'ldirish */
   document.getElementById("detail-topbar-title").textContent = place.name;
   document.getElementById("detail-name").textContent = place.name;
-  document.getElementById("detail-category").textContent =
+  document.getElementById("detail-category").innerHTML =
     `${place.icon} ${catName(place.cat)}`;
-  document.getElementById("detail-rating").textContent =
+  document.getElementById("detail-rating").innerHTML =
     `<i class="ph-fill ph-star"></i> ${place.rating} (${place.reviewCount} ${t("reviews").toLowerCase()})`;
-  document.getElementById("detail-hours").textContent = `<i class="ph-fill ph-clock"></i> ${place.hours}`;
+  document.getElementById("detail-hours").innerHTML = `<i class="ph-fill ph-clock"></i> ${place.hours}`;
 
   /* Holat nishoni */
   const badge = document.getElementById("detail-status-badge");
@@ -959,6 +966,14 @@ function openPlace(id) {
   /* Yulduz inputni reset qilish */
   updateStarUI(0);
 
+  /* Izoh formasi har safar yopilgan holatda ochiladi */
+  const reviewForm = document.getElementById("review-form");
+  const reviewBtn = document.getElementById("btn-toggle-review");
+  if (reviewForm) reviewForm.style.display = "none";
+  if (reviewBtn) reviewBtn.style.display = "";
+  const reviewTa = document.getElementById("review-text-inp");
+  if (reviewTa) reviewTa.value = "";
+
   showScreen("screen-detail");
 }
 
@@ -986,6 +1001,25 @@ function updateStarUI(n) {
   document.querySelectorAll("#star-input .star-btn").forEach((btn, i) => {
     btn.classList.toggle("active", i < n);
   });
+}
+
+/* Izoh yozish formasini ochish/yopish */
+function toggleReviewForm() {
+  const form = document.getElementById("review-form");
+  const btn = document.getElementById("btn-toggle-review");
+  if (!form) return;
+  const isHidden = form.style.display === "none" || !form.style.display;
+  if (isHidden) {
+    form.style.display = "block";
+    if (btn) btn.style.display = "none";
+  } else {
+    form.style.display = "none";
+    if (btn) btn.style.display = "";
+    /* Yopilganda inputni tozalash */
+    const ta = document.getElementById("review-text-inp");
+    if (ta) ta.value = "";
+    setRating(0);
+  }
 }
 
 /* Izoh yuborish */
@@ -1019,6 +1053,11 @@ function submitReview() {
   setRating(0);
   showToast(t("toastReviewSubmitted"));
   openPlace(STATE.currentPlace.id); /* sahifani yangilash */
+  /* Izoh formasini yopib qo'yish */
+  const form = document.getElementById("review-form");
+  const btn = document.getElementById("btn-toggle-review");
+  if (form) form.style.display = "none";
+  if (btn) btn.style.display = "";
 }
 
 /* =====================================================
@@ -1043,12 +1082,21 @@ function openJoinModal() {
   const p = STATE.currentPlace;
   const num = p.queueCount + 1;
 
-  document.getElementById("modal-join-title").textContent = p.name;
-  document.getElementById("modal-join-sub").textContent =
-    `${p.location.district} · ~${p.waitMin + 2} ${t("minutesFull")} ${t("waiting").replace("...", "").toLowerCase()}`;
-  document.getElementById("modal-join-num").textContent = `#${num}`;
-  document.getElementById("modal-join-wait").textContent =
-    `${t("waitApprox")}: ~${(p.queueCount + 1) * 2} ${t("minutesFull")}`;
+  /* Modal sarlavhasi: joy nomi, ostidagi matn — manzil/kutish */
+  const titleEl = document.getElementById("ui-modal-join-title");
+  const subEl = document.getElementById("ui-modal-join-sub");
+  const numEl = document.getElementById("modal-join-num");
+  const waitEl = document.getElementById("modal-join-wait");
+
+  if (titleEl) titleEl.textContent = p.name;
+  if (subEl) {
+    subEl.textContent = `${p.location.district} · ~${p.waitMin + 2} ${t("minutesFull")}`;
+  }
+  if (numEl) numEl.textContent = `#${num}`;
+  if (waitEl) {
+    waitEl.innerHTML =
+      `<span id="ui-est-wait">${t("estWait")}</span> ~${(p.queueCount + 1) * 2} ${t("minutesFull")}`;
+  }
 
   openModal("modal-join");
 }
@@ -1221,31 +1269,48 @@ function leaveQueue() {
 function renderAdmin() {
   if (!STATE.adminPlace) return;
 
-  /* Joriy xizmatdagi kishi */
-  const current = STATE.adminQueue.find((q) => q.current);
-  const next = STATE.adminQueue.filter((q) => !q.done && !q.current)[0];
-  const waiting = STATE.adminQueue.filter((q) => !q.done);
+  /* Mijozlarni guruhlarga ajratish:
+     - current: hozirda xizmatdagi mijoz (bittagina)
+     - waiting: navbatda turganlar (current ga kirmaydi)
+     - served: bugun xizmat ko'rsatilganlar */
+  const current = STATE.adminQueue.find((q) => q.current && !q.done);
+  const waiting = STATE.adminQueue.filter((q) => !q.done && !q.current);
+  const served = STATE.adminQueue.filter((q) => q.done);
+  const next = waiting[0];
 
+  /* Joriy xizmatda — raqam va ism */
   const curNumEl = document.getElementById("admin-cur-num");
   const curNameEl = document.getElementById("admin-cur-name");
-  const curNextEl = document.getElementById("admin-cur-next");
-
   if (curNumEl) curNumEl.textContent = current ? `#${current.num}` : "#—";
   if (curNameEl) curNameEl.textContent = current ? current.name : t("adminNoOne");
-  if (curNextEl)
-    curNextEl.textContent = next
-      ? `${t("adminNextLabel")}: ${next.name} (#${next.num})`
-      : t("adminQueueEnded");
+
+  /* Keyingi mijoz — raqam va ism alohida */
+  const nextNumEl = document.getElementById("admin-next-num");
+  const nextNameEl = document.getElementById("admin-next-name");
+  const nextWrapEl = document.getElementById("admin-next-wrap");
+  const nextEmptyEl = document.getElementById("admin-next-empty");
+  if (next) {
+    if (nextWrapEl) nextWrapEl.style.display = "";
+    if (nextEmptyEl) nextEmptyEl.style.display = "none";
+    if (nextNumEl) nextNumEl.textContent = `#${next.num}`;
+    if (nextNameEl) nextNameEl.textContent = next.name;
+  } else {
+    if (nextWrapEl) nextWrapEl.style.display = "none";
+    if (nextEmptyEl) {
+      nextEmptyEl.style.display = "";
+      nextEmptyEl.textContent = t("adminQueueEnded");
+    }
+  }
 
   /* Statistika */
   const todayEl = document.getElementById("adm-stat-today");
   const waitingEl = document.getElementById("adm-stat-waiting");
   const countEl = document.getElementById("adm-q-count");
-  if (todayEl) todayEl.textContent = STATE.adminQueue.length + 10;
+  if (todayEl) todayEl.textContent = served.length;
   if (waitingEl) waitingEl.textContent = waiting.length;
   if (countEl) countEl.textContent = waiting.length;
 
-  /* Navbat ro'yxati */
+  /* Navbat ro'yxati — faqat kutayotganlar (current va done chiqarib tashlanadi) */
   const listEl = document.getElementById("admin-queue-list");
   if (listEl) {
     if (waiting.length === 0) {
@@ -1256,12 +1321,11 @@ function renderAdmin() {
         .map(
           (q) => `
         <div class="q-row">
-          <div class="q-num ${q.current ? "is-current" : ""}">#${q.num}</div>
+          <div class="q-num">#${q.num}</div>
           <div class="q-name">${q.name}</div>
           <span class="badge ${q.type === "online" ? "badge-blue" : "badge-gray"}">
             ${q.type === "online" ? t("statusOnline") : t("statusOffline")}
           </span>
-          ${q.current ? `<span class="badge badge-green">${t("statusCurrent")}</span>` : ""}
         </div>
       `,
         )
@@ -1274,13 +1338,19 @@ function renderAdmin() {
   updateDisplay();
 }
 
-/* "Keyingi" tugmasi bosilganda */
+/* "Keyingi" tugmasi bosilganda — joriy mijozni tugatish, keyingisini current qilish */
 function adminNext() {
-  const curIdx = STATE.adminQueue.findIndex((q) => q.current);
+  /* Joriy current mijozlarni done qilish va current flagini olib tashlash.
+     Bir nechta current bo'lsa ham hammasini tozalaymiz (data buzilishidan saqlanish). */
+  STATE.adminQueue.forEach((q) => {
+    if (q.current) {
+      q.done = true;
+      q.current = false;
+    }
+  });
+
+  /* Keyingi kutayotgan mijozni topib current qilish */
   const nextIdx = STATE.adminQueue.findIndex((q) => !q.done && !q.current);
-
-  if (curIdx >= 0) STATE.adminQueue[curIdx].done = true;
-
   if (nextIdx >= 0) {
     STATE.adminQueue[nextIdx].current = true;
     if (STATE.adminPlace) STATE.adminPlace.currentNum = STATE.adminQueue[nextIdx].num;
@@ -1292,6 +1362,39 @@ function adminNext() {
   if (STATE.adminPlace) STATE.adminPlace.queue = STATE.adminQueue.map((q) => ({ ...q }));
 
   renderAdmin();
+}
+
+/* Bugungi xizmat ko'rsatilgan mijozlar ro'yxatini ochish */
+function openServedToday() {
+  const served = STATE.adminQueue.filter((q) => q.done);
+
+  const listEl = document.getElementById("served-today-list");
+  const countEl = document.getElementById("served-today-count");
+  if (countEl) countEl.textContent = served.length;
+
+  if (listEl) {
+    if (served.length === 0) {
+      listEl.innerHTML =
+        `<p style="text-align:center;color:var(--c-text3);padding:20px;font-size:14px">${t("servedEmpty")}</p>`;
+    } else {
+      listEl.innerHTML = served
+        .map(
+          (q) => `
+        <div class="q-row">
+          <div class="q-num is-done">#${q.num}</div>
+          <div class="q-name">${q.name}</div>
+          <span class="badge ${q.type === "online" ? "badge-blue" : "badge-gray"}">
+            ${q.type === "online" ? t("statusOnline") : t("statusOffline")}
+          </span>
+          <span style="color:var(--c-success,#22c55e);font-size:16px;font-weight:700">✓</span>
+        </div>
+      `,
+        )
+        .join("");
+    }
+  }
+
+  openModal("modal-served");
 }
 
 /* Offline mijoz qo'shish modali */

@@ -210,7 +210,12 @@ const I18N = {
     emptyNoResults: "Natija topilmadi",
     emptySearchOther: "Boshqa so'z bilan qidiring",
     hourUnit: "soat",
-    enabledArrow: "Yoqilgan ›"
+    enabledArrow: "Yoqilgan ›",
+    btnWriteReview: "Izoh yozish",
+    servedTitle: "Bugungi mijozlar",
+    servedSub: "Bugun xizmat ko'rsatilgan barcha mijozlar",
+    servedEmpty: "Hozircha hech kim xizmat ko'rsatilmagan",
+    btnCloseServed: "Yopish"
   },
   "uz-cyrl": {
     langName: "Ўзбек (Кирилл) ›",
@@ -408,7 +413,12 @@ const I18N = {
     emptyNoResults: "Натижа топилмади",
     emptySearchOther: "Бошқа сўз билан қидиринг",
     hourUnit: "соат",
-    enabledArrow: "Ёқилган ›"
+    enabledArrow: "Ёқилган ›",
+    btnWriteReview: "Изоҳ ёзиш",
+    servedTitle: "Бугунги мижозлар",
+    servedSub: "Бугун хизмат кўрсатилган барча мижозлар",
+    servedEmpty: "Ҳозирча ҳеч ким хизмат кўрсатилмаган",
+    btnCloseServed: "Ёпиш"
   },
   "ru": {
     langName: "Русский ›",
@@ -606,7 +616,12 @@ const I18N = {
     emptyNoResults: "Результаты не найдены",
     emptySearchOther: "Попробуйте другие слова",
     hourUnit: "ч",
-    enabledArrow: "Включено ›"
+    enabledArrow: "Включено ›",
+    btnWriteReview: "Написать отзыв",
+    servedTitle: "Клиенты сегодня",
+    servedSub: "Все клиенты, обслуженные сегодня",
+    servedEmpty: "Пока никто не обслужен",
+    btnCloseServed: "Закрыть"
   },
   "en": {
     langName: "English ›",
@@ -804,7 +819,12 @@ const I18N = {
     emptyNoResults: "No results found",
     emptySearchOther: "Try a different keyword",
     hourUnit: "h",
-    enabledArrow: "Enabled ›"
+    enabledArrow: "Enabled ›",
+    btnWriteReview: "Write a review",
+    servedTitle: "Today's customers",
+    servedSub: "All customers served today",
+    servedEmpty: "No customers served yet",
+    btnCloseServed: "Close"
   }
 };
 
@@ -1005,8 +1025,15 @@ function setLang(langCode) {
   setPlaceholder("admin-pass-inp", t.passInputPlaceholder);
   setPlaceholder("walkin-name", t.walkinNamePlaceholder);
   setPlaceholder("walkin-phone", t.walkinPhonePlaceholder);
-  const reviewArea = document.getElementById("ui-review-placeholder");
-  if (reviewArea) reviewArea.placeholder = t.reviewPlaceholder;
+  setPlaceholder("review-text-inp", t.reviewPlaceholder);
+  setText("ui-btn-toggle-review", t.btnWriteReview);
+  setText("ui-btn-cancel-review", t.btnCancel);
+
+  /* Admin panel: keyingi mijoz va bugungi mijozlar modali */
+  setText("ui-admin-next-label", t.adminNextLabel);
+  setText("ui-served-title", t.servedTitle);
+  setText("ui-served-sub", t.servedSub);
+  setText("ui-btn-close-served", t.btnCloseServed);
 
   // Title attributes
   const splashThemeBtn = document.getElementById("splash-theme-btn");
