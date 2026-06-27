@@ -24,9 +24,6 @@ export default function SplashScreen({ navigation }) {
 
   return (
     <LinearGradient colors={colors.bgGradient} style={styles.fill}>
-      <View pointerEvents="none" style={[styles.blobA, { backgroundColor: colors.bgBlobA }]} />
-      <View pointerEvents="none" style={[styles.blobB, { backgroundColor: colors.bgBlobB }]} />
-
       <TouchableOpacity
         onPress={toggleTheme}
         style={[styles.themeBtn, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder }]}
@@ -90,8 +87,6 @@ export default function SplashScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   fill: { flex: 1 },
-  blobA: { position: "absolute", width: 280, height: 280, borderRadius: 140, top: -40, right: -70, opacity: 0.55 },
-  blobB: { position: "absolute", width: 240, height: 240, borderRadius: 120, bottom: 60, left: -70, opacity: 0.45 },
   themeBtn: {
     position: "absolute",
     top: 56,
@@ -102,6 +97,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
+    zIndex: 10,
   },
   center: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 30 },
   logo: {

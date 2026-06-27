@@ -29,9 +29,17 @@ export default function AdminLoginScreen({ navigation }) {
 
   return (
     <LinearGradient colors={colors.bgGradient} style={styles.fill}>
-      <HeaderBar title={t("adminLoginTitle")} onBack={() => navigation.goBack()} />
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.fill}>
-        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <HeaderBar title={t("adminLoginTitle")} onBack={() => navigation.goBack()} showThemeToggle={false} />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.fill}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+      >
+        <ScrollView
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
           <LinearGradient colors={[colors.gradientStart, colors.gradientEnd]} style={styles.logo}>
             <Ionicons name="business" size={26} color="#fff" />
           </LinearGradient>
@@ -109,7 +117,7 @@ export default function AdminLoginScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   fill: { flex: 1 },
-  content: { paddingHorizontal: 20, paddingTop: 4, paddingBottom: 50 },
+  content: { paddingHorizontal: 20, paddingTop: 4, paddingBottom: 60 },
   logo: { width: 56, height: 56, borderRadius: 18, alignItems: "center", justifyContent: "center", marginBottom: 14 },
   title: { fontSize: 21, marginBottom: 3 },
   sub: { fontSize: 13, marginBottom: 16, lineHeight: 18 },

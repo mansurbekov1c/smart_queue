@@ -24,7 +24,7 @@ export default function MyQueueScreen({ navigation }) {
   if (!myQueue) {
     return (
       <LinearGradient colors={colors.bgGradient} style={styles.fill}>
-        <HeaderBar title={t("myQueue")} showThemeToggle />
+        <HeaderBar title={t("myQueue")} showThemeToggle={false} />
         <View style={styles.emptyWrap}>
           <Ionicons name="clipboard-outline" size={46} color={colors.text3} />
           <Text style={[styles.emptyTitle, { color: colors.text, fontFamily: fonts.bold }]}>{t("myQueueNoActive")}</Text>

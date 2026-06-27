@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAppTheme } from "../context/ThemeContext";
 import { fonts } from "../theme/typography";
 
-export default function HeaderBar({ title, onBack, right, showThemeToggle = true }) {
+export default function HeaderBar({ title, onBack, right, showThemeToggle = false }) {
   const { colors, isDark, toggleTheme } = useAppTheme();
   const insets = useSafeAreaInsets();
 
