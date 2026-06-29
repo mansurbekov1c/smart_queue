@@ -6,7 +6,7 @@ import { CommonActions, useFocusEffect } from "@react-navigation/native";
 import GlassCard from "../components/GlassCard";
 import FadeInView from "../components/FadeInView";
 import LanguagePickerModal from "../modals/LanguagePickerModal";
-import ChangeCredentialsModal from "../modals/ChangeCredentialsModal";
+import AdminSettingsModal from "../modals/AdminSettingsModal";
 import { useAppTheme } from "../context/ThemeContext";
 import { useI18n } from "../context/I18nContext";
 import { useApp } from "../context/AppContext";
@@ -89,9 +89,9 @@ export default function AdminProfileScreen({ navigation }) {
             </TouchableOpacity>
 
             <TouchableOpacity onPress={() => setCredOpen(true)} style={styles.row}>
-              <Ionicons name="lock-closed" size={19} color={colors.accent} />
+              <Ionicons name="settings-outline" size={19} color={colors.accent} />
               <Text style={[styles.rowLabel, { color: colors.text, fontFamily: fonts.semibold }]}>
-                {t("changeCredentials")}
+                {t("settingsBtnLabel")}
               </Text>
               <Ionicons name="chevron-forward" size={16} color={colors.text3} />
             </TouchableOpacity>
@@ -109,7 +109,7 @@ export default function AdminProfileScreen({ navigation }) {
       </FadeInView>
 
       <LanguagePickerModal visible={langOpen} onClose={() => setLangOpen(false)} />
-      <ChangeCredentialsModal visible={credOpen} onClose={() => setCredOpen(false)} isAdmin />
+      <AdminSettingsModal visible={credOpen} onClose={() => setCredOpen(false)} />
     </LinearGradient>
   );
 }

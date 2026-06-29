@@ -16,14 +16,17 @@ import { useApp } from "../context/AppContext";
 import { fonts, radius } from "../theme/typography";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+const DELAY_OPTIONS = [1, 2, 3, 4, 5];
+
 export default function AdminPanelScreen({ navigation }) {
   const { colors } = useAppTheme();
   const { t } = useI18n();
-  const { adminPlace, adminQueue, adminNext, adminReject, adminLogout, confirmResetQueue, dailyServedCount } = useApp();
+  const { adminPlace, adminQueue, adminNext, adminReject, adminLogout, confirmResetQueue, dailyServedCount, adminRejectItem, adminDelayItem } = useApp();
   const insets = useSafeAreaInsets();
 
   const [addOpen, setAddOpen] = useState(false);
   const [servedOpen, setServedOpen] = useState(false);
+  const [expandedNum, setExpandedNum] = useState(null);
 
   const onLogout = () => {
     Alert.alert(t("confirmLogout"), t("confirmLogoutMsg"), [
@@ -105,13 +108,7 @@ export default function AdminPanelScreen({ navigation }) {
             {/* Amallar */}
             <View style={styles.actionsRow}>
               <PrimaryButton label={t("btnNext")} icon="play" onPress={adminNext} color={colors.success} style={styles.flex2} />
-              <TouchableOpacity
-                onPress={adminReject}
-                style={[styles.rejectBtn, { backgroundColor: colors.inputBg, borderColor: colors.danger }]}
-              >
-                <Ionicons name="close-circle" size={17} color={colors.danger} />
-                <Text style={[styles.rejectText, { color: colors.danger, fontFamily: fonts.bold }]}>{t("btnReject")}</Text>
-              </TouchableOpacity>
+              <PrimaryButton label={t("btnReject")} icon="close-circle" onPress={adminReject} color={colors.danger} style={styles.flex1} />
               <SecondaryButton label={t("btnAdd")} onPress={() => setAddOpen(true)} style={styles.flex1} />
             </View>
 
@@ -145,9 +142,60 @@ export default function AdminPanelScreen({ navigation }) {
               {waiting.length === 0 ? (
                 <Text style={{ color: colors.text3, textAlign: "center", padding: 16 }}>{t("emptyQueue")}</Text>
               ) : (
-                waiting.map((q, i) => (
-                  <QueueRow key={q.num} num={q.num} name={q.name} type={q.type} last={i === waiting.length - 1} />
-                ))
+                waiting.map((q, i) => {
+                  const isExpanded = expandedNum === q.num;
+                  const isLast = i === waiting.length - 1;
+                  return (
+                    <View key={q.num}>
+                      <TouchableOpacity
+                        onPress={() => setExpandedNum(isExpanded ? null : q.num)}
+                        activeOpacity={0.7}
+                      >
+                        <QueueRow num={q.num} name={q.name} type={q.type} last={isLast && !isExpanded} />
+                      </TouchableOpacity>
+                      {isExpanded && (
+                        <View
+                          style={[
+                            styles.itemActions,
+                            { borderBottomWidth: isLast ? 0 : 1, borderBottomColor: colors.border },
+                          ]}
+                        >
+                          <TouchableOpacity
+                            style={[styles.itemRejectBtn, { borderColor: colors.danger, backgroundColor: colors.inputBg }]}
+                            onPress={() => {
+                              adminRejectItem(q.num);
+                              setExpandedNum(null);
+                            }}
+                          >
+                            <Ionicons name="close-circle" size={15} color={colors.danger} />
+                            <Text style={[styles.itemActionText, { color: colors.danger, fontFamily: fonts.bold }]}>
+                              {t("btnReject")}
+                            </Text>
+                          </TouchableOpacity>
+                          <View style={styles.delayBtns}>
+                            {DELAY_OPTIONS.map((n) => (
+                              <TouchableOpacity
+                                key={n}
+                                style={[
+                                  styles.delayBtn,
+                                  { borderColor: colors.inputBorder, backgroundColor: colors.inputBg },
+                                ]}
+                                onPress={() => {
+                                  adminDelayItem(q.num, n);
+                                  setExpandedNum(null);
+                                }}
+                              >
+                                <Text style={[styles.delayBtnText, { color: colors.accent, fontFamily: fonts.bold }]}>
+                                  +{n}
+                                </Text>
+                              </TouchableOpacity>
+                            ))}
+                          </View>
+                        </View>
+                      )}
+                    </View>
+                  );
+                })
               )}
             </GlassCard>
           </ScrollView>
@@ -197,18 +245,28 @@ const styles = StyleSheet.create({
   actionsRow: { flexDirection: "row", gap: 8, marginBottom: 14 },
   flex1: { flex: 1 },
   flex2: { flex: 2 },
-  rejectBtn: {
-    flex: 1,
+  statsRow: { flexDirection: "row", gap: 12, marginBottom: 16 },
+  itemActions: { paddingBottom: 10, paddingTop: 6, paddingHorizontal: 4, gap: 8 },
+  itemRejectBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 5,
-    paddingVertical: 14,
+    paddingVertical: 8,
     borderRadius: radius.md,
-    borderWidth: 1.5,
+    borderWidth: 1,
   },
-  rejectText: { fontSize: 12.5 },
-  statsRow: { flexDirection: "row", gap: 12, marginBottom: 16 },
+  itemActionText: { fontSize: 13 },
+  delayBtns: { flexDirection: "row", gap: 6 },
+  delayBtn: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 8,
+    borderRadius: radius.sm || 8,
+    borderWidth: 1,
+  },
+  delayBtnText: { fontSize: 13 },
   statBox: { flex: 1, padding: 0 },
   statInner: { padding: 15, alignItems: "center" },
   statVal: { fontSize: 24 },

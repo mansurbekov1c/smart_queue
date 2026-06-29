@@ -9,6 +9,7 @@ import FadeInView from "../components/FadeInView";
 import LanguagePickerModal from "../modals/LanguagePickerModal";
 import PaymentCardModal from "../modals/PaymentCardModal";
 import SettingsModal from "../modals/SettingsModal";
+import FavoritesModal from "../modals/FavoritesModal";
 import { useAppTheme } from "../context/ThemeContext";
 import { useI18n } from "../context/I18nContext";
 import { useApp } from "../context/AppContext";
@@ -17,15 +18,19 @@ import { fonts, radius } from "../theme/typography";
 export default function ProfileScreen({ navigation }) {
   const { colors, isDark, toggleTheme } = useAppTheme();
   const { t, lang, langName } = useI18n();
-  const { user, logoutUser } = useApp();
+  const { user, logoutUser, likedPlaces, openPlace } = useApp();
 
   const [notifEnabled, setNotifEnabled] = useState(true);
   const [langOpen, setLangOpen] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [favOpen, setFavOpen] = useState(false);
 
   const fullName = user ? `${user.first} ${user.last}` : "—";
   const initials = user ? `${(user.first[0] || "").toUpperCase()}${(user.last[0] || "").toUpperCase()}` : "—";
+  const displayPhone = user?.phone
+    ? user.phone.startsWith("+") ? user.phone : "+" + user.phone
+    : "—";
 
   const onLogout = () => {
     Alert.alert(t("confirmLogout"), t("confirmLogoutMsg"), [
@@ -59,11 +64,7 @@ export default function ProfileScreen({ navigation }) {
           <TouchableOpacity style={styles.avatarWrap} onPress={() => setSettingsOpen(true)} activeOpacity={0.7}>
             <Avatar initials={initials} />
             <Text style={[styles.name, { color: colors.text, fontFamily: fonts.extrabold }]}>{fullName}</Text>
-            <View style={styles.editHint}>
-              <Ionicons name="pencil" size={12} color={colors.text3} />
-              <Text style={[styles.editHintText, { color: colors.text3 }]}>{t("editName")}</Text>
-            </View>
-            <Text style={[styles.phone, { color: colors.text2 }]}>{user?.phone || "—"}</Text>
+            <Text style={[styles.phone, { color: colors.text2 }]}>{displayPhone}</Text>
           </TouchableOpacity>
 
           <View style={styles.statsRow}>
@@ -122,6 +123,17 @@ export default function ProfileScreen({ navigation }) {
               <Text style={[styles.settingValue, { color: colors.text3 }]}>{t("configure")} ›</Text>
             </TouchableOpacity>
 
+            <TouchableOpacity
+              onPress={() => setFavOpen(true)}
+              style={[styles.settingRow, { borderBottomWidth: 1, borderBottomColor: colors.border }]}
+            >
+              <Ionicons name="heart" size={19} color="#ef4444" />
+              <Text style={[styles.settingLabel, { color: colors.text, fontFamily: fonts.semibold }]}>
+                {t("myFavorites")}
+              </Text>
+              <Text style={[styles.settingValue, { color: colors.text3 }]}>{likedPlaces.length} ›</Text>
+            </TouchableOpacity>
+
             <TouchableOpacity onPress={() => setSettingsOpen(true)} style={styles.settingRow}>
               <Ionicons name="settings-outline" size={19} color={colors.accent} />
               <Text style={[styles.settingLabel, { color: colors.text, fontFamily: fonts.semibold }]}>
@@ -145,6 +157,14 @@ export default function ProfileScreen({ navigation }) {
       <LanguagePickerModal visible={langOpen} onClose={() => setLangOpen(false)} />
       <PaymentCardModal visible={payOpen} onClose={() => setPayOpen(false)} />
       <SettingsModal visible={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <FavoritesModal
+        visible={favOpen}
+        onClose={() => setFavOpen(false)}
+        onSelectPlace={(id) => {
+          openPlace(id);
+          navigation.navigate("PlaceDetail", { placeId: id });
+        }}
+      />
     </LinearGradient>
   );
 }
@@ -154,9 +174,7 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 16, paddingTop: 60, paddingBottom: 120 },
   avatarWrap: { alignItems: "center", paddingVertical: 16, marginBottom: 6 },
   name: { fontSize: 21, marginTop: 12 },
-  editHint: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 4 },
-  editHintText: { fontSize: 12 },
-  phone: { fontSize: 14, marginTop: 3 },
+  phone: { fontSize: 14, marginTop: 6 },
   statsRow: { flexDirection: "row", gap: 12, marginBottom: 14 },
   statBox: { flex: 1, alignItems: "center" },
   statVal: { fontSize: 26 },

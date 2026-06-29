@@ -1,5 +1,5 @@
-import React, { useRef, useState } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import HeaderBar from "../components/HeaderBar";
@@ -30,8 +30,15 @@ export default function AdminLoginScreen({ navigation }) {
   const scrollToBottom = () => {
     setTimeout(() => {
       scrollRef.current?.scrollToEnd({ animated: true });
-    }, 150);
+    }, 350);
   };
+
+  useEffect(() => {
+    const sub = Keyboard.addListener("keyboardDidShow", () => {
+      setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
+    });
+    return () => sub.remove();
+  }, []);
 
   const onSubmit = () => {
     if (doAdminLogin(login, pass)) {
@@ -43,9 +50,9 @@ export default function AdminLoginScreen({ navigation }) {
     <LinearGradient colors={colors.bgGradient} style={styles.fill}>
       <HeaderBar title={t("adminLoginTitle")} onBack={() => navigation.goBack()} showThemeToggle={false} />
       <KeyboardAvoidingView
-        behavior="padding"
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.fill}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 30}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 60}
       >
         <ScrollView
           ref={scrollRef}

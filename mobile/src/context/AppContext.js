@@ -5,6 +5,23 @@ import { USERS } from "../data/users";
 import { useI18n } from "./I18nContext";
 import { useToast } from "./ToastContext";
 
+const TEST_ADMIN_QUEUE = {
+  1: [
+    { num: 1, name: "Alisher Hasanov", type: "online", done: false, current: true },
+    { num: 2, name: "Barno Toshmatova", type: "offline", done: false, current: false },
+    { num: 3, name: "Dilshod Qodirov", type: "online", done: false, current: false },
+    { num: 4, name: "Gulnora Nazarova", type: "online", done: false, current: false },
+    { num: 5, name: "Hamza Yusupov", type: "offline", done: false, current: false },
+  ],
+  2: [
+    { num: 1, name: "Iroda Rahimova", type: "online", done: false, current: true },
+    { num: 2, name: "Jasur Fattoyev", type: "offline", done: false, current: false },
+    { num: 3, name: "Komiljon Sobirov", type: "online", done: false, current: false },
+    { num: 4, name: "Laylo Azimova", type: "online", done: false, current: false },
+    { num: 5, name: "Mirzo Tursunov", type: "offline", done: false, current: false },
+  ],
+};
+
 const AppCtx = createContext(null);
 
 export function AppProvider({ children }) {
@@ -122,9 +139,10 @@ export function AppProvider({ children }) {
       const place = places.find((p) => p.id === placeId);
       if (!place) return;
 
+      const initialQueue = TEST_ADMIN_QUEUE[placeId] || [];
       setAdminPlaceId(placeId);
-      setAdminQueue([]);
-      setAdminNextNum(1);
+      setAdminQueue(initialQueue);
+      setAdminNextNum(initialQueue.length + 1);
       setPlaces((prev) => prev.map((p) => (p.id === placeId ? { ...p, currentNum: 0, queue: [] } : p)));
 
       showToast(`${place.name} — ${t("toastAdminLoginSuccess")}`);
@@ -358,6 +376,50 @@ export function AppProvider({ children }) {
     showToast(t("toastQueueCleared"));
   }, [showToast, t]);
 
+  const adminRejectItem = useCallback(
+    (num) => {
+      setAdminQueue((prev) => prev.map((q) => (q.num === num ? { ...q, rejected: true, current: false } : q)));
+      showToast(`#${num} ${t("toastAdminReject")}`);
+    },
+    [showToast, t],
+  );
+
+  const adminDelayItem = useCallback(
+    (num, positions) => {
+      setAdminQueue((prev) => {
+        const waiting = prev.filter((q) => !q.done && !q.rejected && !q.current);
+        const idx = waiting.findIndex((q) => q.num === num);
+        if (idx === -1) return prev;
+        const item = waiting[idx];
+        const rest = [...waiting.slice(0, idx), ...waiting.slice(idx + 1)];
+        const insertAt = Math.min(idx + positions, rest.length);
+        rest.splice(insertAt, 0, item);
+        const others = prev.filter((q) => q.done || q.rejected || q.current);
+        return [...others, ...rest];
+      });
+      showToast(`#${num} +${positions} ${t("slot")} kechiktirildi`);
+    },
+    [showToast, t],
+  );
+
+  const verifyAdminPass = useCallback(
+    (pass) => {
+      const cred = ADMINS.find((a) => a.placeId === adminPlaceId);
+      return cred?.parol === pass;
+    },
+    [adminPlaceId],
+  );
+
+  const verifyUserPass = useCallback(
+    (pass) => {
+      if (!user) return false;
+      const normalized = user.phone.replace(/\D/g, "");
+      const found = registeredUsers.find((u) => u.phone.replace(/\D/g, "") === normalized);
+      return found?.pass === pass;
+    },
+    [user, registeredUsers],
+  );
+
   const value = useMemo(
     () => ({
       places,
@@ -406,6 +468,10 @@ export function AppProvider({ children }) {
       adminReject,
       addWalkIn,
       confirmResetQueue,
+      adminRejectItem,
+      adminDelayItem,
+      verifyAdminPass,
+      verifyUserPass,
       toggleLike,
     }),
     [
@@ -453,6 +519,10 @@ export function AppProvider({ children }) {
       adminReject,
       addWalkIn,
       confirmResetQueue,
+      adminRejectItem,
+      adminDelayItem,
+      verifyAdminPass,
+      verifyUserPass,
       toggleLike,
     ],
   );
