@@ -22,7 +22,7 @@ const CATS = [
 ];
 
 export default function HomeScreen({ navigation }) {
-  const { colors, isDark, toggleTheme } = useAppTheme();
+  const { colors } = useAppTheme();
   const { t } = useI18n();
   const { places, homeFilter, setHomeFilter, user, myQueue } = useApp();
   const insets = useSafeAreaInsets();
@@ -44,12 +44,6 @@ export default function HomeScreen({ navigation }) {
               <Ionicons name="flash" size={19} color={colors.accent} />
               <Text style={[styles.brandText, { color: colors.text, fontFamily: fonts.extrabold }]}>Navbat</Text>
             </View>
-            <TouchableOpacity
-              onPress={toggleTheme}
-              style={[styles.themeBtn, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder }]}
-            >
-              <Ionicons name={isDark ? "sunny" : "moon"} size={17} color={isDark ? "#ffd34d" : colors.text} />
-            </TouchableOpacity>
           </View>
 
           <LinearGradient colors={[colors.gradientStart, colors.gradientMid, colors.gradientEnd]} style={styles.hero}>
@@ -123,10 +117,9 @@ export default function HomeScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   fill: { flex: 1 },
-  topBar: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, marginBottom: 12 },
+  topBar: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, marginBottom: 12 },
   brand: { flexDirection: "row", alignItems: "center", gap: 7 },
   brandText: { fontSize: 16 },
-  themeBtn: { width: 38, height: 38, borderRadius: 13, borderWidth: 1, alignItems: "center", justifyContent: "center" },
   hero: { marginHorizontal: 16, borderRadius: radius.xl, padding: 18, marginBottom: 14 },
   heroGreeting: { color: "rgba(255,255,255,0.85)", fontSize: 13.5 },
   heroName: { color: "#fff", fontSize: 21, marginTop: 2, marginBottom: 14 },

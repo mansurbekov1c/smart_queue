@@ -18,7 +18,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 export default function AdminPanelScreen({ navigation }) {
   const { colors } = useAppTheme();
   const { t } = useI18n();
-  const { adminPlace, adminQueue, adminNext, confirmResetQueue } = useApp();
+  const { adminPlace, adminQueue, adminNext, confirmResetQueue, dailyServedCount, weeklyServed, monthlyServed, yearlyServed } = useApp();
   const insets = useSafeAreaInsets();
 
   const [addOpen, setAddOpen] = useState(false);
@@ -94,11 +94,11 @@ export default function AdminPanelScreen({ navigation }) {
               <SecondaryButton label={t("btnAdd")} onPress={() => setAddOpen(true)} style={styles.flex1} />
             </View>
 
-            {/* Statistika */}
+            {/* Bugungi / kutayotganlar */}
             <View style={styles.statsRow}>
               <GlassCard style={styles.statBox}>
                 <TouchableOpacity onPress={() => setServedOpen(true)} style={styles.statInner}>
-                  <Text style={[styles.statVal, { color: colors.accent, fontFamily: fonts.mono }]}>{served.length}</Text>
+                  <Text style={[styles.statVal, { color: colors.accent, fontFamily: fonts.mono }]}>{dailyServedCount}</Text>
                   <Text style={[styles.statLbl, { color: colors.text3 }]}>{t("statToday")}</Text>
                 </TouchableOpacity>
               </GlassCard>
@@ -109,6 +109,32 @@ export default function AdminPanelScreen({ navigation }) {
                 </View>
               </GlassCard>
             </View>
+
+            {/* Statistika */}
+            <Text style={[styles.chartTitle, { color: colors.text, fontFamily: fonts.extrabold }]}>{t("statsTitle")}</Text>
+            <GlassCard style={styles.statsDetailCard}>
+              <View style={styles.statsDetailRow}>
+                <View style={styles.statsDetailItem}>
+                  <Text style={[styles.statsDetailVal, { color: colors.accent, fontFamily: fonts.mono }]}>{dailyServedCount}</Text>
+                  <Text style={[styles.statsDetailLbl, { color: colors.text3 }]}>{t("statsDaily")}</Text>
+                </View>
+                <View style={[styles.statsDivider, { backgroundColor: colors.border }]} />
+                <View style={styles.statsDetailItem}>
+                  <Text style={[styles.statsDetailVal, { color: colors.accent, fontFamily: fonts.mono }]}>{weeklyServed}</Text>
+                  <Text style={[styles.statsDetailLbl, { color: colors.text3 }]}>{t("statsWeekly")}</Text>
+                </View>
+                <View style={[styles.statsDivider, { backgroundColor: colors.border }]} />
+                <View style={styles.statsDetailItem}>
+                  <Text style={[styles.statsDetailVal, { color: colors.accent, fontFamily: fonts.mono }]}>{monthlyServed}</Text>
+                  <Text style={[styles.statsDetailLbl, { color: colors.text3 }]}>{t("statsMonthly")}</Text>
+                </View>
+                <View style={[styles.statsDivider, { backgroundColor: colors.border }]} />
+                <View style={styles.statsDetailItem}>
+                  <Text style={[styles.statsDetailVal, { color: colors.accent, fontFamily: fonts.mono }]}>{yearlyServed}</Text>
+                  <Text style={[styles.statsDetailLbl, { color: colors.text3 }]}>{t("statsYearly")}</Text>
+                </View>
+              </View>
+            </GlassCard>
 
             {/* Navbat ro'yxati */}
             <View style={styles.sectionHead}>
@@ -206,6 +232,12 @@ const styles = StyleSheet.create({
   statInner: { padding: 15, alignItems: "center" },
   statVal: { fontSize: 24 },
   statLbl: { fontSize: 11.5, marginTop: 2, textAlign: "center" },
+  statsDetailCard: { marginBottom: 18 },
+  statsDetailRow: { flexDirection: "row", alignItems: "center" },
+  statsDetailItem: { flex: 1, alignItems: "center", paddingVertical: 14 },
+  statsDetailVal: { fontSize: 20 },
+  statsDetailLbl: { fontSize: 10.5, marginTop: 3, textAlign: "center" },
+  statsDivider: { width: 1, height: 40 },
   sectionHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10 },
   sectionTitle: { fontSize: 15 },
   clearLink: { fontSize: 13 },

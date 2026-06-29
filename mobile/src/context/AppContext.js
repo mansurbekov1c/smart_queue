@@ -1,12 +1,11 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
 import { PLACES } from "../data/places";
 import { ADMINS } from "../data/admins";
+import { USERS } from "../data/users";
 import { useI18n } from "./I18nContext";
 import { useToast } from "./ToastContext";
 
 const AppCtx = createContext(null);
-
-const DEFAULT_PHONE = "+998 90 123 45 67";
 
 export function AppProvider({ children }) {
   const { t } = useI18n();
@@ -15,6 +14,7 @@ export function AppProvider({ children }) {
   const [places, setPlaces] = useState(PLACES);
   const [role, setRole] = useState("customer");
   const [user, setUser] = useState(null);
+  const [registeredUsers, setRegisteredUsers] = useState(USERS);
   const [currentPlaceId, setCurrentPlaceId] = useState(null);
   const [myQueue, setMyQueue] = useState(null);
   const [delaysUsed, setDelaysUsed] = useState(0);
@@ -25,6 +25,7 @@ export function AppProvider({ children }) {
   const [adminPlaceId, setAdminPlaceId] = useState(null);
   const [adminQueue, setAdminQueue] = useState([]);
   const [adminNextNum, setAdminNextNum] = useState(1);
+  const [likedPlaceIds, setLikedPlaceIds] = useState([]);
 
   const currentPlace = useMemo(() => places.find((p) => p.id === currentPlaceId) || null, [places, currentPlaceId]);
   const adminPlace = useMemo(() => places.find((p) => p.id === adminPlaceId) || null, [places, adminPlaceId]);
@@ -33,28 +34,66 @@ export function AppProvider({ children }) {
     [places, selectedAdminPlaceId],
   );
 
+  const likedPlaces = useMemo(() => places.filter((p) => likedPlaceIds.includes(p.id)), [places, likedPlaceIds]);
+
+  const dailyServedCount = useMemo(() => {
+    const servedToday = adminQueue.filter((q) => q.done).length;
+    return servedToday;
+  }, [adminQueue]);
+
+  const weeklyServed = useMemo(() => dailyServedCount + 38, [dailyServedCount]);
+  const monthlyServed = useMemo(() => dailyServedCount + 162, [dailyServedCount]);
+  const yearlyServed = useMemo(() => dailyServedCount + 1986, [dailyServedCount]);
+
   /* ---------- Auth ---------- */
   const selectRole = useCallback((r) => setRole(r), []);
 
   const doLogin = useCallback(
-    (phone) => {
-      setUser({ first: "Ali", last: "Valiyev", phone: phone || DEFAULT_PHONE, isAdmin: false });
+    (phone, pass) => {
+      const normalized = phone.replace(/\D/g, "");
+      const found = registeredUsers.find((u) => u.phone.replace(/\D/g, "") === normalized);
+      if (!found) {
+        showToast(t("toastLoginNotFound"));
+        return false;
+      }
+      if (found.pass !== pass) {
+        showToast(t("toastLoginWrongPass"));
+        return false;
+      }
+      setUser({ first: found.first, last: found.last, phone: phone, isAdmin: false });
       showToast(t("toastLoginWelcome"));
+      return true;
     },
-    [showToast, t],
+    [registeredUsers, showToast, t],
   );
 
   const doRegister = useCallback(
-    (first, last, phone) => {
+    (first, last, phone, pass) => {
       if (!first?.trim() || !last?.trim()) {
         showToast(t("toastRegisterNameRequired"));
         return false;
       }
-      setUser({ first: first.trim(), last: last.trim(), phone: phone?.trim() || DEFAULT_PHONE, isAdmin: false });
+      if (!phone?.trim()) {
+        showToast(t("toastPhoneEmpty"));
+        return false;
+      }
+      if (!pass || pass.length < 4) {
+        showToast(t("toastPassTooShort"));
+        return false;
+      }
+      const normalized = phone.replace(/\D/g, "");
+      const exists = registeredUsers.find((u) => u.phone.replace(/\D/g, "") === normalized);
+      if (exists) {
+        showToast(t("toastPhoneExists"));
+        return false;
+      }
+      const newUser = { id: Date.now(), phone: normalized, pass, first: first.trim(), last: last.trim() };
+      setRegisteredUsers((prev) => [...prev, newUser]);
+      setUser({ first: first.trim(), last: last.trim(), phone: phone.trim(), isAdmin: false });
       showToast(t("toastRegisterSuccess"));
       return true;
     },
-    [showToast, t],
+    [registeredUsers, showToast, t],
   );
 
   const logoutUser = useCallback(() => {
@@ -97,7 +136,8 @@ export function AppProvider({ children }) {
       loginAsAdmin(1);
       return;
     }
-    setUser({ first: "Ali", last: "Valiyev", phone: DEFAULT_PHONE, isAdmin: false });
+    const demoUser = USERS[0];
+    setUser({ first: demoUser.first, last: demoUser.last, phone: demoUser.phone, isAdmin: false });
     setMyQueue(null);
     showToast(t("toastDemoLogin"));
   }, [role, showToast, t, loginAsAdmin]);
@@ -127,6 +167,13 @@ export function AppProvider({ children }) {
     showToast(t("toastAdminLogout"));
   }, [showToast, t]);
 
+  /* ---------- Like ---------- */
+  const toggleLike = useCallback((placeId) => {
+    setLikedPlaceIds((prev) =>
+      prev.includes(placeId) ? prev.filter((id) => id !== placeId) : [...prev, placeId],
+    );
+  }, []);
+
   /* ---------- Joylar / qidiruv ---------- */
   const openPlace = useCallback((placeId) => {
     setCurrentPlaceId(placeId);
@@ -150,14 +197,16 @@ export function AppProvider({ children }) {
 
   const joinPreview = useMemo(() => {
     if (!currentPlace) return null;
-    const num = currentPlace.queueCount + 1;
-    return { num, waitMin: (currentPlace.queueCount + 1) * 2 };
+    const maxNum = currentPlace.queue.length > 0 ? Math.max(...currentPlace.queue.map((q) => q.num)) : 0;
+    const num = maxNum + 1;
+    return { num, waitMin: currentPlace.queueCount * 2 };
   }, [currentPlace]);
 
   const confirmJoin = useCallback(() => {
     if (!currentPlace || !user) return;
     const place = currentPlace;
-    const num = place.queueCount + 1;
+    const maxNum = place.queue.length > 0 ? Math.max(...place.queue.map((q) => q.num)) : 0;
+    const num = maxNum + 1;
 
     setMyQueue({
       placeId: place.id,
@@ -290,6 +339,7 @@ export function AppProvider({ children }) {
       places,
       role,
       user,
+      registeredUsers,
       currentPlace,
       myQueue,
       delaysUsed,
@@ -302,6 +352,12 @@ export function AppProvider({ children }) {
       adminQueue,
       adminNextNum,
       joinPreview,
+      likedPlaceIds,
+      likedPlaces,
+      dailyServedCount,
+      weeklyServed,
+      monthlyServed,
+      yearlyServed,
       setHomeFilter,
       setMarketFilter,
       selectRole,
@@ -322,11 +378,13 @@ export function AppProvider({ children }) {
       adminNext,
       addWalkIn,
       confirmResetQueue,
+      toggleLike,
     }),
     [
       places,
       role,
       user,
+      registeredUsers,
       currentPlace,
       myQueue,
       delaysUsed,
@@ -339,6 +397,12 @@ export function AppProvider({ children }) {
       adminQueue,
       adminNextNum,
       joinPreview,
+      likedPlaceIds,
+      likedPlaces,
+      dailyServedCount,
+      weeklyServed,
+      monthlyServed,
+      yearlyServed,
       selectRole,
       doLogin,
       doRegister,
@@ -357,6 +421,7 @@ export function AppProvider({ children }) {
       adminNext,
       addWalkIn,
       confirmResetQueue,
+      toggleLike,
     ],
   );
 

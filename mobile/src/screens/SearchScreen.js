@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -23,7 +23,7 @@ const CATS = [
 export default function SearchScreen({ navigation }) {
   const { colors } = useAppTheme();
   const { t } = useI18n();
-  const { places, marketFilter, setMarketFilter } = useApp();
+  const { places, marketFilter, setMarketFilter, likedPlaces } = useApp();
   const insets = useSafeAreaInsets();
   const [query, setQuery] = useState("");
 
@@ -47,6 +47,33 @@ export default function SearchScreen({ navigation }) {
       <ScrollView contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 120 }} keyboardShouldPersistTaps="handled">
         <Text style={[styles.title, { color: colors.text, fontFamily: fonts.extrabold }]}>{t("services")}</Text>
 
+        {/* Men yoqtirganlar */}
+        <View style={styles.favSection}>
+          <View style={styles.favHeader}>
+            <Ionicons name="heart" size={16} color={colors.danger} />
+            <Text style={[styles.favTitle, { color: colors.text, fontFamily: fonts.extrabold }]}>
+              {t("myFavorites")}
+            </Text>
+          </View>
+
+          {likedPlaces.length === 0 ? (
+            <View style={[styles.favEmpty, { backgroundColor: colors.glassBg, borderColor: colors.glassBorder }]}>
+              <Ionicons name="heart-outline" size={26} color={colors.text3} />
+              <Text style={[styles.favEmptyTitle, { color: colors.text2, fontFamily: fonts.bold }]}>
+                {t("noFavorites")}
+              </Text>
+              <Text style={[styles.favEmptySub, { color: colors.text3 }]}>{t("noFavoritesSub")}</Text>
+            </View>
+          ) : (
+            <View style={styles.favList}>
+              {likedPlaces.map((p) => (
+                <PlaceCard key={p.id} place={p} onPress={() => navigation.navigate("PlaceDetail", { placeId: p.id })} />
+              ))}
+            </View>
+          )}
+        </View>
+
+        {/* Qidiruv */}
         <View style={[styles.searchBox, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder }]}>
           <Ionicons name="search" size={17} color={colors.text3} />
           <TextInput
@@ -91,6 +118,20 @@ export default function SearchScreen({ navigation }) {
 const styles = StyleSheet.create({
   fill: { flex: 1 },
   title: { fontSize: 21, paddingHorizontal: 16, marginBottom: 14 },
+  favSection: { paddingHorizontal: 16, marginBottom: 18 },
+  favHeader: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 10 },
+  favTitle: { fontSize: 16 },
+  favEmpty: {
+    alignItems: "center",
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    gap: 6,
+  },
+  favEmptyTitle: { fontSize: 14, marginTop: 4 },
+  favEmptySub: { fontSize: 12, textAlign: "center" },
+  favList: {},
   searchBox: {
     flexDirection: "row",
     alignItems: "center",

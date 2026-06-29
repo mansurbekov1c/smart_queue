@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -18,8 +18,16 @@ export default function AdminLoginScreen({ navigation }) {
 
   const [login, setLogin] = useState("");
   const [pass, setPass] = useState("");
+  const scrollRef = useRef(null);
 
   const selectedPlace = places.find((p) => p.id === selectedAdminPlaceId);
+
+  const onSelectPlace = (id) => {
+    selectAdminPlace(id);
+    setTimeout(() => {
+      scrollRef.current?.scrollToEnd({ animated: true });
+    }, 150);
+  };
 
   const onSubmit = () => {
     if (doAdminLogin(login, pass)) {
@@ -31,11 +39,12 @@ export default function AdminLoginScreen({ navigation }) {
     <LinearGradient colors={colors.bgGradient} style={styles.fill}>
       <HeaderBar title={t("adminLoginTitle")} onBack={() => navigation.goBack()} showThemeToggle={false} />
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior="padding"
         style={styles.fill}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 30}
       >
         <ScrollView
+          ref={scrollRef}
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
@@ -54,7 +63,7 @@ export default function AdminLoginScreen({ navigation }) {
             return (
               <TouchableOpacity
                 key={p.id}
-                onPress={() => selectAdminPlace(p.id)}
+                onPress={() => onSelectPlace(p.id)}
                 style={[
                   styles.placeRow,
                   {
@@ -81,34 +90,37 @@ export default function AdminLoginScreen({ navigation }) {
           })}
 
           {selectedPlace ? (
-            <View style={[styles.selectedBox, { backgroundColor: colors.accentSoft, borderColor: colors.accentBorder }]}>
-              <Text style={[styles.selectedLabel, { color: colors.accent, fontFamily: fonts.bold }]}>
-                {t("selectedPlace").toUpperCase()}
-              </Text>
-              <Text style={[styles.selectedName, { color: colors.accent, fontFamily: fonts.extrabold }]}>
-                {selectedPlace.name}
-              </Text>
-            </View>
+            <>
+              <View style={[styles.selectedBox, { backgroundColor: colors.accentSoft, borderColor: colors.accentBorder }]}>
+                <Text style={[styles.selectedLabel, { color: colors.accent, fontFamily: fonts.bold }]}>
+                  {t("selectedPlace").toUpperCase()}
+                </Text>
+                <Text style={[styles.selectedName, { color: colors.accent, fontFamily: fonts.extrabold }]}>
+                  {selectedPlace.name}
+                </Text>
+              </View>
+
+              <InputField
+                label={t("labelLogin")}
+                placeholder={t("loginInputPlaceholder")}
+                value={login}
+                onChangeText={setLogin}
+                autoCapitalize="none"
+                style={styles.field}
+              />
+              <InputField
+                label={t("labelPass")}
+                placeholder={t("passInputPlaceholder")}
+                value={pass}
+                onChangeText={setPass}
+                secureTextEntry
+                autoCapitalize="none"
+                style={styles.field}
+              />
+
+              <PrimaryButton label={t("btnAdminLogin")} onPress={onSubmit} style={styles.submitBtn} />
+            </>
           ) : null}
-
-          <InputField
-            label={t("labelLogin")}
-            placeholder={t("loginInputPlaceholder")}
-            value={login}
-            onChangeText={setLogin}
-            autoCapitalize="none"
-            style={styles.field}
-          />
-          <InputField
-            label={t("labelPass")}
-            placeholder={t("passInputPlaceholder")}
-            value={pass}
-            onChangeText={setPass}
-            secureTextEntry
-            style={styles.field}
-          />
-
-          <PrimaryButton label={t("btnAdminLogin")} onPress={onSubmit} style={styles.submitBtn} />
         </ScrollView>
       </KeyboardAvoidingView>
     </LinearGradient>
@@ -127,7 +139,7 @@ const styles = StyleSheet.create({
   placeInfo: { flex: 1 },
   placeName: { fontSize: 14.5 },
   placeCity: { fontSize: 12, marginTop: 1 },
-  selectedBox: { borderRadius: radius.md, borderWidth: 1, padding: 12, alignItems: "center", marginVertical: 16 },
+  selectedBox: { borderRadius: radius.md, borderWidth: 1, padding: 12, alignItems: "center", marginBottom: 16, marginTop: 6 },
   selectedLabel: { fontSize: 10.5, letterSpacing: 0.5 },
   selectedName: { fontSize: 18, marginTop: 4 },
   field: { marginBottom: 14 },

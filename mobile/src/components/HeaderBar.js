@@ -19,7 +19,7 @@ export default function HeaderBar({ title, onBack, right, showThemeToggle = fals
           <Ionicons name="chevron-back" size={19} color={colors.text} />
         </TouchableOpacity>
       ) : (
-        <View style={styles.iconBtn} />
+        <View style={styles.placeholder} />
       )}
 
       {title ? <Text style={[styles.title, { color: colors.text, fontFamily: fonts.bold }]}>{title}</Text> : <View />}
@@ -34,7 +34,7 @@ export default function HeaderBar({ title, onBack, right, showThemeToggle = fals
           <Ionicons name={isDark ? "sunny" : "moon"} size={18} color={isDark ? "#ffd34d" : colors.text} />
         </TouchableOpacity>
       ) : (
-        <View style={styles.iconBtn} />
+        <View style={styles.placeholder} />
       )}
     </View>
   );
@@ -56,5 +56,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  placeholder: { width: 38, height: 38 },
   title: { fontSize: 16 },
 });

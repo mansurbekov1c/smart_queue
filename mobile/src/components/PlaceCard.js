@@ -3,13 +3,16 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAppTheme } from "../context/ThemeContext";
 import { useI18n } from "../context/I18nContext";
+import { useApp } from "../context/AppContext";
 import { CAT_ICONS } from "../data/categoryIcons";
 import { fonts, radius } from "../theme/typography";
 
 export default function PlaceCard({ place, onPress }) {
   const { colors } = useAppTheme();
   const { t } = useI18n();
+  const { likedPlaceIds, toggleLike } = useApp();
 
+  const isLiked = likedPlaceIds.includes(place.id);
   const queueColor = place.queueCount > 10 ? colors.danger : place.queueCount > 5 ? colors.amber : colors.success;
 
   return (
@@ -34,6 +37,17 @@ export default function PlaceCard({ place, onPress }) {
         </View>
       </View>
       <View style={styles.right}>
+        <TouchableOpacity
+          onPress={() => toggleLike(place.id)}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          style={styles.likeBtn}
+        >
+          <Ionicons
+            name={isLiked ? "heart" : "heart-outline"}
+            size={19}
+            color={isLiked ? colors.danger : colors.text3}
+          />
+        </TouchableOpacity>
         <Text style={[styles.num, { color: place.isOpen ? queueColor : colors.text3, fontFamily: fonts.mono }]}>
           {place.isOpen ? place.queueCount : "—"}
         </Text>
@@ -65,7 +79,8 @@ const styles = StyleSheet.create({
   metaRow: { flexDirection: "row", alignItems: "center", marginTop: 3, flexWrap: "wrap" },
   metaText: { fontSize: 12.5 },
   metaDot: { fontSize: 12.5 },
-  right: { alignItems: "flex-end" },
+  right: { alignItems: "flex-end", gap: 4 },
+  likeBtn: { padding: 2 },
   num: { fontSize: 17 },
-  numLabel: { fontSize: 10, marginTop: 1 },
+  numLabel: { fontSize: 10 },
 });

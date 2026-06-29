@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { CommonActions } from "@react-navigation/native";
@@ -28,8 +28,17 @@ export default function ProfileScreen({ navigation }) {
   const initials = user ? `${(user.first[0] || "").toUpperCase()}${(user.last[0] || "").toUpperCase()}` : "—";
 
   const onLogout = () => {
-    logoutUser();
-    navigation.dispatch(CommonActions.reset({ index: 0, routes: [{ name: "Splash" }] }));
+    Alert.alert(t("confirmLogout"), t("confirmLogoutMsg"), [
+      { text: t("btnCancel"), style: "cancel" },
+      {
+        text: t("logout"),
+        style: "destructive",
+        onPress: () => {
+          logoutUser();
+          navigation.dispatch(CommonActions.reset({ index: 0, routes: [{ name: "Splash" }] }));
+        },
+      },
+    ]);
   };
 
   return (

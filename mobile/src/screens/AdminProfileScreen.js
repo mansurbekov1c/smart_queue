@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { CommonActions } from "@react-navigation/native";
@@ -21,8 +21,17 @@ export default function AdminProfileScreen({ navigation }) {
   const [credOpen, setCredOpen] = useState(false);
 
   const onLogout = () => {
-    adminLogout();
-    navigation.dispatch(CommonActions.reset({ index: 0, routes: [{ name: "Splash" }] }));
+    Alert.alert(t("confirmLogout"), t("confirmLogoutMsg"), [
+      { text: t("btnCancel"), style: "cancel" },
+      {
+        text: t("logout"),
+        style: "destructive",
+        onPress: () => {
+          adminLogout();
+          navigation.dispatch(CommonActions.reset({ index: 0, routes: [{ name: "Splash" }] }));
+        },
+      },
+    ]);
   };
 
   return (
