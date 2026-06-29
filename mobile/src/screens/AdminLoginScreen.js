@@ -24,6 +24,10 @@ export default function AdminLoginScreen({ navigation }) {
 
   const onSelectPlace = (id) => {
     selectAdminPlace(id);
+    scrollToBottom();
+  };
+
+  const scrollToBottom = () => {
     setTimeout(() => {
       scrollRef.current?.scrollToEnd({ animated: true });
     }, 150);
@@ -31,7 +35,7 @@ export default function AdminLoginScreen({ navigation }) {
 
   const onSubmit = () => {
     if (doAdminLogin(login, pass)) {
-      navigation.replace("AdminPanel");
+      navigation.replace("AdminTabs");
     }
   };
 
@@ -106,6 +110,7 @@ export default function AdminLoginScreen({ navigation }) {
                 value={login}
                 onChangeText={setLogin}
                 autoCapitalize="none"
+                onFocus={scrollToBottom}
                 style={styles.field}
               />
               <InputField
@@ -115,6 +120,7 @@ export default function AdminLoginScreen({ navigation }) {
                 onChangeText={setPass}
                 secureTextEntry
                 autoCapitalize="none"
+                onFocus={scrollToBottom}
                 style={styles.field}
               />
 

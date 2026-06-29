@@ -26,6 +26,7 @@ export function AppProvider({ children }) {
   const [adminQueue, setAdminQueue] = useState([]);
   const [adminNextNum, setAdminNextNum] = useState(1);
   const [likedPlaceIds, setLikedPlaceIds] = useState([]);
+  const [joinedPlaceIds, setJoinedPlaceIds] = useState([]);
 
   const currentPlace = useMemo(() => places.find((p) => p.id === currentPlaceId) || null, [places, currentPlaceId]);
   const adminPlace = useMemo(() => places.find((p) => p.id === adminPlaceId) || null, [places, adminPlaceId]);
@@ -36,10 +37,8 @@ export function AppProvider({ children }) {
 
   const likedPlaces = useMemo(() => places.filter((p) => likedPlaceIds.includes(p.id)), [places, likedPlaceIds]);
 
-  const dailyServedCount = useMemo(() => {
-    const servedToday = adminQueue.filter((q) => q.done).length;
-    return servedToday;
-  }, [adminQueue]);
+  const dailyServedCount = useMemo(() => adminQueue.filter((q) => q.done && !q.rejected).length, [adminQueue]);
+  const rejectedCount = useMemo(() => adminQueue.filter((q) => q.rejected).length, [adminQueue]);
 
   const weeklyServed = useMemo(() => dailyServedCount + 38, [dailyServedCount]);
   const monthlyServed = useMemo(() => dailyServedCount + 162, [dailyServedCount]);
@@ -99,7 +98,21 @@ export function AppProvider({ children }) {
   const logoutUser = useCallback(() => {
     setUser(null);
     setMyQueue(null);
+    setJoinedPlaceIds([]);
   }, []);
+
+  const editUserName = useCallback(
+    (first, last) => {
+      if (!first?.trim() || !last?.trim()) {
+        showToast(t("toastRegisterNameRequired"));
+        return false;
+      }
+      setUser((u) => ({ ...u, first: first.trim(), last: last.trim() }));
+      showToast(t("toastCredSaved"));
+      return true;
+    },
+    [showToast, t],
+  );
 
   /* ---------- Admin auth ---------- */
   const selectAdminPlace = useCallback((placeId) => setSelectedAdminPlaceId(placeId), []);
@@ -109,22 +122,10 @@ export function AppProvider({ children }) {
       const place = places.find((p) => p.id === placeId);
       if (!place) return;
 
-      const queueCopy = place.queue.map((q) => ({ ...q, current: false }));
-      let currentPerson = queueCopy.find((q) => q.num === place.currentNum && !q.done);
-      if (!currentPerson) currentPerson = queueCopy.find((q) => !q.done);
-
-      let newCurrentNum = place.currentNum;
-      if (currentPerson) {
-        currentPerson.current = true;
-        newCurrentNum = currentPerson.num;
-      }
-
       setAdminPlaceId(placeId);
-      setAdminQueue(queueCopy);
-      setPlaces((prev) => prev.map((p) => (p.id === placeId ? { ...p, currentNum: newCurrentNum } : p)));
-
-      const qNums = place.queue.map((q) => q.num);
-      setAdminNextNum((qNums.length > 0 ? Math.max(...qNums) : 0) + 1);
+      setAdminQueue([]);
+      setAdminNextNum(1);
+      setPlaces((prev) => prev.map((p) => (p.id === placeId ? { ...p, currentNum: 0, queue: [] } : p)));
 
       showToast(`${place.name} — ${t("toastAdminLoginSuccess")}`);
     },
@@ -164,6 +165,7 @@ export function AppProvider({ children }) {
   const adminLogout = useCallback(() => {
     setAdminPlaceId(null);
     setAdminQueue([]);
+    setAdminNextNum(1);
     showToast(t("toastAdminLogout"));
   }, [showToast, t]);
 
@@ -208,6 +210,7 @@ export function AppProvider({ children }) {
     const maxNum = place.queue.length > 0 ? Math.max(...place.queue.map((q) => q.num)) : 0;
     const num = maxNum + 1;
 
+    setJoinedPlaceIds((prev) => (prev.includes(place.id) ? prev : [...prev, place.id]));
     setMyQueue({
       placeId: place.id,
       placeName: place.name,
@@ -310,6 +313,27 @@ export function AppProvider({ children }) {
     });
   }, [adminPlaceId, showToast, t]);
 
+  const adminReject = useCallback(() => {
+    setAdminQueue((prev) => {
+      const cleared = prev.map((q) => (q.current ? { ...q, rejected: true, done: false, current: false } : q));
+      const nextIdx = cleared.findIndex((q) => !q.done && !q.rejected && !q.current);
+
+      let updated = cleared;
+      if (nextIdx >= 0) {
+        updated = cleared.map((q, i) => (i === nextIdx ? { ...q, current: true } : q));
+        const nextNum = updated[nextIdx].num;
+        const nextName = updated[nextIdx].name;
+        setPlaces((pp) => pp.map((p) => (p.id === adminPlaceId ? { ...p, currentNum: nextNum } : p)));
+        showToast(`${t("toastAdminNext")}: ${nextName}`);
+      } else {
+        showToast(t("toastAllServed"));
+      }
+
+      setPlaces((pp) => pp.map((p) => (p.id === adminPlaceId ? { ...p, queue: updated.map((q) => ({ ...q })) } : p)));
+      return updated;
+    });
+  }, [adminPlaceId, showToast, t]);
+
   const addWalkIn = useCallback(
     (name) => {
       const trimmed = name?.trim();
@@ -354,7 +378,9 @@ export function AppProvider({ children }) {
       joinPreview,
       likedPlaceIds,
       likedPlaces,
+      joinedPlaceIds,
       dailyServedCount,
+      rejectedCount,
       weeklyServed,
       monthlyServed,
       yearlyServed,
@@ -365,6 +391,7 @@ export function AppProvider({ children }) {
       doRegister,
       demoLogin,
       logoutUser,
+      editUserName,
       selectAdminPlace,
       doAdminLogin,
       adminLogout,
@@ -376,6 +403,7 @@ export function AppProvider({ children }) {
       setRating,
       submitReview,
       adminNext,
+      adminReject,
       addWalkIn,
       confirmResetQueue,
       toggleLike,
@@ -399,7 +427,9 @@ export function AppProvider({ children }) {
       joinPreview,
       likedPlaceIds,
       likedPlaces,
+      joinedPlaceIds,
       dailyServedCount,
+      rejectedCount,
       weeklyServed,
       monthlyServed,
       yearlyServed,
@@ -408,6 +438,7 @@ export function AppProvider({ children }) {
       doRegister,
       demoLogin,
       logoutUser,
+      editUserName,
       selectAdminPlace,
       doAdminLogin,
       adminLogout,
@@ -419,6 +450,7 @@ export function AppProvider({ children }) {
       setRating,
       submitReview,
       adminNext,
+      adminReject,
       addWalkIn,
       confirmResetQueue,
       toggleLike,

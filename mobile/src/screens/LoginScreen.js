@@ -39,23 +39,12 @@ const COUNTRY_CODES = [
   { code: "91", flag: "🇮🇳", name: "Hindiston" },
 ];
 
-function detectCountry(phone) {
-  const digits = phone.replace(/\D/g, "");
-  for (const len of [3, 2, 1]) {
-    const prefix = digits.slice(0, len);
-    const match = COUNTRY_CODES.find((c) => c.code === prefix);
-    if (match) return match;
-  }
-  return null;
-}
 
-function PhoneField({ label, value, onChangeText, colors }) {
+function PhoneField({ label, onChangeText, colors }) {
   const [pickerVisible, setPickerVisible] = useState(false);
   const [search, setSearch] = useState("");
   const [selectedCountry, setSelectedCountry] = useState(COUNTRY_CODES[0]);
-
-  const detectedCountry = useMemo(() => detectCountry(value), [value]);
-  const displayCountry = detectedCountry || selectedCountry;
+  const [localNumber, setLocalNumber] = useState("");
 
   const filteredCodes = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -65,6 +54,20 @@ function PhoneField({ label, value, onChangeText, colors }) {
     );
   }, [search]);
 
+  const handleLocalChange = (text) => {
+    setLocalNumber(text);
+    const digits = text.replace(/\D/g, "");
+    onChangeText(selectedCountry.code + digits);
+  };
+
+  const handleCountrySelect = (c) => {
+    setSelectedCountry(c);
+    setLocalNumber("");
+    onChangeText(c.code);
+    setPickerVisible(false);
+    setSearch("");
+  };
+
   return (
     <View>
       {label ? (
@@ -72,18 +75,18 @@ function PhoneField({ label, value, onChangeText, colors }) {
       ) : null}
       <View style={[styles.phoneRow, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder }]}>
         <TouchableOpacity style={styles.codeBtn} onPress={() => setPickerVisible(true)}>
-          <Text style={styles.codeFlag}>{displayCountry.flag}</Text>
+          <Text style={styles.codeFlag}>{selectedCountry.flag}</Text>
           <Text style={[styles.codeText, { color: colors.accent, fontFamily: fonts.bold }]}>
-            +{displayCountry.code}
+            +{selectedCountry.code}
           </Text>
           <Ionicons name="chevron-down" size={13} color={colors.text3} />
         </TouchableOpacity>
         <View style={[styles.codeDivider, { backgroundColor: colors.inputBorder }]} />
         <TextInput
-          value={value}
-          onChangeText={onChangeText}
+          value={localNumber}
+          onChangeText={handleLocalChange}
           keyboardType="phone-pad"
-          placeholder="90 123 45 67"
+          placeholder="90 457 23 86"
           placeholderTextColor={colors.placeholder}
           style={[styles.phoneInput, { color: colors.text, fontFamily: fonts.medium }]}
           autoCapitalize="none"
@@ -109,11 +112,7 @@ function PhoneField({ label, value, onChangeText, colors }) {
                 <TouchableOpacity
                   key={c.code + c.name}
                   style={[styles.modalItem, { borderBottomColor: colors.border }]}
-                  onPress={() => {
-                    setSelectedCountry(c);
-                    setPickerVisible(false);
-                    setSearch("");
-                  }}
+                  onPress={() => handleCountrySelect(c)}
                 >
                   <Text style={styles.modalFlag}>{c.flag}</Text>
                   <Text style={[styles.modalName, { color: colors.text, fontFamily: fonts.medium }]}>{c.name}</Text>
@@ -134,11 +133,11 @@ export default function LoginScreen({ navigation }) {
   const { doLogin, doRegister } = useApp();
 
   const [tab, setTab] = useState("login");
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState("998");
   const [pass, setPass] = useState("");
   const [first, setFirst] = useState("");
   const [last, setLast] = useState("");
-  const [regPhone, setRegPhone] = useState("");
+  const [regPhone, setRegPhone] = useState("998");
   const [regPass, setRegPass] = useState("");
 
   const onLogin = () => {
@@ -192,7 +191,6 @@ export default function LoginScreen({ navigation }) {
             <>
               <PhoneField
                 label={t("labelPhone")}
-                value={phone}
                 onChangeText={setPhone}
                 colors={colors}
               />
@@ -228,7 +226,6 @@ export default function LoginScreen({ navigation }) {
               </View>
               <PhoneField
                 label={t("labelPhone")}
-                value={regPhone}
                 onChangeText={setRegPhone}
                 colors={colors}
               />

@@ -11,15 +11,10 @@ import { fonts, radius } from "../theme/typography";
 export default function SplashScreen({ navigation }) {
   const { colors, isDark, toggleTheme } = useAppTheme();
   const { t } = useI18n();
-  const { role, selectRole, demoLogin } = useApp();
+  const { role, selectRole } = useApp();
 
   const goToLogin = () => {
     navigation.navigate(role === "admin" ? "AdminLogin" : "Login");
-  };
-
-  const onDemo = () => {
-    demoLogin();
-    navigation.navigate(role === "admin" ? "AdminPanel" : "MainTabs");
   };
 
   return (
@@ -70,14 +65,6 @@ export default function SplashScreen({ navigation }) {
         </View>
 
         <PrimaryButton label={t("btnLogin")} onPress={goToLogin} style={styles.fullBtn} />
-
-        <TouchableOpacity
-          onPress={onDemo}
-          style={[styles.demoBtn, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder }]}
-        >
-          <Ionicons name="flash" size={15} color={colors.accent} />
-          <Text style={[styles.demoText, { color: colors.accent, fontFamily: fonts.bold }]}>{t("btnDemoText")}</Text>
-        </TouchableOpacity>
 
         <Text style={[styles.footer, { color: colors.text3 }]}>Navbat v2.5 · {t("appFooter")}</Text>
       </SafeAreaView>
@@ -130,17 +117,6 @@ const styles = StyleSheet.create({
     borderRadius: 11,
   },
   roleBtnText: { fontSize: 14 },
-  fullBtn: { width: "100%", marginBottom: 11 },
-  demoBtn: {
-    width: "100%",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    paddingVertical: 14,
-    borderRadius: radius.md,
-    borderWidth: 1,
-  },
-  demoText: { fontSize: 14 },
+  fullBtn: { width: "100%", marginBottom: 0 },
   footer: { fontSize: 12, marginTop: 30 },
 });

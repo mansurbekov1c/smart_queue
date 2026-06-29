@@ -1,14 +1,14 @@
 import React, { useState } from "react";
-import { Alert, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
+import { Alert, BackHandler, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { CommonActions } from "@react-navigation/native";
+import { CommonActions, useFocusEffect } from "@react-navigation/native";
 import GlassCard from "../components/GlassCard";
 import Avatar from "../components/Avatar";
 import FadeInView from "../components/FadeInView";
 import LanguagePickerModal from "../modals/LanguagePickerModal";
 import PaymentCardModal from "../modals/PaymentCardModal";
-import ChangeCredentialsModal from "../modals/ChangeCredentialsModal";
+import SettingsModal from "../modals/SettingsModal";
 import { useAppTheme } from "../context/ThemeContext";
 import { useI18n } from "../context/I18nContext";
 import { useApp } from "../context/AppContext";
@@ -22,7 +22,7 @@ export default function ProfileScreen({ navigation }) {
   const [notifEnabled, setNotifEnabled] = useState(true);
   const [langOpen, setLangOpen] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
-  const [credOpen, setCredOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const fullName = user ? `${user.first} ${user.last}` : "—";
   const initials = user ? `${(user.first[0] || "").toUpperCase()}${(user.last[0] || "").toUpperCase()}` : "—";
@@ -41,15 +41,30 @@ export default function ProfileScreen({ navigation }) {
     ]);
   };
 
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBack = () => {
+        onLogout();
+        return true;
+      };
+      const sub = BackHandler.addEventListener("hardwareBackPress", onBack);
+      return () => sub.remove();
+    }, [user]),
+  );
+
   return (
     <LinearGradient colors={colors.bgGradient} style={styles.fill}>
       <FadeInView>
         <ScrollView contentContainerStyle={styles.content}>
-          <View style={styles.avatarWrap}>
+          <TouchableOpacity style={styles.avatarWrap} onPress={() => setSettingsOpen(true)} activeOpacity={0.7}>
             <Avatar initials={initials} />
             <Text style={[styles.name, { color: colors.text, fontFamily: fonts.extrabold }]}>{fullName}</Text>
+            <View style={styles.editHint}>
+              <Ionicons name="pencil" size={12} color={colors.text3} />
+              <Text style={[styles.editHintText, { color: colors.text3 }]}>{t("editName")}</Text>
+            </View>
             <Text style={[styles.phone, { color: colors.text2 }]}>{user?.phone || "—"}</Text>
-          </View>
+          </TouchableOpacity>
 
           <View style={styles.statsRow}>
             <GlassCard style={styles.statBox}>
@@ -64,9 +79,7 @@ export default function ProfileScreen({ navigation }) {
             </GlassCard>
           </View>
 
-          {/* Asosiy sozlamalar */}
           <GlassCard style={styles.settingsCard}>
-            {/* Bildirishnomalar — switch */}
             <View style={[styles.settingRow, { borderBottomWidth: 1, borderBottomColor: colors.border }]}>
               <Ionicons name="notifications" size={19} color={colors.accent} />
               <Text style={[styles.settingLabel, { color: colors.text, fontFamily: fonts.semibold }]}>
@@ -80,7 +93,6 @@ export default function ProfileScreen({ navigation }) {
               />
             </View>
 
-            {/* Tun/kun rejimi */}
             <TouchableOpacity
               onPress={toggleTheme}
               style={[styles.settingRow, { borderBottomWidth: 1, borderBottomColor: colors.border }]}
@@ -92,7 +104,6 @@ export default function ProfileScreen({ navigation }) {
               </Text>
             </TouchableOpacity>
 
-            {/* Til */}
             <TouchableOpacity
               onPress={() => setLangOpen(true)}
               style={[styles.settingRow, { borderBottomWidth: 1, borderBottomColor: colors.border }]}
@@ -102,7 +113,6 @@ export default function ProfileScreen({ navigation }) {
               <Text style={[styles.settingValue, { color: colors.text3 }]}>{langName(lang)} ›</Text>
             </TouchableOpacity>
 
-            {/* To'lov usuli */}
             <TouchableOpacity
               onPress={() => setPayOpen(true)}
               style={[styles.settingRow, { borderBottomWidth: 1, borderBottomColor: colors.border }]}
@@ -112,17 +122,15 @@ export default function ProfileScreen({ navigation }) {
               <Text style={[styles.settingValue, { color: colors.text3 }]}>{t("configure")} ›</Text>
             </TouchableOpacity>
 
-            {/* Login/Parol o'zgartirish */}
-            <TouchableOpacity onPress={() => setCredOpen(true)} style={styles.settingRow}>
-              <Ionicons name="lock-closed" size={19} color={colors.accent} />
+            <TouchableOpacity onPress={() => setSettingsOpen(true)} style={styles.settingRow}>
+              <Ionicons name="settings-outline" size={19} color={colors.accent} />
               <Text style={[styles.settingLabel, { color: colors.text, fontFamily: fonts.semibold }]}>
-                {t("changeCredentials")}
+                {t("settingsBtnLabel")}
               </Text>
               <Ionicons name="chevron-forward" size={16} color={colors.text3} />
             </TouchableOpacity>
           </GlassCard>
 
-          {/* Chiqish */}
           <GlassCard style={styles.settingsCard}>
             <TouchableOpacity style={styles.settingRow} onPress={onLogout}>
               <Ionicons name="log-out" size={19} color={colors.danger} />
@@ -136,7 +144,7 @@ export default function ProfileScreen({ navigation }) {
 
       <LanguagePickerModal visible={langOpen} onClose={() => setLangOpen(false)} />
       <PaymentCardModal visible={payOpen} onClose={() => setPayOpen(false)} />
-      <ChangeCredentialsModal visible={credOpen} onClose={() => setCredOpen(false)} />
+      <SettingsModal visible={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </LinearGradient>
   );
 }
@@ -146,6 +154,8 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 16, paddingTop: 60, paddingBottom: 120 },
   avatarWrap: { alignItems: "center", paddingVertical: 16, marginBottom: 6 },
   name: { fontSize: 21, marginTop: 12 },
+  editHint: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 4 },
+  editHintText: { fontSize: 12 },
   phone: { fontSize: 14, marginTop: 3 },
   statsRow: { flexDirection: "row", gap: 12, marginBottom: 14 },
   statBox: { flex: 1, alignItems: "center" },

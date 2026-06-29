@@ -21,7 +21,7 @@ export default function PlaceDetailScreen({ route, navigation }) {
   const { placeId } = route.params;
   const { colors } = useAppTheme();
   const { t } = useI18n();
-  const { openPlace, currentPlace, myQueue, user, selectedRating, setRating, submitReview, canJoinQueue } = useApp();
+  const { openPlace, currentPlace, myQueue, user, selectedRating, setRating, submitReview, canJoinQueue, joinedPlaceIds } = useApp();
   const insets = useSafeAreaInsets();
 
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -179,7 +179,12 @@ export default function PlaceDetailScreen({ route, navigation }) {
 
             <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
-            {!showReviewForm ? (
+            {!joinedPlaceIds.includes(place.id) ? (
+              <View style={[styles.reviewDisabled, { backgroundColor: colors.accentSoft, borderColor: colors.accentBorder }]}>
+                <Ionicons name="lock-closed-outline" size={16} color={colors.text3} />
+                <Text style={[styles.reviewDisabledText, { color: colors.text3 }]}>{t("reviewNotAllowed")}</Text>
+              </View>
+            ) : !showReviewForm ? (
               <SecondaryButton label={t("btnWriteReview")} icon="create-outline" onPress={() => setShowReviewForm(true)} />
             ) : (
               <View>
@@ -265,6 +270,8 @@ const styles = StyleSheet.create({
   reviewMeta: { fontSize: 11 },
   reviewText: { fontSize: 14, lineHeight: 19 },
   divider: { height: 1, marginVertical: 10 },
+  reviewDisabled: { flexDirection: "row", alignItems: "center", gap: 8, padding: 12, borderRadius: 10, borderWidth: 1, marginBottom: 4 },
+  reviewDisabledText: { fontSize: 13, flex: 1 },
   leaveReviewLabel: { fontSize: 13.5, marginBottom: 10 },
   reviewInput: { borderWidth: 1, borderRadius: radius.md, padding: 12, minHeight: 80, marginTop: 12, marginBottom: 12, fontSize: 14, textAlignVertical: "top" },
   reviewBtnRow: { flexDirection: "row", gap: 10 },

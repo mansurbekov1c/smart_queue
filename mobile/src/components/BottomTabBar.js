@@ -11,6 +11,9 @@ const ICONS = {
   Search: ["search", "search-outline"],
   MyQueue: ["clipboard", "clipboard-outline"],
   Profile: ["person", "person-outline"],
+  AdminHome: ["home", "home-outline"],
+  AdminStats: ["bar-chart", "bar-chart-outline"],
+  AdminProfile: ["person-circle", "person-circle-outline"],
 };
 
 const LABEL_KEYS = {
@@ -18,6 +21,9 @@ const LABEL_KEYS = {
   Search: "navSearch",
   MyQueue: "navQueue",
   Profile: "navProfile",
+  AdminHome: "navHome",
+  AdminStats: "navAdminStats",
+  AdminProfile: "navProfile",
 };
 
 export default function BottomTabBar({ state, navigation }) {

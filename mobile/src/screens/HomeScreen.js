@@ -1,7 +1,8 @@
 import React, { useMemo } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, BackHandler, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { CommonActions, useFocusEffect } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAppTheme } from "../context/ThemeContext";
 import { useI18n } from "../context/I18nContext";
@@ -24,8 +25,29 @@ const CATS = [
 export default function HomeScreen({ navigation }) {
   const { colors } = useAppTheme();
   const { t } = useI18n();
-  const { places, homeFilter, setHomeFilter, user, myQueue } = useApp();
+  const { places, homeFilter, setHomeFilter, user, myQueue, logoutUser } = useApp();
   const insets = useSafeAreaInsets();
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBack = () => {
+        Alert.alert(t("confirmLogout"), t("confirmLogoutMsg"), [
+          { text: t("btnCancel"), style: "cancel" },
+          {
+            text: t("logout"),
+            style: "destructive",
+            onPress: () => {
+              logoutUser();
+              navigation.dispatch(CommonActions.reset({ index: 0, routes: [{ name: "Splash" }] }));
+            },
+          },
+        ]);
+        return true;
+      };
+      const sub = BackHandler.addEventListener("hardwareBackPress", onBack);
+      return () => sub.remove();
+    }, [user]),
+  );
 
   const filtered = useMemo(() => {
     const list = homeFilter === "all" ? places : places.filter((p) => p.cat === homeFilter);

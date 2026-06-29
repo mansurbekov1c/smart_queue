@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, BackHandler, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { CommonActions } from "@react-navigation/native";
+import { CommonActions, useFocusEffect } from "@react-navigation/native";
 import GlassCard from "../components/GlassCard";
 import FadeInView from "../components/FadeInView";
 import LanguagePickerModal from "../modals/LanguagePickerModal";
@@ -11,11 +11,13 @@ import { useAppTheme } from "../context/ThemeContext";
 import { useI18n } from "../context/I18nContext";
 import { useApp } from "../context/AppContext";
 import { fonts, radius } from "../theme/typography";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function AdminProfileScreen({ navigation }) {
   const { colors, isDark, toggleTheme } = useAppTheme();
   const { t, lang, langName } = useI18n();
   const { adminPlace, adminLogout } = useApp();
+  const insets = useSafeAreaInsets();
 
   const [langOpen, setLangOpen] = useState(false);
   const [credOpen, setCredOpen] = useState(false);
@@ -34,18 +36,22 @@ export default function AdminProfileScreen({ navigation }) {
     ]);
   };
 
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBack = () => {
+        onLogout();
+        return true;
+      };
+      const sub = BackHandler.addEventListener("hardwareBackPress", onBack);
+      return () => sub.remove();
+    }, [adminPlace]),
+  );
+
   return (
     <LinearGradient colors={colors.bgGradient} style={styles.fill}>
       <FadeInView>
-        <View style={[styles.header, { paddingTop: 56 }]}>
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            style={[styles.backBtn, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder }]}
-          >
-            <Ionicons name="chevron-back" size={19} color={colors.text} />
-          </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: colors.text, fontFamily: fonts.bold }]}>{t("adminProfile")}</Text>
-          <View style={styles.backBtn} />
+        <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
+          <Text style={[styles.headerTitle, { color: colors.text, fontFamily: fonts.extrabold }]}>{t("adminProfile")}</Text>
         </View>
 
         <ScrollView contentContainerStyle={styles.content}>
@@ -111,14 +117,10 @@ export default function AdminProfileScreen({ navigation }) {
 const styles = StyleSheet.create({
   fill: { flex: 1 },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingBottom: 8,
   },
-  backBtn: { width: 38, height: 38, borderRadius: 13, borderWidth: 1, alignItems: "center", justifyContent: "center" },
-  headerTitle: { fontSize: 16 },
+  headerTitle: { fontSize: 20 },
   content: { paddingHorizontal: 16, paddingBottom: 120 },
   adminCard: {
     flexDirection: "row",
