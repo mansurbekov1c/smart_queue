@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Alert, BackHandler, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, BackHandler, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { CommonActions, useFocusEffect } from "@react-navigation/native";
@@ -16,11 +16,22 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 export default function AdminProfileScreen({ navigation }) {
   const { colors, isDark, toggleTheme } = useAppTheme();
   const { t, lang, langName } = useI18n();
-  const { adminPlace, adminLogout } = useApp();
+  const { adminPlace, adminLogout, updatePlaceName } = useApp();
   const insets = useSafeAreaInsets();
 
   const [langOpen, setLangOpen] = useState(false);
   const [credOpen, setCredOpen] = useState(false);
+  const [editingName, setEditingName] = useState(false);
+  const [nameValue, setNameValue] = useState("");
+
+  const startEditName = () => {
+    setNameValue(adminPlace?.name || "");
+    setEditingName(true);
+  };
+
+  const saveName = () => {
+    if (updatePlaceName(nameValue)) setEditingName(false);
+  };
 
   const onLogout = () => {
     Alert.alert(t("confirmLogout"), t("confirmLogoutMsg"), [
@@ -60,9 +71,26 @@ export default function AdminProfileScreen({ navigation }) {
               <Ionicons name="business" size={28} color="#fff" />
             </LinearGradient>
             <View style={styles.adminInfo}>
-              <Text style={[styles.adminName, { color: colors.text, fontFamily: fonts.extrabold }]}>
-                {adminPlace?.name || "—"}
-              </Text>
+              {editingName ? (
+                <TextInput
+                  value={nameValue}
+                  onChangeText={setNameValue}
+                  autoFocus
+                  onSubmitEditing={saveName}
+                  onBlur={saveName}
+                  style={[
+                    styles.adminName,
+                    styles.adminNameInput,
+                    { color: colors.text, fontFamily: fonts.extrabold, borderBottomColor: colors.accent },
+                  ]}
+                />
+              ) : (
+                <TouchableOpacity onPress={startEditName} activeOpacity={0.7}>
+                  <Text style={[styles.adminName, { color: colors.text, fontFamily: fonts.extrabold }]}>
+                    {adminPlace?.name || "—"}
+                  </Text>
+                </TouchableOpacity>
+              )}
               <Text style={[styles.adminRole, { color: colors.accent, fontFamily: fonts.bold }]}>Administrator</Text>
             </View>
           </View>
@@ -135,6 +163,7 @@ const styles = StyleSheet.create({
   adminAvatar: { width: 56, height: 56, borderRadius: 18, alignItems: "center", justifyContent: "center" },
   adminInfo: { flex: 1 },
   adminName: { fontSize: 16 },
+  adminNameInput: { paddingVertical: 2, borderBottomWidth: 1 },
   adminRole: { fontSize: 13, marginTop: 2 },
   settingsCard: { marginBottom: 12, paddingVertical: 4 },
   row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 14 },

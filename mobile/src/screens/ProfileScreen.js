@@ -9,7 +9,6 @@ import FadeInView from "../components/FadeInView";
 import LanguagePickerModal from "../modals/LanguagePickerModal";
 import PaymentCardModal from "../modals/PaymentCardModal";
 import SettingsModal from "../modals/SettingsModal";
-import FavoritesModal from "../modals/FavoritesModal";
 import { useAppTheme } from "../context/ThemeContext";
 import { useI18n } from "../context/I18nContext";
 import { useApp } from "../context/AppContext";
@@ -18,13 +17,12 @@ import { fonts, radius } from "../theme/typography";
 export default function ProfileScreen({ navigation }) {
   const { colors, isDark, toggleTheme } = useAppTheme();
   const { t, lang, langName } = useI18n();
-  const { user, logoutUser, likedPlaces, openPlace } = useApp();
+  const { user, logoutUser } = useApp();
 
   const [notifEnabled, setNotifEnabled] = useState(true);
   const [langOpen, setLangOpen] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [favOpen, setFavOpen] = useState(false);
 
   const fullName = user ? `${user.first} ${user.last}` : "—";
   const initials = user ? `${(user.first[0] || "").toUpperCase()}${(user.last[0] || "").toUpperCase()}` : "—";
@@ -123,17 +121,6 @@ export default function ProfileScreen({ navigation }) {
               <Text style={[styles.settingValue, { color: colors.text3 }]}>{t("configure")} ›</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              onPress={() => setFavOpen(true)}
-              style={[styles.settingRow, { borderBottomWidth: 1, borderBottomColor: colors.border }]}
-            >
-              <Ionicons name="heart" size={19} color="#ef4444" />
-              <Text style={[styles.settingLabel, { color: colors.text, fontFamily: fonts.semibold }]}>
-                {t("myFavorites")}
-              </Text>
-              <Text style={[styles.settingValue, { color: colors.text3 }]}>{likedPlaces.length} ›</Text>
-            </TouchableOpacity>
-
             <TouchableOpacity onPress={() => setSettingsOpen(true)} style={styles.settingRow}>
               <Ionicons name="settings-outline" size={19} color={colors.accent} />
               <Text style={[styles.settingLabel, { color: colors.text, fontFamily: fonts.semibold }]}>
@@ -157,14 +144,6 @@ export default function ProfileScreen({ navigation }) {
       <LanguagePickerModal visible={langOpen} onClose={() => setLangOpen(false)} />
       <PaymentCardModal visible={payOpen} onClose={() => setPayOpen(false)} />
       <SettingsModal visible={settingsOpen} onClose={() => setSettingsOpen(false)} />
-      <FavoritesModal
-        visible={favOpen}
-        onClose={() => setFavOpen(false)}
-        onSelectPlace={(id) => {
-          openPlace(id);
-          navigation.navigate("PlaceDetail", { placeId: id });
-        }}
-      />
     </LinearGradient>
   );
 }

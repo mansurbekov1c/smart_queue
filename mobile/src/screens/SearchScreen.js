@@ -26,9 +26,10 @@ export default function SearchScreen({ navigation }) {
   const { places, marketFilter, setMarketFilter, likedPlaces } = useApp();
   const insets = useSafeAreaInsets();
   const [query, setQuery] = useState("");
+  const [showFavOnly, setShowFavOnly] = useState(false);
 
   const filtered = useMemo(() => {
-    let list = places;
+    let list = showFavOnly ? likedPlaces : places;
     if (marketFilter !== "all") list = list.filter((p) => p.cat === marketFilter);
     if (query.trim()) {
       const q = query.trim().toLowerCase();
@@ -40,37 +41,33 @@ export default function SearchScreen({ navigation }) {
       );
     }
     return list;
-  }, [places, marketFilter, query]);
+  }, [places, likedPlaces, showFavOnly, marketFilter, query]);
 
   return (
     <LinearGradient colors={colors.bgGradient} style={styles.fill}>
       <ScrollView contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 120 }} keyboardShouldPersistTaps="handled">
-        <Text style={[styles.title, { color: colors.text, fontFamily: fonts.extrabold }]}>{t("services")}</Text>
-
-        {/* Men yoqtirganlar */}
-        <View style={styles.favSection}>
-          <View style={styles.favHeader}>
-            <Ionicons name="heart" size={16} color={colors.danger} />
-            <Text style={[styles.favTitle, { color: colors.text, fontFamily: fonts.extrabold }]}>
+        <View style={styles.titleRow}>
+          <Text style={[styles.title, { color: colors.text, fontFamily: fonts.extrabold }]}>{t("services")}</Text>
+          <TouchableOpacity
+            onPress={() => setShowFavOnly((v) => !v)}
+            style={[
+              styles.favToggle,
+              {
+                backgroundColor: showFavOnly ? colors.danger : colors.inputBg,
+                borderColor: showFavOnly ? colors.danger : colors.inputBorder,
+              },
+            ]}
+          >
+            <Ionicons name={showFavOnly ? "heart" : "heart-outline"} size={16} color={showFavOnly ? "#fff" : colors.danger} />
+            <Text
+              style={[
+                styles.favToggleText,
+                { color: showFavOnly ? "#fff" : colors.text2, fontFamily: fonts.bold },
+              ]}
+            >
               {t("myFavorites")}
             </Text>
-          </View>
-
-          {likedPlaces.length === 0 ? (
-            <View style={[styles.favEmpty, { backgroundColor: colors.glassBg, borderColor: colors.glassBorder }]}>
-              <Ionicons name="heart-outline" size={26} color={colors.text3} />
-              <Text style={[styles.favEmptyTitle, { color: colors.text2, fontFamily: fonts.bold }]}>
-                {t("noFavorites")}
-              </Text>
-              <Text style={[styles.favEmptySub, { color: colors.text3 }]}>{t("noFavoritesSub")}</Text>
-            </View>
-          ) : (
-            <View style={styles.favList}>
-              {likedPlaces.map((p) => (
-                <PlaceCard key={p.id} place={p} onPress={() => navigation.navigate("PlaceDetail", { placeId: p.id })} />
-              ))}
-            </View>
-          )}
+          </TouchableOpacity>
         </View>
 
         {/* Qidiruv */}
@@ -100,9 +97,13 @@ export default function SearchScreen({ navigation }) {
         <View style={styles.list}>
           {filtered.length === 0 ? (
             <View style={styles.empty}>
-              <Ionicons name="search" size={28} color={colors.text3} />
-              <Text style={[styles.emptyTitle, { color: colors.text2, fontFamily: fonts.bold }]}>{t("emptyNoResults")}</Text>
-              <Text style={[styles.emptySub, { color: colors.text3 }]}>{t("emptySearchOther")}</Text>
+              <Ionicons name={showFavOnly ? "heart-outline" : "search"} size={28} color={colors.text3} />
+              <Text style={[styles.emptyTitle, { color: colors.text2, fontFamily: fonts.bold }]}>
+                {showFavOnly ? t("noFavorites") : t("emptyNoResults")}
+              </Text>
+              <Text style={[styles.emptySub, { color: colors.text3 }]}>
+                {showFavOnly ? t("noFavoritesSub") : t("emptySearchOther")}
+              </Text>
             </View>
           ) : (
             filtered.map((p) => (
@@ -117,21 +118,24 @@ export default function SearchScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   fill: { flex: 1 },
-  title: { fontSize: 21, paddingHorizontal: 16, marginBottom: 14 },
-  favSection: { paddingHorizontal: 16, marginBottom: 18 },
-  favHeader: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 10 },
-  favTitle: { fontSize: 16 },
-  favEmpty: {
+  titleRow: {
+    flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 20,
+    justifyContent: "space-between",
     paddingHorizontal: 16,
+    marginBottom: 14,
+  },
+  title: { fontSize: 21 },
+  favToggle: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     borderRadius: radius.md,
     borderWidth: 1,
-    gap: 6,
   },
-  favEmptyTitle: { fontSize: 14, marginTop: 4 },
-  favEmptySub: { fontSize: 12, textAlign: "center" },
-  favList: {},
+  favToggleText: { fontSize: 12.5 },
   searchBox: {
     flexDirection: "row",
     alignItems: "center",

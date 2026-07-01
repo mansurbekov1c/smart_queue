@@ -20,7 +20,13 @@ export default function PrimaryButton({ label, onPress, icon, disabled, loading,
         ) : (
           <View style={styles.row}>
             {icon ? <Ionicons name={icon} size={17} color="#fff" style={styles.icon} /> : null}
-            <Text style={[styles.label, { fontFamily: fonts.bold }]}>{label}</Text>
+            <Text
+              style={[styles.label, { fontFamily: fonts.bold }]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+            >
+              {label}
+            </Text>
           </View>
         )}
       </LinearGradient>
@@ -31,12 +37,13 @@ export default function PrimaryButton({ label, onPress, icon, disabled, loading,
 const styles = StyleSheet.create({
   btn: {
     paddingVertical: 15,
+    paddingHorizontal: 8,
     borderRadius: radius.md,
     alignItems: "center",
     justifyContent: "center",
   },
-  row: { flexDirection: "row", alignItems: "center" },
-  icon: { marginRight: 8 },
-  label: { color: "#fff", fontSize: 15 },
+  row: { flexDirection: "row", alignItems: "center", maxWidth: "100%" },
+  icon: { marginRight: 6, flexShrink: 0 },
+  label: { color: "#fff", fontSize: 15, flexShrink: 1 },
   disabled: { opacity: 0.5 },
 });

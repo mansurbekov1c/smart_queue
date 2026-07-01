@@ -106,10 +106,8 @@ export default function AdminStatsScreen({ navigation }) {
       subKey: "statsSubHourly",
       chartData: hourlyData,
       chartLabels: hourLabels,
-      avg: hourlyData.filter((h) => h > 0).length
-        ? Math.round(hourlyData.reduce((a, b) => a + b, 0) / Math.max(hourlyData.filter((h) => h > 0).length, 1))
-        : 0,
-      avgSuffix: t("hourUnit"),
+      avg: dailyServedCount,
+      avgSuffix: t("dayUnit"),
     },
     weekly: {
       labelKey: "periodWeekly",
@@ -119,8 +117,8 @@ export default function AdminStatsScreen({ navigation }) {
       subKey: "statsSubDaily",
       chartData: weeklyDayData,
       chartLabels: weekDayLabels,
-      avg: Math.round(weeklyServed / 7),
-      avgSuffix: t("statsDaily").toLowerCase(),
+      avg: weeklyServed,
+      avgSuffix: t("weekUnit"),
     },
     monthly: {
       labelKey: "periodMonthly",
@@ -130,8 +128,8 @@ export default function AdminStatsScreen({ navigation }) {
       subKey: "statsSubWeekly",
       chartData: monthlyWeekData,
       chartLabels: weekLabels,
-      avg: Math.round(monthlyServed / 4),
-      avgSuffix: t("periodWeekly").toLowerCase(),
+      avg: monthlyServed,
+      avgSuffix: t("monthUnit"),
     },
     yearly: {
       labelKey: "periodYearly",
@@ -141,8 +139,8 @@ export default function AdminStatsScreen({ navigation }) {
       subKey: "statsSubMonthly",
       chartData: yearlyMonthData,
       chartLabels: monthLabels,
-      avg: Math.round(yearlyServed / 12),
-      avgSuffix: t("statsMonthly").toLowerCase(),
+      avg: yearlyServed,
+      avgSuffix: t("yearUnit"),
     },
   };
 

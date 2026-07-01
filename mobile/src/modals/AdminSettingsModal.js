@@ -39,14 +39,6 @@ export default function AdminSettingsModal({ visible, onClose }) {
       showToast("❌ " + t("newLogin") + " kiriting");
       return;
     }
-    if (!oldPass.trim()) {
-      showToast("❌ " + t("oldPass") + " kiriting");
-      return;
-    }
-    if (!verifyAdminPass(oldPass.trim())) {
-      showToast(t("toastOldPassWrong"));
-      return;
-    }
     showToast(t("toastCredSaved"));
     handleClose();
   };
@@ -139,15 +131,6 @@ export default function AdminSettingsModal({ visible, onClose }) {
                 placeholder={t("loginInputPlaceholder")}
                 value={newLogin}
                 onChangeText={setNewLogin}
-                autoCapitalize="none"
-                style={styles.field}
-              />
-              <InputField
-                label={t("oldPass")}
-                placeholder={t("passPlaceholder")}
-                value={oldPass}
-                onChangeText={setOldPass}
-                secureTextEntry
                 autoCapitalize="none"
                 style={styles.field}
               />

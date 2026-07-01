@@ -21,7 +21,7 @@ export default function PlaceDetailScreen({ route, navigation }) {
   const { placeId } = route.params;
   const { colors } = useAppTheme();
   const { t } = useI18n();
-  const { openPlace, currentPlace, myQueue, user, selectedRating, setRating, submitReview, canJoinQueue, joinedPlaceIds } = useApp();
+  const { openPlace, currentPlace, myQueue, user, selectedRating, setRating, submitReview, canJoinQueue, joinedPlaceIds, likedPlaceIds, toggleLike } = useApp();
   const insets = useSafeAreaInsets();
 
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -37,6 +37,7 @@ export default function PlaceDetailScreen({ route, navigation }) {
 
   if (!currentPlace) return null;
   const place = currentPlace;
+  const isLiked = likedPlaceIds.includes(place.id);
 
   const onSubmitReview = () => {
     if (submitReview(reviewText)) {
@@ -72,7 +73,17 @@ export default function PlaceDetailScreen({ route, navigation }) {
               </View>
             </LinearGradient>
             <View style={styles.cardBody}>
-              <Text style={[styles.placeName, { color: colors.text, fontFamily: fonts.extrabold }]}>{place.name}</Text>
+              <View style={styles.nameRow}>
+                <Text style={[styles.placeName, styles.flex1, { color: colors.text, fontFamily: fonts.extrabold }]}>
+                  {place.name}
+                </Text>
+                <TouchableOpacity
+                  onPress={() => toggleLike(place.id)}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <Ionicons name={isLiked ? "heart" : "heart-outline"} size={24} color={isLiked ? colors.danger : colors.text3} />
+                </TouchableOpacity>
+              </View>
               <Text style={[styles.placeCat, { color: colors.text3 }]}>{t("category" + place.cat.charAt(0).toUpperCase() + place.cat.slice(1))}</Text>
               <View style={styles.metaRow}>
                 <View style={styles.metaItem}>
@@ -240,6 +251,7 @@ const styles = StyleSheet.create({
   },
   ratingText: { fontSize: 12, color: "#16243c" },
   cardBody: { padding: 16, paddingTop: 18 },
+  nameRow: { flexDirection: "row", alignItems: "center", gap: 10 },
   placeName: { fontSize: 18 },
   placeCat: { fontSize: 12.5, marginTop: 2 },
   metaRow: { flexDirection: "row", gap: 16, marginTop: 10 },

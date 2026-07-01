@@ -194,6 +194,15 @@ export function AppProvider({ children }) {
     );
   }, []);
 
+  const updatePlaceName = useCallback(
+    (name) => {
+      if (!name?.trim() || !adminPlaceId) return false;
+      setPlaces((prev) => prev.map((p) => (p.id === adminPlaceId ? { ...p, name: name.trim() } : p)));
+      return true;
+    },
+    [adminPlaceId],
+  );
+
   /* ---------- Joylar / qidiruv ---------- */
   const openPlace = useCallback((placeId) => {
     setCurrentPlaceId(placeId);
@@ -473,6 +482,7 @@ export function AppProvider({ children }) {
       verifyAdminPass,
       verifyUserPass,
       toggleLike,
+      updatePlaceName,
     }),
     [
       places,
@@ -524,6 +534,7 @@ export function AppProvider({ children }) {
       verifyAdminPass,
       verifyUserPass,
       toggleLike,
+      updatePlaceName,
     ],
   );
 
