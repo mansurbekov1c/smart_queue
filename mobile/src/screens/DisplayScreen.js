@@ -13,7 +13,7 @@ export default function DisplayScreen({ navigation }) {
   const insets = useSafeAreaInsets();
 
   const current = useMemo(() => adminQueue.find((q) => q.current), [adminQueue]);
-  const next = useMemo(() => adminQueue.filter((q) => !q.done && !q.current)[0], [adminQueue]);
+  const next = useMemo(() => adminQueue.filter((q) => q.status === "waiting")[0], [adminQueue]);
 
   return (
     <LinearGradient colors={["#1543bd", "#2f73e8", "#1E5BD6"]} style={styles.fill}>

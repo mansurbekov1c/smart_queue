@@ -1,90 +1,252 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
-import { PLACES } from "../data/places";
-import { ADMINS } from "../data/admins";
-import { USERS } from "../data/users";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { fetchBranches } from "../api/branches";
+import { fetchProfile } from "../api/profile";
+import {
+  fetchBranchQueue,
+  subscribeBranchQueue,
+  rpcJoinQueue,
+  rpcAdvanceQueue,
+  rpcRejectCurrent,
+  rpcRejectTicket,
+  rpcDelayTicket,
+  rpcLeaveQueue,
+  resetBranchQueue,
+} from "../api/queue";
+import { supabase } from "../lib/supabase";
 import { useI18n } from "./I18nContext";
 import { useToast } from "./ToastContext";
 
-const TEST_ADMIN_QUEUE = {
-  1: [
-    { num: 1, name: "Alisher Hasanov", type: "online", done: false, current: true },
-    { num: 2, name: "Barno Toshmatova", type: "offline", done: false, current: false },
-    { num: 3, name: "Dilshod Qodirov", type: "online", done: false, current: false },
-    { num: 4, name: "Gulnora Nazarova", type: "online", done: false, current: false },
-    { num: 5, name: "Hamza Yusupov", type: "offline", done: false, current: false },
-  ],
-  2: [
-    { num: 1, name: "Iroda Rahimova", type: "online", done: false, current: true },
-    { num: 2, name: "Jasur Fattoyev", type: "offline", done: false, current: false },
-    { num: 3, name: "Komiljon Sobirov", type: "online", done: false, current: false },
-    { num: 4, name: "Laylo Azimova", type: "online", done: false, current: false },
-    { num: 5, name: "Mirzo Tursunov", type: "offline", done: false, current: false },
-  ],
-};
-
 const AppCtx = createContext(null);
+
+const EMPTY_META = { currentNum: 0, nextNum: 1, isOpen: true };
 
 export function AppProvider({ children }) {
   const { t } = useI18n();
   const { showToast } = useToast();
 
-  const [places, setPlaces] = useState(PLACES);
+  const [places, setPlaces] = useState([]);
+  const [placesLoading, setPlacesLoading] = useState(true);
   const [role, setRole] = useState("customer");
   const [user, setUser] = useState(null);
-  const [registeredUsers, setRegisteredUsers] = useState(USERS);
   const [currentPlaceId, setCurrentPlaceId] = useState(null);
   const [myQueue, setMyQueue] = useState(null);
   const [delaysUsed, setDelaysUsed] = useState(0);
   const [selectedRating, setSelectedRating] = useState(0);
   const [homeFilter, setHomeFilter] = useState("all");
   const [marketFilter, setMarketFilter] = useState("all");
-  const [selectedAdminPlaceId, setSelectedAdminPlaceId] = useState(null);
   const [adminPlaceId, setAdminPlaceId] = useState(null);
+  const [adminRole, setAdminRole] = useState(null);
+  const [adminEmail, setAdminEmail] = useState(null);
   const [adminQueue, setAdminQueue] = useState([]);
-  const [adminNextNum, setAdminNextNum] = useState(1);
+  const [currentQueue, setCurrentQueue] = useState([]);
+  const [currentMeta, setCurrentMeta] = useState(EMPTY_META);
   const [likedPlaceIds, setLikedPlaceIds] = useState([]);
   const [joinedPlaceIds, setJoinedPlaceIds] = useState([]);
 
-  const currentPlace = useMemo(() => places.find((p) => p.id === currentPlaceId) || null, [places, currentPlaceId]);
-  const adminPlace = useMemo(() => places.find((p) => p.id === adminPlaceId) || null, [places, adminPlaceId]);
-  const selectedAdminPlace = useMemo(
-    () => places.find((p) => p.id === selectedAdminPlaceId) || null,
-    [places, selectedAdminPlaceId],
-  );
+  // myQueue'ning eng so'nggi qiymatini effektlar/callbacklardan o'qish uchun (loopsiz)
+  const myQueueRef = useRef(null);
+  useEffect(() => {
+    myQueueRef.current = myQueue;
+  }, [myQueue]);
 
+  /* ---------- Mavjud Supabase sessiyasini tiklash (ilova qayta ochilganda) ----------
+     Supabase klienti sessiyani AsyncStorage'da saqlaydi (lib/supabase.js).
+     Bu yerda faqat o'sha sessiyaga mos profilni o'qib, local holatni tiklaymiz.
+     Eslatma: mijoz va admin bitta Supabase Auth sessiyasini ishlatadi (bir vaqtda
+     faqat bittasi faol bo'lishi mumkin) — bu ilovaning "customer" / "admin"
+     rejim tanlash oqimiga mos keladi. */
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (cancelled || !session?.user) return;
+      try {
+        const profile = await fetchProfile(session.user.id);
+        if (cancelled || !profile) return;
+        if (profile.role === "admin" || profile.role === "super_admin") {
+          setAdminEmail(session.user.email);
+          setAdminRole(profile.role);
+          setAdminPlaceId(profile.branch_id || null);
+        } else {
+          setUser({
+            id: profile.id,
+            first: profile.first_name || "",
+            last: profile.last_name || "",
+            phone: profile.phone || "",
+            email: session.user.email,
+            isAdmin: false,
+          });
+        }
+      } catch (e) {
+        console.error("Sessiyani tiklashda xatolik:", e);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  /* ---------- Filiallarni yuklash ---------- */
+  useEffect(() => {
+    let cancelled = false;
+    setPlacesLoading(true);
+    fetchBranches()
+      .then((branches) => {
+        if (!cancelled) setPlaces(branches);
+      })
+      .catch((err) => {
+        console.error("Filiallarni yuklashda xatolik:", err);
+        if (!cancelled) showToast(t("toastBranchesLoadError", "Filiallarni yuklab bo'lmadi"));
+      })
+      .finally(() => {
+        if (!cancelled) setPlacesLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /* ---------- Admin navbati: yuklash + realtime ---------- */
+  useEffect(() => {
+    if (!adminPlaceId) {
+      setAdminQueue([]);
+      return;
+    }
+    let active = true;
+    const load = () =>
+      fetchBranchQueue(adminPlaceId)
+        .then(({ tickets }) => {
+          if (active) setAdminQueue(tickets);
+        })
+        .catch((e) => console.error("Admin navbatini yuklash xatosi:", e));
+    load();
+    const unsub = subscribeBranchQueue(adminPlaceId, load, "admin");
+    return () => {
+      active = false;
+      unsub();
+    };
+  }, [adminPlaceId]);
+
+  /* ---------- Mijoz ko'rayotgan filial navbati: yuklash + realtime ---------- */
+  useEffect(() => {
+    if (!currentPlaceId) {
+      setCurrentQueue([]);
+      setCurrentMeta(EMPTY_META);
+      return;
+    }
+    let active = true;
+    setCurrentQueue([]);
+    setCurrentMeta(EMPTY_META);
+    const load = () =>
+      fetchBranchQueue(currentPlaceId)
+        .then(({ tickets, currentNum, nextNum, isOpen }) => {
+          if (!active) return;
+          setCurrentQueue(tickets);
+          setCurrentMeta({ currentNum, nextNum, isOpen });
+        })
+        .catch((e) => console.error("Filial navbatini yuklash xatosi:", e));
+    load();
+    const unsub = subscribeBranchQueue(currentPlaceId, load, "place");
+    return () => {
+      active = false;
+      unsub();
+    };
+  }, [currentPlaceId]);
+
+  /* ---------- myQueue'ni jonli yangilash (mijoz ko'rayotgan filial bo'yicha) ---------- */
+  useEffect(() => {
+    const mq = myQueueRef.current;
+    if (!mq || mq.placeId !== currentPlaceId) return;
+
+    const mine = currentQueue.find((q) => q.id === mq.ticketId);
+    if (!mine || mine.status === "done" || mine.status === "rejected") {
+      // Xizmat ko'rsatildi yoki rad etildi/chiqib ketildi → navbatdan chiqarildi
+      setMyQueue(null);
+      return;
+    }
+    const activeList = currentQueue.filter((q) => q.status === "waiting" || q.status === "current");
+    const idx = activeList.findIndex((q) => q.id === mq.ticketId);
+    const ahead = idx < 0 ? 0 : idx;
+    setMyQueue((prev) =>
+      prev ? { ...prev, position: ahead, waitMin: ahead * 2, currentNum: currentMeta.currentNum } : prev,
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentQueue, currentMeta, currentPlaceId]);
+
+  /* ---------- Derived ---------- */
+  const currentPlace = useMemo(() => {
+    const branch = places.find((p) => p.id === currentPlaceId);
+    if (!branch) return null;
+    const activeList = currentQueue.filter((q) => q.status === "waiting" || q.status === "current");
+    return {
+      ...branch,
+      queue: activeList,
+      queueCount: activeList.length,
+      currentNum: currentMeta.currentNum,
+      waitMin: activeList.length * 2,
+      isOpen: currentMeta.isOpen && branch.isOpen,
+    };
+  }, [places, currentPlaceId, currentQueue, currentMeta]);
+
+  const adminPlace = useMemo(() => places.find((p) => p.id === adminPlaceId) || null, [places, adminPlaceId]);
   const likedPlaces = useMemo(() => places.filter((p) => likedPlaceIds.includes(p.id)), [places, likedPlaceIds]);
 
-  const dailyServedCount = useMemo(() => adminQueue.filter((q) => q.done && !q.rejected).length, [adminQueue]);
-  const rejectedCount = useMemo(() => adminQueue.filter((q) => q.rejected).length, [adminQueue]);
+  const dailyServedCount = useMemo(() => adminQueue.filter((q) => q.status === "done").length, [adminQueue]);
+  const rejectedCount = useMemo(() => adminQueue.filter((q) => q.status === "rejected").length, [adminQueue]);
 
   const weeklyServed = useMemo(() => dailyServedCount + 38, [dailyServedCount]);
   const monthlyServed = useMemo(() => dailyServedCount + 162, [dailyServedCount]);
   const yearlyServed = useMemo(() => dailyServedCount + 1986, [dailyServedCount]);
 
-  /* ---------- Auth ---------- */
+  /* ---------- Auth (mijoz — Supabase Auth, email + parol) ---------- */
   const selectRole = useCallback((r) => setRole(r), []);
 
   const doLogin = useCallback(
-    (phone, pass) => {
-      const normalized = phone.replace(/\D/g, "");
-      const found = registeredUsers.find((u) => u.phone.replace(/\D/g, "") === normalized);
-      if (!found) {
+    async (email, pass) => {
+      if (!email?.trim()) {
+        showToast(t("toastEmailEmpty"));
+        return false;
+      }
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: pass,
+      });
+      if (authError || !authData?.user) {
+        console.error("Login xatosi:", authError?.message, authError?.status);
+        if (authError?.message?.toLowerCase().includes("not confirmed")) {
+          showToast(t("toastEmailNotConfirmed"));
+        } else {
+          showToast(t("toastLoginNotFound"));
+        }
+        return false;
+      }
+      try {
+        const profile = await fetchProfile(authData.user.id);
+        setUser({
+          id: profile.id,
+          first: profile.first_name || "",
+          last: profile.last_name || "",
+          phone: profile.phone || "",
+          email: authData.user.email,
+          isAdmin: false,
+        });
+        showToast(t("toastLoginWelcome"));
+        return true;
+      } catch (e) {
+        console.error("Profilni o'qishda xatolik:", e);
+        await supabase.auth.signOut();
         showToast(t("toastLoginNotFound"));
         return false;
       }
-      if (found.pass !== pass) {
-        showToast(t("toastLoginWrongPass"));
-        return false;
-      }
-      setUser({ first: found.first, last: found.last, phone: phone, isAdmin: false });
-      showToast(t("toastLoginWelcome"));
-      return true;
     },
-    [registeredUsers, showToast, t],
+    [showToast, t],
   );
 
   const doRegister = useCallback(
-    (first, last, phone, pass) => {
+    async (first, last, phone, email, pass) => {
       if (!first?.trim() || !last?.trim()) {
         showToast(t("toastRegisterNameRequired"));
         return false;
@@ -93,111 +255,151 @@ export function AppProvider({ children }) {
         showToast(t("toastPhoneEmpty"));
         return false;
       }
-      if (!pass || pass.length < 4) {
+      if (!email?.trim()) {
+        showToast(t("toastEmailEmpty"));
+        return false;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+        showToast(t("toastEmailInvalid"));
+        return false;
+      }
+      if (!pass || pass.length < 6) {
         showToast(t("toastPassTooShort"));
         return false;
       }
-      const normalized = phone.replace(/\D/g, "");
-      const exists = registeredUsers.find((u) => u.phone.replace(/\D/g, "") === normalized);
-      if (exists) {
-        showToast(t("toastPhoneExists"));
+      const normalizedPhone = phone.replace(/\D/g, "");
+
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: email.trim(),
+        password: pass,
+        options: {
+          data: { first_name: first.trim(), last_name: last.trim(), phone: normalizedPhone },
+        },
+      });
+
+      if (authError) {
+        console.error("Ro'yxatdan o'tish xatosi:", authError.message, authError.status);
+        if (authError.message?.toLowerCase().includes("already registered")) {
+          showToast(t("toastEmailExists"));
+        } else if (authError.message?.toLowerCase().includes("invalid")) {
+          showToast(t("toastEmailInvalid"));
+        } else {
+          showToast(t("toastActionFailed", "Amal bajarilmadi"));
+        }
         return false;
       }
-      const newUser = { id: Date.now(), phone: normalized, pass, first: first.trim(), last: last.trim() };
-      setRegisteredUsers((prev) => [...prev, newUser]);
-      setUser({ first: first.trim(), last: last.trim(), phone: phone.trim(), isAdmin: false });
+      if (!authData?.user) {
+        showToast(t("toastActionFailed", "Amal bajarilmadi"));
+        return false;
+      }
+
+      setUser({
+        id: authData.user.id,
+        first: first.trim(),
+        last: last.trim(),
+        phone: normalizedPhone,
+        email: email.trim(),
+        isAdmin: false,
+      });
       showToast(t("toastRegisterSuccess"));
       return true;
     },
-    [registeredUsers, showToast, t],
+    [showToast, t],
   );
 
-  const logoutUser = useCallback(() => {
+  const logoutUser = useCallback(async () => {
+    await supabase.auth.signOut();
     setUser(null);
     setMyQueue(null);
     setJoinedPlaceIds([]);
   }, []);
 
   const editUserName = useCallback(
-    (first, last) => {
+    async (first, last) => {
       if (!first?.trim() || !last?.trim()) {
         showToast(t("toastRegisterNameRequired"));
+        return false;
+      }
+      if (!user?.id) return false;
+      const { error } = await supabase
+        .from("profiles")
+        .update({ first_name: first.trim(), last_name: last.trim() })
+        .eq("id", user.id);
+      if (error) {
+        console.error("Ismni yangilash xatosi:", error);
+        showToast(t("toastActionFailed", "Amal bajarilmadi"));
         return false;
       }
       setUser((u) => ({ ...u, first: first.trim(), last: last.trim() }));
       showToast(t("toastCredSaved"));
       return true;
     },
+    [user, showToast, t],
+  );
+
+  /* ---------- Admin auth (Supabase Auth) ---------- */
+  const doAdminLogin = useCallback(
+    async (email, password) => {
+      if (!email?.trim() || !password) {
+        showToast(t("toastAdminCredInvalid"));
+        return null;
+      }
+
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+      if (authError || !authData?.user) {
+        showToast(t("toastAdminCredInvalid"));
+        return null;
+      }
+
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("id, role, branch_id, first_name, last_name")
+        .eq("id", authData.user.id)
+        .single();
+
+      if (profileError || !profile || (profile.role !== "admin" && profile.role !== "super_admin")) {
+        await supabase.auth.signOut();
+        showToast(t("toastAdminNoAccess"));
+        return null;
+      }
+
+      setAdminEmail(email.trim());
+      setAdminRole(profile.role);
+      setAdminPlaceId(profile.branch_id || null);
+      showToast(t("toastAdminLoginSuccess"));
+      return profile;
+    },
     [showToast, t],
   );
 
-  /* ---------- Admin auth ---------- */
-  const selectAdminPlace = useCallback((placeId) => setSelectedAdminPlaceId(placeId), []);
-
-  const loginAsAdmin = useCallback(
-    (placeId) => {
-      const place = places.find((p) => p.id === placeId);
-      if (!place) return;
-
-      const initialQueue = TEST_ADMIN_QUEUE[placeId] || [];
-      setAdminPlaceId(placeId);
-      setAdminQueue(initialQueue);
-      setAdminNextNum(initialQueue.length + 1);
-      setPlaces((prev) => prev.map((p) => (p.id === placeId ? { ...p, currentNum: 0, queue: [] } : p)));
-
-      showToast(`${place.name} — ${t("toastAdminLoginSuccess")}`);
-    },
-    [places, showToast, t],
-  );
-
-  const demoLogin = useCallback(() => {
-    if (role === "admin") {
-      loginAsAdmin(1);
-      return;
-    }
-    const demoUser = USERS[0];
-    setUser({ first: demoUser.first, last: demoUser.last, phone: demoUser.phone, isAdmin: false });
-    setMyQueue(null);
-    showToast(t("toastDemoLogin"));
-  }, [role, showToast, t, loginAsAdmin]);
-
-  const doAdminLogin = useCallback(
-    (loginVal, passVal) => {
-      if (!selectedAdminPlaceId) {
-        showToast(t("toastAdminSelectPlace"));
-        return false;
-      }
-      const cred = ADMINS.find(
-        (a) => a.placeId === selectedAdminPlaceId && a.login === loginVal.trim() && a.parol === passVal.trim(),
-      );
-      if (!cred) {
-        showToast(t("toastAdminCredInvalid"));
-        return false;
-      }
-      loginAsAdmin(selectedAdminPlaceId);
-      return true;
-    },
-    [selectedAdminPlaceId, showToast, t, loginAsAdmin],
-  );
-
-  const adminLogout = useCallback(() => {
+  const adminLogout = useCallback(async () => {
+    await supabase.auth.signOut();
     setAdminPlaceId(null);
+    setAdminRole(null);
+    setAdminEmail(null);
     setAdminQueue([]);
-    setAdminNextNum(1);
     showToast(t("toastAdminLogout"));
   }, [showToast, t]);
 
   /* ---------- Like ---------- */
   const toggleLike = useCallback((placeId) => {
-    setLikedPlaceIds((prev) =>
-      prev.includes(placeId) ? prev.filter((id) => id !== placeId) : [...prev, placeId],
-    );
+    setLikedPlaceIds((prev) => (prev.includes(placeId) ? prev.filter((id) => id !== placeId) : [...prev, placeId]));
   }, []);
 
   const updatePlaceName = useCallback(
     (name) => {
       if (!name?.trim() || !adminPlaceId) return false;
       setPlaces((prev) => prev.map((p) => (p.id === adminPlaceId ? { ...p, name: name.trim() } : p)));
+      supabase
+        .from("branches")
+        .update({ name: name.trim() })
+        .eq("id", adminPlaceId)
+        .then(({ error }) => {
+          if (error) console.error("Filial nomini yangilash xatosi:", error);
+        });
       return true;
     },
     [adminPlaceId],
@@ -209,7 +411,7 @@ export function AppProvider({ children }) {
     setSelectedRating(0);
   }, []);
 
-  /* ---------- Navbatga qo'shilish ---------- */
+  /* ---------- Navbatga qo'shilish (mijoz) ---------- */
   const canJoinQueue = useCallback(() => {
     if (!user) return { ok: false, reason: "login" };
     if (!currentPlace) return { ok: false, reason: "noplace" };
@@ -225,65 +427,72 @@ export function AppProvider({ children }) {
   }, [user, currentPlace, myQueue, showToast, t]);
 
   const joinPreview = useMemo(() => {
-    if (!currentPlace) return null;
-    const maxNum = currentPlace.queue.length > 0 ? Math.max(...currentPlace.queue.map((q) => q.num)) : 0;
-    const num = maxNum + 1;
-    return { num, waitMin: currentPlace.queueCount * 2 };
-  }, [currentPlace]);
+    if (!currentPlaceId) return null;
+    const activeList = currentQueue.filter((q) => q.status === "waiting" || q.status === "current");
+    return { num: currentMeta.nextNum, waitMin: activeList.length * 2 };
+  }, [currentPlaceId, currentQueue, currentMeta]);
 
-  const confirmJoin = useCallback(() => {
-    if (!currentPlace || !user) return;
-    const place = currentPlace;
-    const maxNum = place.queue.length > 0 ? Math.max(...place.queue.map((q) => q.num)) : 0;
-    const num = maxNum + 1;
+  const confirmJoin = useCallback(async () => {
+    if (!currentPlaceId || !user) return;
+    const branch = places.find((p) => p.id === currentPlaceId);
+    if (!branch) return;
+    try {
+      const ticket = await rpcJoinQueue(currentPlaceId, `${user.first} ${user.last}`, "online");
+      if (!ticket) return;
+      setJoinedPlaceIds((prev) => (prev.includes(currentPlaceId) ? prev : [...prev, currentPlaceId]));
+      setDelaysUsed(0);
+      setMyQueue({
+        placeId: currentPlaceId,
+        placeName: branch.name,
+        ticketId: ticket.id,
+        num: ticket.num,
+        position: 0,
+        waitMin: 0,
+        currentNum: currentMeta.currentNum,
+      });
+      showToast(`${t("toastJoinQueueSuccess")}: #${ticket.num}`);
+    } catch (e) {
+      console.error("Navbatga yozilish xatosi:", e);
+      showToast(t("toastActionFailed", "Amal bajarilmadi"));
+    }
+  }, [currentPlaceId, user, places, currentMeta, showToast, t]);
 
-    setJoinedPlaceIds((prev) => (prev.includes(place.id) ? prev : [...prev, place.id]));
-    setMyQueue({
-      placeId: place.id,
-      placeName: place.name,
-      num,
-      position: num - place.currentNum,
-      waitMin: (num - place.currentNum) * 2,
-    });
-
-    setPlaces((prev) =>
-      prev.map((p) =>
-        p.id === place.id
-          ? {
-              ...p,
-              queueCount: p.queueCount + 1,
-              queue: [...p.queue, { num, name: `${user.first} ${user.last}`, type: "online", done: false, current: false }],
-            }
-          : p,
-      ),
-    );
-
-    showToast(`${t("toastJoinQueueSuccess")}: #${num}`);
-  }, [currentPlace, user, showToast, t]);
-
-  const leaveQueue = useCallback(() => {
+  const leaveQueue = useCallback(async () => {
+    const mq = myQueueRef.current;
+    if (mq?.ticketId) {
+      try {
+        await rpcLeaveQueue(mq.ticketId);
+      } catch (e) {
+        console.error("Navbatdan chiqish xatosi:", e);
+      }
+    }
     setMyQueue(null);
     setDelaysUsed(0);
     showToast(t("toastLeaveQueue"));
   }, [showToast, t]);
 
   const doDelay = useCallback(
-    (positions) => {
-      if (!myQueue) return;
+    async (positions) => {
+      const mq = myQueueRef.current;
+      if (!mq?.ticketId) return;
       const isFree = delaysUsed === 0;
-      setMyQueue((q) => ({
-        ...q,
-        num: q.num + positions,
-        position: q.position + positions,
-        waitMin: q.waitMin + positions * 2,
-      }));
-      setDelaysUsed((d) => d + 1);
-      showToast(isFree ? `${t("toastDelayFree")} (+${positions} ${t("slot")})` : `${t("toastDelayPaid")} (+${positions} ${t("slot")})`);
+      try {
+        await rpcDelayTicket(mq.ticketId, positions);
+        setDelaysUsed((d) => d + 1);
+        showToast(
+          isFree
+            ? `${t("toastDelayFree")} (+${positions} ${t("slot")})`
+            : `${t("toastDelayPaid")} (+${positions} ${t("slot")})`,
+        );
+      } catch (e) {
+        console.error("Kechiktirish xatosi:", e);
+        showToast(t("toastActionFailed", "Amal bajarilmadi"));
+      }
     },
-    [myQueue, delaysUsed, showToast, t],
+    [delaysUsed, showToast, t],
   );
 
-  /* ---------- Sharhlar ---------- */
+  /* ---------- Sharhlar (hozircha local) ---------- */
   const setRating = useCallback((n) => setSelectedRating(n), []);
 
   const submitReview = useCallback(
@@ -306,7 +515,10 @@ export function AppProvider({ children }) {
             ? {
                 ...p,
                 reviewCount: p.reviewCount + 1,
-                reviews: [{ name: `${user.first} ${user.last[0]}.`, date: t("dateNow"), rating: selectedRating, text: text.trim() }, ...p.reviews],
+                reviews: [
+                  { name: `${user.first} ${user.last[0]}.`, date: t("dateNow"), rating: selectedRating, text: text.trim() },
+                  ...p.reviews,
+                ],
               }
             : p,
         ),
@@ -318,134 +530,123 @@ export function AppProvider({ children }) {
     [selectedRating, user, currentPlaceId, showToast, t],
   );
 
-  /* ---------- Admin panel ---------- */
-  const adminNext = useCallback(() => {
-    setAdminQueue((prev) => {
-      const cleared = prev.map((q) => (q.current ? { ...q, done: true, current: false } : q));
-      const nextIdx = cleared.findIndex((q) => !q.done && !q.current);
-
-      let updated = cleared;
-      if (nextIdx >= 0) {
-        updated = cleared.map((q, i) => (i === nextIdx ? { ...q, current: true } : q));
-        const nextNum = updated[nextIdx].num;
-        const nextName = updated[nextIdx].name;
-        setPlaces((pp) => pp.map((p) => (p.id === adminPlaceId ? { ...p, currentNum: nextNum } : p)));
-        showToast(`${t("toastAdminNext")}: ${nextName}`);
-      } else {
-        showToast(t("toastAllServed"));
-      }
-
-      setPlaces((pp) => pp.map((p) => (p.id === adminPlaceId ? { ...p, queue: updated.map((q) => ({ ...q })) } : p)));
-      return updated;
-    });
+  /* ---------- Admin panel (Supabase RPC) ---------- */
+  const adminNext = useCallback(async () => {
+    if (!adminPlaceId) return;
+    try {
+      const next = await rpcAdvanceQueue(adminPlaceId);
+      showToast(next ? `${t("toastAdminNext")}: ${next.name}` : t("toastAllServed"));
+    } catch (e) {
+      console.error("adminNext xatosi:", e);
+      showToast(t("toastActionFailed", "Amal bajarilmadi"));
+    }
   }, [adminPlaceId, showToast, t]);
 
-  const adminReject = useCallback(() => {
-    setAdminQueue((prev) => {
-      const cleared = prev.map((q) => (q.current ? { ...q, rejected: true, done: false, current: false } : q));
-      const nextIdx = cleared.findIndex((q) => !q.done && !q.rejected && !q.current);
-
-      let updated = cleared;
-      if (nextIdx >= 0) {
-        updated = cleared.map((q, i) => (i === nextIdx ? { ...q, current: true } : q));
-        const nextNum = updated[nextIdx].num;
-        const nextName = updated[nextIdx].name;
-        setPlaces((pp) => pp.map((p) => (p.id === adminPlaceId ? { ...p, currentNum: nextNum } : p)));
-        showToast(`${t("toastAdminNext")}: ${nextName}`);
-      } else {
-        showToast(t("toastAllServed"));
-      }
-
-      setPlaces((pp) => pp.map((p) => (p.id === adminPlaceId ? { ...p, queue: updated.map((q) => ({ ...q })) } : p)));
-      return updated;
-    });
+  const adminReject = useCallback(async () => {
+    if (!adminPlaceId) return;
+    try {
+      const next = await rpcRejectCurrent(adminPlaceId);
+      showToast(next ? `${t("toastAdminNext")}: ${next.name}` : t("toastAllServed"));
+    } catch (e) {
+      console.error("adminReject xatosi:", e);
+      showToast(t("toastActionFailed", "Amal bajarilmadi"));
+    }
   }, [adminPlaceId, showToast, t]);
 
   const addWalkIn = useCallback(
-    (name) => {
+    async (name) => {
       const trimmed = name?.trim();
       if (!trimmed) {
         showToast(t("toastNameRequired"));
         return false;
       }
-      setAdminQueue((prev) => {
-        const hasCurrent = prev.some((q) => q.current && !q.done);
-        return [...prev, { num: adminNextNum, name: trimmed, type: "offline", done: false, current: !hasCurrent }];
-      });
-      setAdminNextNum((n) => n + 1);
-      showToast(`${trimmed} ${t("toastCustomerAdded")} (#${adminNextNum})`);
-      return true;
+      if (!adminPlaceId) return false;
+      try {
+        const ticket = await rpcJoinQueue(adminPlaceId, trimmed, "offline");
+        showToast(`${trimmed} ${t("toastCustomerAdded")} (#${ticket.num})`);
+        return true;
+      } catch (e) {
+        console.error("addWalkIn xatosi:", e);
+        showToast(t("toastActionFailed", "Amal bajarilmadi"));
+        return false;
+      }
     },
-    [adminNextNum, showToast, t],
+    [adminPlaceId, showToast, t],
   );
 
-  const confirmResetQueue = useCallback(() => {
-    setAdminQueue([]);
-    setAdminNextNum(1);
-    showToast(t("toastQueueCleared"));
-  }, [showToast, t]);
+  const confirmResetQueue = useCallback(async () => {
+    if (!adminPlaceId) return;
+    try {
+      await resetBranchQueue(adminPlaceId);
+      showToast(t("toastQueueCleared"));
+    } catch (e) {
+      console.error("Navbatni tozalash xatosi:", e);
+      showToast(t("toastActionFailed", "Amal bajarilmadi"));
+    }
+  }, [adminPlaceId, showToast, t]);
 
   const adminRejectItem = useCallback(
-    (num) => {
-      setAdminQueue((prev) => prev.map((q) => (q.num === num ? { ...q, rejected: true, current: false } : q)));
-      showToast(`#${num} ${t("toastAdminReject")}`);
+    async (ticketId) => {
+      try {
+        const tk = await rpcRejectTicket(ticketId);
+        showToast(`#${tk?.num ?? ""} ${t("toastAdminReject")}`);
+      } catch (e) {
+        console.error("adminRejectItem xatosi:", e);
+        showToast(t("toastActionFailed", "Amal bajarilmadi"));
+      }
     },
     [showToast, t],
   );
 
   const adminDelayItem = useCallback(
-    (num, positions) => {
-      setAdminQueue((prev) => {
-        const waiting = prev.filter((q) => !q.done && !q.rejected && !q.current);
-        const idx = waiting.findIndex((q) => q.num === num);
-        if (idx === -1) return prev;
-        const item = waiting[idx];
-        const rest = [...waiting.slice(0, idx), ...waiting.slice(idx + 1)];
-        const insertAt = Math.min(idx + positions, rest.length);
-        rest.splice(insertAt, 0, item);
-        const others = prev.filter((q) => q.done || q.rejected || q.current);
-        return [...others, ...rest];
-      });
-      showToast(`#${num} +${positions} ${t("slot")} kechiktirildi`);
+    async (ticketId, positions) => {
+      try {
+        const tk = await rpcDelayTicket(ticketId, positions);
+        showToast(`#${tk?.num ?? ""} +${positions} ${t("slot")} kechiktirildi`);
+      } catch (e) {
+        console.error("adminDelayItem xatosi:", e);
+        showToast(t("toastActionFailed", "Amal bajarilmadi"));
+      }
     },
     [showToast, t],
   );
 
   const verifyAdminPass = useCallback(
-    (pass) => {
-      const cred = ADMINS.find((a) => a.placeId === adminPlaceId);
-      return cred?.parol === pass;
+    async (pass) => {
+      if (!adminEmail) return false;
+      const { error } = await supabase.auth.signInWithPassword({ email: adminEmail, password: pass });
+      return !error;
     },
-    [adminPlaceId],
+    [adminEmail],
   );
 
   const verifyUserPass = useCallback(
-    (pass) => {
-      if (!user) return false;
-      const normalized = user.phone.replace(/\D/g, "");
-      const found = registeredUsers.find((u) => u.phone.replace(/\D/g, "") === normalized);
-      return found?.pass === pass;
+    async (pass) => {
+      if (!user?.email) return false;
+      const { error } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: pass,
+      });
+      return !error;
     },
-    [user, registeredUsers],
+    [user],
   );
 
   const value = useMemo(
     () => ({
       places,
+      placesLoading,
       role,
       user,
-      registeredUsers,
       currentPlace,
       myQueue,
       delaysUsed,
       selectedRating,
       homeFilter,
       marketFilter,
-      selectedAdminPlaceId,
-      selectedAdminPlace,
       adminPlace,
+      adminRole,
       adminQueue,
-      adminNextNum,
       joinPreview,
       likedPlaceIds,
       likedPlaces,
@@ -460,10 +661,8 @@ export function AppProvider({ children }) {
       selectRole,
       doLogin,
       doRegister,
-      demoLogin,
       logoutUser,
       editUserName,
-      selectAdminPlace,
       doAdminLogin,
       adminLogout,
       openPlace,
@@ -486,20 +685,18 @@ export function AppProvider({ children }) {
     }),
     [
       places,
+      placesLoading,
       role,
       user,
-      registeredUsers,
       currentPlace,
       myQueue,
       delaysUsed,
       selectedRating,
       homeFilter,
       marketFilter,
-      selectedAdminPlaceId,
-      selectedAdminPlace,
       adminPlace,
+      adminRole,
       adminQueue,
-      adminNextNum,
       joinPreview,
       likedPlaceIds,
       likedPlaces,
@@ -512,10 +709,8 @@ export function AppProvider({ children }) {
       selectRole,
       doLogin,
       doRegister,
-      demoLogin,
       logoutUser,
       editUserName,
-      selectAdminPlace,
       doAdminLogin,
       adminLogout,
       openPlace,

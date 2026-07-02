@@ -25,23 +25,29 @@ export default function LoginScreen({ navigation }) {
   const { doLogin, doRegister } = useApp();
 
   const [tab, setTab] = useState("login");
-  const [phone, setPhone] = useState("998");
+  const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
   const [first, setFirst] = useState("");
   const [last, setLast] = useState("");
   const [regPhone, setRegPhone] = useState("998");
+  const [regEmail, setRegEmail] = useState("");
   const [regPass, setRegPass] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const onLogin = () => {
-    if (doLogin(phone, pass)) {
-      navigation.replace("MainTabs");
-    }
+  const onLogin = async () => {
+    if (submitting) return;
+    setSubmitting(true);
+    const ok = await doLogin(email, pass);
+    setSubmitting(false);
+    if (ok) navigation.replace("MainTabs");
   };
 
-  const onRegister = () => {
-    if (doRegister(first, last, regPhone, regPass)) {
-      navigation.replace("MainTabs");
-    }
+  const onRegister = async () => {
+    if (submitting) return;
+    setSubmitting(true);
+    const ok = await doRegister(first, last, regPhone, regEmail, regPass);
+    setSubmitting(false);
+    if (ok) navigation.replace("MainTabs");
   };
 
   return (
@@ -81,12 +87,15 @@ export default function LoginScreen({ navigation }) {
 
           {tab === "login" ? (
             <>
-              <PhoneField
-                label={t("labelPhone")}
-                onChangeText={setPhone}
-                colors={colors}
+              <InputField
+                label={t("labelEmail")}
+                placeholder={t("emailInputPlaceholder")}
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                style={styles.field}
               />
-              <View style={styles.field} />
               <InputField
                 label={t("labelPass")}
                 placeholder={t("passPlaceholder")}
@@ -96,7 +105,13 @@ export default function LoginScreen({ navigation }) {
                 autoCapitalize="none"
                 style={styles.field}
               />
-              <PrimaryButton label={t("btnLoginSubmit")} onPress={onLogin} style={styles.submitBtn} />
+              <PrimaryButton
+                label={t("btnLoginSubmit")}
+                onPress={onLogin}
+                disabled={submitting}
+                loading={submitting}
+                style={styles.submitBtn}
+              />
             </>
           ) : (
             <>
@@ -123,6 +138,15 @@ export default function LoginScreen({ navigation }) {
               />
               <View style={styles.field} />
               <InputField
+                label={t("labelEmail")}
+                placeholder={t("emailInputPlaceholder")}
+                value={regEmail}
+                onChangeText={setRegEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                style={styles.field}
+              />
+              <InputField
                 label={t("labelPass")}
                 placeholder={t("minCharsPlaceholder")}
                 value={regPass}
@@ -131,7 +155,13 @@ export default function LoginScreen({ navigation }) {
                 autoCapitalize="none"
                 style={styles.field}
               />
-              <PrimaryButton label={t("btnRegisterSubmit")} onPress={onRegister} style={styles.submitBtn} />
+              <PrimaryButton
+                label={t("btnRegisterSubmit")}
+                onPress={onRegister}
+                disabled={submitting}
+                loading={submitting}
+                style={styles.submitBtn}
+              />
             </>
           )}
         </ScrollView>

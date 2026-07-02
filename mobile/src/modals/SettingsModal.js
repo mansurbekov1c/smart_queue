@@ -8,6 +8,7 @@ import { useAppTheme } from "../context/ThemeContext";
 import { useI18n } from "../context/I18nContext";
 import { useToast } from "../context/ToastContext";
 import { useApp } from "../context/AppContext";
+import { supabase } from "../lib/supabase";
 import { fonts, radius } from "../theme/typography";
 
 export default function SettingsModal({ visible, onClose }) {
@@ -45,27 +46,32 @@ export default function SettingsModal({ visible, onClose }) {
     setStep("name");
   };
 
-  const onSaveName = () => {
-    if (editUserName(firstName, lastName)) {
+  const onSaveName = async () => {
+    if (await editUserName(firstName, lastName)) {
       reset();
     }
   };
 
-  const onSavePassword = () => {
+  const onSavePassword = async () => {
     if (!oldPass.trim()) {
       showToast("❌ " + t("oldPass") + " kiriting");
       return;
     }
-    if (!verifyUserPass(oldPass.trim())) {
+    if (!(await verifyUserPass(oldPass.trim()))) {
       showToast(t("toastOldPassWrong"));
       return;
     }
-    if (newPass.length < 4) {
+    if (newPass.length < 6) {
       showToast(t("toastPassTooShort"));
       return;
     }
     if (newPass !== confirmPass) {
       showToast(t("toastPassMismatch"));
+      return;
+    }
+    const { error } = await supabase.auth.updateUser({ password: newPass });
+    if (error) {
+      showToast(t("toastOldPassWrong"));
       return;
     }
     showToast(t("toastCredSaved"));

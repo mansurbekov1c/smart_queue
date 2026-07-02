@@ -15,8 +15,8 @@ export default function JoinQueueModal({ visible, onClose, navigation }) {
 
   if (!currentPlace || !joinPreview) return null;
 
-  const onConfirm = () => {
-    confirmJoin();
+  const onConfirm = async () => {
+    await confirmJoin();
     onClose();
     setTimeout(() => navigation.navigate("MainTabs", { screen: "MyQueue" }), 400);
   };

@@ -50,7 +50,7 @@ export default function ChangeCredentialsModal({ visible, onClose, isAdmin = fal
       showToast("❌ " + t("oldPass") + " kiriting");
       return;
     }
-    if (newPass.length < 4) {
+    if (newPass.length < 6) {
       showToast(t("toastPassTooShort"));
       return;
     }

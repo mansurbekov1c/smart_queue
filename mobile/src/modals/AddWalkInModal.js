@@ -17,8 +17,8 @@ export default function AddWalkInModal({ visible, onClose }) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
 
-  const onSubmit = () => {
-    if (addWalkIn(name)) {
+  const onSubmit = async () => {
+    if (await addWalkIn(name)) {
       setName("");
       setPhone("");
       onClose();

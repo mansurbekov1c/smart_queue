@@ -163,7 +163,7 @@ export default function AdminPanelScreen({ navigation }) {
                           <TouchableOpacity
                             style={[styles.itemRejectBtn, { borderColor: colors.danger, backgroundColor: colors.inputBg }]}
                             onPress={() => {
-                              adminRejectItem(q.num);
+                              adminRejectItem(q.id);
                               setExpandedNum(null);
                             }}
                           >
@@ -181,7 +181,7 @@ export default function AdminPanelScreen({ navigation }) {
                                   { borderColor: colors.inputBorder, backgroundColor: colors.inputBg },
                                 ]}
                                 onPress={() => {
-                                  adminDelayItem(q.num, n);
+                                  adminDelayItem(q.id, n);
                                   setExpandedNum(null);
                                 }}
                               >

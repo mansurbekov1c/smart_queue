@@ -68,7 +68,7 @@ export default function MyQueueScreen({ navigation }) {
                 {t("peopleAhead")} {ahead} {t("peopleAheadSuffix")}
               </Text>
               <Text style={styles.aheadText}>
-                {t("nowNum")}: #{place?.currentNum ?? "—"}
+                {t("nowNum")}: #{myQueue.currentNum ?? "—"}
               </Text>
             </View>
             <View style={styles.progressTrack}>

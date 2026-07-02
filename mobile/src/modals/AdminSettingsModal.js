@@ -7,6 +7,7 @@ import { useAppTheme } from "../context/ThemeContext";
 import { useI18n } from "../context/I18nContext";
 import { useToast } from "../context/ToastContext";
 import { useApp } from "../context/AppContext";
+import { supabase } from "../lib/supabase";
 import { fonts, radius } from "../theme/typography";
 
 export default function AdminSettingsModal({ visible, onClose }) {
@@ -43,21 +44,26 @@ export default function AdminSettingsModal({ visible, onClose }) {
     handleClose();
   };
 
-  const onSavePassword = () => {
+  const onSavePassword = async () => {
     if (!oldPass.trim()) {
       showToast("❌ " + t("oldPass") + " kiriting");
       return;
     }
-    if (!verifyAdminPass(oldPass.trim())) {
+    if (!(await verifyAdminPass(oldPass.trim()))) {
       showToast(t("toastOldPassWrong"));
       return;
     }
-    if (newPass.length < 4) {
+    if (newPass.length < 6) {
       showToast(t("toastPassTooShort"));
       return;
     }
     if (newPass !== confirmPass) {
       showToast(t("toastPassMismatch"));
+      return;
+    }
+    const { error } = await supabase.auth.updateUser({ password: newPass });
+    if (error) {
+      showToast(t("toastOldPassWrong"));
       return;
     }
     showToast(t("toastCredSaved"));
