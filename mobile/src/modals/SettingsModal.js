@@ -15,7 +15,7 @@ export default function SettingsModal({ visible, onClose }) {
   const { colors } = useAppTheme();
   const { t } = useI18n();
   const { showToast } = useToast();
-  const { user, editUserName, verifyUserPass } = useApp();
+  const { user, editUserName, updateUserPhone, verifyUserPass } = useApp();
 
   const [step, setStep] = useState("menu"); // "menu" | "name" | "password" | "phone"
   const [firstName, setFirstName] = useState("");
@@ -78,13 +78,14 @@ export default function SettingsModal({ visible, onClose }) {
     reset();
   };
 
-  const onSavePhone = () => {
+  const onSavePhone = async () => {
     if (!newPhone.trim()) {
       showToast("❌ " + t("newPhone") + " kiriting");
       return;
     }
-    showToast(t("toastCredSaved"));
-    reset();
+    if (await updateUserPhone(newPhone)) {
+      reset();
+    }
   };
 
   return (

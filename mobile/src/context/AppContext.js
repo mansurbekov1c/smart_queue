@@ -1,6 +1,8 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { fetchBranches } from "../api/branches";
-import { fetchProfile } from "../api/profile";
+import { fetchProfile, fetchUserCoins } from "../api/profile";
+import { fetchLikedBranchIds, addLike, removeLike } from "../api/likes";
+import { fetchQueueStats, fetchHourlySeries, fetchWeeklySeries, fetchMonthlySeries, fetchYearlySeries } from "../api/stats";
 import {
   fetchBranchQueue,
   subscribeBranchQueue,
@@ -19,6 +21,18 @@ import { useToast } from "./ToastContext";
 const AppCtx = createContext(null);
 
 const EMPTY_META = { currentNum: 0, nextNum: 1, isOpen: true };
+const EMPTY_STATS = {
+  day: { served: 0, rejected: 0 },
+  week: { served: 0, rejected: 0 },
+  month: { served: 0, rejected: 0 },
+  year: { served: 0, rejected: 0 },
+};
+const EMPTY_SERIES = {
+  hourly: [0, 0, 0, 0, 0, 0, 0, 0],
+  weekly: [0, 0, 0, 0, 0, 0, 0],
+  monthly: [0, 0, 0, 0],
+  yearly: new Array(12).fill(0),
+};
 
 export function AppProvider({ children }) {
   const { t } = useI18n();
@@ -30,7 +44,6 @@ export function AppProvider({ children }) {
   const [user, setUser] = useState(null);
   const [currentPlaceId, setCurrentPlaceId] = useState(null);
   const [myQueue, setMyQueue] = useState(null);
-  const [delaysUsed, setDelaysUsed] = useState(0);
   const [selectedRating, setSelectedRating] = useState(0);
   const [homeFilter, setHomeFilter] = useState("all");
   const [marketFilter, setMarketFilter] = useState("all");
@@ -38,6 +51,8 @@ export function AppProvider({ children }) {
   const [adminRole, setAdminRole] = useState(null);
   const [adminEmail, setAdminEmail] = useState(null);
   const [adminQueue, setAdminQueue] = useState([]);
+  const [queueStats, setQueueStats] = useState(EMPTY_STATS);
+  const [queueSeries, setQueueSeries] = useState(EMPTY_SERIES);
   const [currentQueue, setCurrentQueue] = useState([]);
   const [currentMeta, setCurrentMeta] = useState(EMPTY_META);
   const [likedPlaceIds, setLikedPlaceIds] = useState([]);
@@ -76,6 +91,7 @@ export function AppProvider({ children }) {
             last: profile.last_name || "",
             phone: profile.phone || "",
             email: session.user.email,
+            coins: profile.coins || 0,
             isAdmin: false,
           });
         }
@@ -87,6 +103,23 @@ export function AppProvider({ children }) {
       cancelled = true;
     };
   }, []);
+
+  /* ---------- Mijozning like'larini yuklash (login/sessiya tiklanganda, logout'da tozalash) ---------- */
+  useEffect(() => {
+    if (!user?.id) {
+      setLikedPlaceIds([]);
+      return;
+    }
+    let cancelled = false;
+    fetchLikedBranchIds(user.id)
+      .then((ids) => {
+        if (!cancelled) setLikedPlaceIds(ids);
+      })
+      .catch((e) => console.error("Like'larni yuklash xatosi:", e));
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
 
   /* ---------- Filiallarni yuklash ---------- */
   useEffect(() => {
@@ -113,15 +146,33 @@ export function AppProvider({ children }) {
   useEffect(() => {
     if (!adminPlaceId) {
       setAdminQueue([]);
+      setQueueStats(EMPTY_STATS);
+      setQueueSeries(EMPTY_SERIES);
       return;
     }
     let active = true;
-    const load = () =>
+    const load = () => {
       fetchBranchQueue(adminPlaceId)
         .then(({ tickets }) => {
           if (active) setAdminQueue(tickets);
         })
         .catch((e) => console.error("Admin navbatini yuklash xatosi:", e));
+      fetchQueueStats(adminPlaceId)
+        .then((stats) => {
+          if (active) setQueueStats(stats);
+        })
+        .catch((e) => console.error("Statistikani yuklash xatosi:", e));
+      Promise.all([
+        fetchHourlySeries(adminPlaceId),
+        fetchWeeklySeries(adminPlaceId),
+        fetchMonthlySeries(adminPlaceId),
+        fetchYearlySeries(adminPlaceId),
+      ])
+        .then(([hourly, weekly, monthly, yearly]) => {
+          if (active) setQueueSeries({ hourly, weekly, monthly, yearly });
+        })
+        .catch((e) => console.error("Grafik ma'lumotlarini yuklash xatosi:", e));
+    };
     load();
     const unsub = subscribeBranchQueue(adminPlaceId, load, "admin");
     return () => {
@@ -194,12 +245,11 @@ export function AppProvider({ children }) {
   const adminPlace = useMemo(() => places.find((p) => p.id === adminPlaceId) || null, [places, adminPlaceId]);
   const likedPlaces = useMemo(() => places.filter((p) => likedPlaceIds.includes(p.id)), [places, likedPlaceIds]);
 
-  const dailyServedCount = useMemo(() => adminQueue.filter((q) => q.status === "done").length, [adminQueue]);
-  const rejectedCount = useMemo(() => adminQueue.filter((q) => q.status === "rejected").length, [adminQueue]);
-
-  const weeklyServed = useMemo(() => dailyServedCount + 38, [dailyServedCount]);
-  const monthlyServed = useMemo(() => dailyServedCount + 162, [dailyServedCount]);
-  const yearlyServed = useMemo(() => dailyServedCount + 1986, [dailyServedCount]);
+  const dailyServedCount = queueStats.day.served;
+  const rejectedCount = queueStats.day.rejected;
+  const weeklyServed = queueStats.week.served;
+  const monthlyServed = queueStats.month.served;
+  const yearlyServed = queueStats.year.served;
 
   /* ---------- Auth (mijoz — Supabase Auth, email + parol) ---------- */
   const selectRole = useCallback((r) => setRole(r), []);
@@ -231,6 +281,7 @@ export function AppProvider({ children }) {
           last: profile.last_name || "",
           phone: profile.phone || "",
           email: authData.user.email,
+          coins: profile.coins || 0,
           isAdmin: false,
         });
         showToast(t("toastLoginWelcome"));
@@ -299,6 +350,7 @@ export function AppProvider({ children }) {
         last: last.trim(),
         phone: normalizedPhone,
         email: email.trim(),
+        coins: 0,
         isAdmin: false,
       });
       showToast(t("toastRegisterSuccess"));
@@ -336,6 +388,37 @@ export function AppProvider({ children }) {
     },
     [user, showToast, t],
   );
+
+  const updateUserPhone = useCallback(
+    async (phone) => {
+      const normalized = phone?.replace(/\D/g, "");
+      if (!normalized) {
+        showToast(t("toastPhoneEmpty"));
+        return false;
+      }
+      if (!user?.id) return false;
+      const { error } = await supabase.from("profiles").update({ phone: normalized }).eq("id", user.id);
+      if (error) {
+        console.error("Telefonni yangilash xatosi:", error);
+        showToast(t("toastActionFailed", "Amal bajarilmadi"));
+        return false;
+      }
+      setUser((u) => ({ ...u, phone: normalized }));
+      showToast(t("toastCredSaved"));
+      return true;
+    },
+    [user, showToast, t],
+  );
+
+  const refreshUserCoins = useCallback(async () => {
+    if (!user?.id) return;
+    try {
+      const coins = await fetchUserCoins(user.id);
+      setUser((u) => (u ? { ...u, coins } : u));
+    } catch (e) {
+      console.error("Coin balansini yangilash xatosi:", e);
+    }
+  }, [user?.id]);
 
   /* ---------- Admin auth (Supabase Auth) ---------- */
   const doAdminLogin = useCallback(
@@ -385,9 +468,28 @@ export function AppProvider({ children }) {
   }, [showToast, t]);
 
   /* ---------- Like ---------- */
-  const toggleLike = useCallback((placeId) => {
-    setLikedPlaceIds((prev) => (prev.includes(placeId) ? prev.filter((id) => id !== placeId) : [...prev, placeId]));
-  }, []);
+  const toggleLike = useCallback(
+    async (placeId) => {
+      if (!user?.id) {
+        showToast(t("toastMustLogin"));
+        return;
+      }
+      const isLiked = likedPlaceIds.includes(placeId);
+      try {
+        if (isLiked) {
+          await removeLike(user.id, placeId);
+          setLikedPlaceIds((prev) => prev.filter((id) => id !== placeId));
+        } else {
+          await addLike(user.id, placeId);
+          setLikedPlaceIds((prev) => (prev.includes(placeId) ? prev : [...prev, placeId]));
+        }
+      } catch (e) {
+        console.error("Like xatosi:", e);
+        showToast(t("toastActionFailed", "Amal bajarilmadi"));
+      }
+    },
+    [user, likedPlaceIds, showToast, t],
+  );
 
   const updatePlaceName = useCallback(
     (name) => {
@@ -440,7 +542,6 @@ export function AppProvider({ children }) {
       const ticket = await rpcJoinQueue(currentPlaceId, `${user.first} ${user.last}`, "online");
       if (!ticket) return;
       setJoinedPlaceIds((prev) => (prev.includes(currentPlaceId) ? prev : [...prev, currentPlaceId]));
-      setDelaysUsed(0);
       setMyQueue({
         placeId: currentPlaceId,
         placeName: branch.name,
@@ -467,29 +568,29 @@ export function AppProvider({ children }) {
       }
     }
     setMyQueue(null);
-    setDelaysUsed(0);
     showToast(t("toastLeaveQueue"));
   }, [showToast, t]);
 
   const doDelay = useCallback(
     async (positions) => {
       const mq = myQueueRef.current;
-      if (!mq?.ticketId) return;
-      const isFree = delaysUsed === 0;
+      if (!mq?.ticketId) return false;
       try {
         await rpcDelayTicket(mq.ticketId, positions);
-        setDelaysUsed((d) => d + 1);
-        showToast(
-          isFree
-            ? `${t("toastDelayFree")} (+${positions} ${t("slot")})`
-            : `${t("toastDelayPaid")} (+${positions} ${t("slot")})`,
-        );
+        showToast(`${t("toastDelaySuccess")} (+${positions} ${t("slot")})`);
+        refreshUserCoins();
+        return true;
       } catch (e) {
         console.error("Kechiktirish xatosi:", e);
-        showToast(t("toastActionFailed", "Amal bajarilmadi"));
+        if (e.message?.includes("Yetarli coin yo'q")) {
+          showToast(t("toastNotEnoughCoins"));
+        } else {
+          showToast(t("toastActionFailed", "Amal bajarilmadi"));
+        }
+        return false;
       }
     },
-    [delaysUsed, showToast, t],
+    [showToast, t, refreshUserCoins],
   );
 
   /* ---------- Sharhlar (hozircha local) ---------- */
@@ -640,13 +741,14 @@ export function AppProvider({ children }) {
       user,
       currentPlace,
       myQueue,
-      delaysUsed,
       selectedRating,
       homeFilter,
       marketFilter,
       adminPlace,
       adminRole,
       adminQueue,
+      queueStats,
+      queueSeries,
       joinPreview,
       likedPlaceIds,
       likedPlaces,
@@ -663,6 +765,8 @@ export function AppProvider({ children }) {
       doRegister,
       logoutUser,
       editUserName,
+      updateUserPhone,
+      refreshUserCoins,
       doAdminLogin,
       adminLogout,
       openPlace,
@@ -690,13 +794,14 @@ export function AppProvider({ children }) {
       user,
       currentPlace,
       myQueue,
-      delaysUsed,
       selectedRating,
       homeFilter,
       marketFilter,
       adminPlace,
       adminRole,
       adminQueue,
+      queueStats,
+      queueSeries,
       joinPreview,
       likedPlaceIds,
       likedPlaces,
@@ -711,6 +816,8 @@ export function AppProvider({ children }) {
       doRegister,
       logoutUser,
       editUserName,
+      updateUserPhone,
+      refreshUserCoins,
       doAdminLogin,
       adminLogout,
       openPlace,

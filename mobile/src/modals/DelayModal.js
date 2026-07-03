@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import BottomSheetModal from "../components/BottomSheetModal";
 import PrimaryButton from "../components/PrimaryButton";
 import SecondaryButton from "../components/SecondaryButton";
@@ -9,19 +9,26 @@ import { useApp } from "../context/AppContext";
 import { fonts, radius } from "../theme/typography";
 
 const OPTIONS = [1, 2, 3];
+const DELAY_COST = 10;
 
 export default function DelayModal({ visible, onClose }) {
   const { colors } = useAppTheme();
   const { t } = useI18n();
-  const { delaysUsed, doDelay } = useApp();
+  const { doDelay } = useApp();
 
   const [selected, setSelected] = React.useState(1);
 
-  const isFreeDelay = delaysUsed === 0;
-
-  const onConfirm = () => {
-    doDelay(selected);
-    onClose();
+  const onPressDelay = () => {
+    Alert.alert(t("confirmDelayTitle"), t("confirmDelayMsg", `Kechiktirish uchun ${DELAY_COST} coin sarflanadi. Davom etasizmi?`), [
+      { text: t("btnCancel"), style: "cancel" },
+      {
+        text: t("btnConfirm"),
+        onPress: async () => {
+          const ok = await doDelay(selected);
+          if (ok) onClose();
+        },
+      },
+    ]);
   };
 
   return (
@@ -47,23 +54,21 @@ export default function DelayModal({ visible, onClose }) {
             >
               <Text style={[styles.optionNum, { color: colors.text, fontFamily: fonts.extrabold }]}>+{n}</Text>
               <Text style={[styles.optionSlot, { color: colors.text3 }]}>{t("slot")}</Text>
-              <Text style={[styles.optionPrice, { color: isFreeDelay ? colors.success : colors.amber, fontFamily: fonts.bold }]}>
-                {isFreeDelay ? t("free") : t("price")}
+              <Text style={[styles.optionPrice, { color: colors.amber, fontFamily: fonts.bold }]}>
+                {DELAY_COST} {t("coinWord")}
               </Text>
             </TouchableOpacity>
           );
         })}
       </View>
 
-      {!isFreeDelay && (
-        <View style={[styles.paidBadge, { backgroundColor: colors.accentSoft, borderColor: colors.accentBorder }]}>
-          <Text style={[styles.paidText, { color: colors.accent, fontFamily: fonts.semibold }]}>
-            {t("price")} so'm
-          </Text>
-        </View>
-      )}
+      <View style={[styles.paidBadge, { backgroundColor: colors.accentSoft, borderColor: colors.accentBorder }]}>
+        <Text style={[styles.paidText, { color: colors.accent, fontFamily: fonts.semibold }]}>
+          {DELAY_COST} {t("coinWord")}
+        </Text>
+      </View>
 
-      <PrimaryButton label={t("btnDelayConfirm")} onPress={onConfirm} style={styles.confirmBtn} />
+      <PrimaryButton label={t("btnDelayConfirm")} onPress={onPressDelay} style={styles.confirmBtn} />
       <SecondaryButton label={t("btnCancel")} onPress={onClose} />
     </BottomSheetModal>
   );

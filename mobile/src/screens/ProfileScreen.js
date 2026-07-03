@@ -7,7 +7,6 @@ import GlassCard from "../components/GlassCard";
 import Avatar from "../components/Avatar";
 import FadeInView from "../components/FadeInView";
 import LanguagePickerModal from "../modals/LanguagePickerModal";
-import PaymentCardModal from "../modals/PaymentCardModal";
 import SettingsModal from "../modals/SettingsModal";
 import { useAppTheme } from "../context/ThemeContext";
 import { useI18n } from "../context/I18nContext";
@@ -17,11 +16,10 @@ import { fonts, radius } from "../theme/typography";
 export default function ProfileScreen({ navigation }) {
   const { colors, isDark, toggleTheme } = useAppTheme();
   const { t, lang, langName } = useI18n();
-  const { user, logoutUser } = useApp();
+  const { user, logoutUser, refreshUserCoins } = useApp();
 
   const [notifEnabled, setNotifEnabled] = useState(true);
   const [langOpen, setLangOpen] = useState(false);
-  const [payOpen, setPayOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   const fullName = user ? `${user.first} ${user.last}` : "—";
@@ -55,6 +53,12 @@ export default function ProfileScreen({ navigation }) {
     }, [user]),
   );
 
+  useFocusEffect(
+    React.useCallback(() => {
+      refreshUserCoins();
+    }, [refreshUserCoins]),
+  );
+
   return (
     <LinearGradient colors={colors.bgGradient} style={styles.fill}>
       <FadeInView>
@@ -64,6 +68,18 @@ export default function ProfileScreen({ navigation }) {
             <Text style={[styles.name, { color: colors.text, fontFamily: fonts.extrabold }]}>{fullName}</Text>
             <Text style={[styles.phone, { color: colors.text2 }]}>{displayPhone}</Text>
           </TouchableOpacity>
+
+          <View style={[styles.coinCard, { backgroundColor: colors.accentSoft, borderColor: colors.accentBorder }]}>
+            <View style={[styles.coinIcon, { backgroundColor: colors.accent }]}>
+              <Ionicons name="star" size={18} color="#fff" />
+            </View>
+            <View style={styles.flex1}>
+              <Text style={[styles.coinLabel, { color: colors.text2 }]}>{t("myCoinsLabel")}</Text>
+              <Text style={[styles.coinValue, { color: colors.accent, fontFamily: fonts.mono }]}>
+                {user?.coins ?? 0} <Text style={[styles.coinUnit, { color: colors.accent }]}>{t("coinWord")}</Text>
+              </Text>
+            </View>
+          </View>
 
           <View style={styles.statsRow}>
             <GlassCard style={styles.statBox}>
@@ -112,15 +128,6 @@ export default function ProfileScreen({ navigation }) {
               <Text style={[styles.settingValue, { color: colors.text3 }]}>{langName(lang)} ›</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              onPress={() => setPayOpen(true)}
-              style={[styles.settingRow, { borderBottomWidth: 1, borderBottomColor: colors.border }]}
-            >
-              <Ionicons name="card" size={19} color={colors.accent} />
-              <Text style={[styles.settingLabel, { color: colors.text, fontFamily: fonts.semibold }]}>{t("paymentMethod")}</Text>
-              <Text style={[styles.settingValue, { color: colors.text3 }]}>{t("configure")} ›</Text>
-            </TouchableOpacity>
-
             <TouchableOpacity onPress={() => setSettingsOpen(true)} style={styles.settingRow}>
               <Ionicons name="settings-outline" size={19} color={colors.accent} />
               <Text style={[styles.settingLabel, { color: colors.text, fontFamily: fonts.semibold }]}>
@@ -142,7 +149,6 @@ export default function ProfileScreen({ navigation }) {
       </FadeInView>
 
       <LanguagePickerModal visible={langOpen} onClose={() => setLangOpen(false)} />
-      <PaymentCardModal visible={payOpen} onClose={() => setPayOpen(false)} />
       <SettingsModal visible={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </LinearGradient>
   );
@@ -154,6 +160,20 @@ const styles = StyleSheet.create({
   avatarWrap: { alignItems: "center", paddingVertical: 16, marginBottom: 6 },
   name: { fontSize: 21, marginTop: 12 },
   phone: { fontSize: 14, marginTop: 6 },
+  coinCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    padding: 14,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    marginBottom: 14,
+  },
+  coinIcon: { width: 38, height: 38, borderRadius: 12, alignItems: "center", justifyContent: "center" },
+  flex1: { flex: 1 },
+  coinLabel: { fontSize: 12.5, marginBottom: 2 },
+  coinValue: { fontSize: 20 },
+  coinUnit: { fontSize: 13 },
   statsRow: { flexDirection: "row", gap: 12, marginBottom: 14 },
   statBox: { flex: 1, alignItems: "center" },
   statVal: { fontSize: 26 },

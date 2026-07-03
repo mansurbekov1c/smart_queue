@@ -51,6 +51,8 @@ export default function AdminStatsScreen({ navigation }) {
     weeklyServed,
     monthlyServed,
     yearlyServed,
+    queueStats,
+    queueSeries,
   } = useApp();
   const insets = useSafeAreaInsets();
 
@@ -83,17 +85,17 @@ export default function AdminStatsScreen({ navigation }) {
 
   if (!adminPlace) return null;
 
-  // Chart data
-  const hourlyData = adminPlace?.hourlyData || [0, 2, 4, 6, 8, 7, 6, 9];
+  // Chart data — tickets jadvalidan real guruhlangan (AppContext -> api/stats.js)
+  const hourlyData = queueSeries.hourly;
   const hourLabels = ["9", "10", "11", "12", "13", "14", "15", "16"];
 
-  const weeklyDayData = [8, 12, 15, dailyServedCount + 4, 14, 22, 10];
+  const weeklyDayData = queueSeries.weekly;
   const weekDayLabels = ["Du", "Se", "Ch", "Pa", "Ju", "Sh", "Ya"];
 
-  const monthlyWeekData = [42, 68, weeklyServed - 20, 71];
+  const monthlyWeekData = queueSeries.monthly;
   const weekLabels = ["1-h", "2-h", "3-h", "4-h"];
 
-  const yearlyMonthData = [120, 145, 132, 160, 175, 190, 168, 182, 155, 200, 178, monthlyServed];
+  const yearlyMonthData = queueSeries.yearly;
   const monthLabels = ["Yan", "Fev", "Mar", "Apr", "May", "Iyn", "Iyl", "Avg", "Sen", "Okt", "Noy", "Dek"];
 
   // Period-specific data
@@ -112,8 +114,8 @@ export default function AdminStatsScreen({ navigation }) {
     weekly: {
       labelKey: "periodWeekly",
       served: weeklyServed,
-      rejected: rejectedCount + 12,
-      total: weeklyServed + rejectedCount + 12,
+      rejected: queueStats.week.rejected,
+      total: weeklyServed + queueStats.week.rejected,
       subKey: "statsSubDaily",
       chartData: weeklyDayData,
       chartLabels: weekDayLabels,
@@ -123,8 +125,8 @@ export default function AdminStatsScreen({ navigation }) {
     monthly: {
       labelKey: "periodMonthly",
       served: monthlyServed,
-      rejected: rejectedCount + 54,
-      total: monthlyServed + rejectedCount + 54,
+      rejected: queueStats.month.rejected,
+      total: monthlyServed + queueStats.month.rejected,
       subKey: "statsSubWeekly",
       chartData: monthlyWeekData,
       chartLabels: weekLabels,
@@ -134,8 +136,8 @@ export default function AdminStatsScreen({ navigation }) {
     yearly: {
       labelKey: "periodYearly",
       served: yearlyServed,
-      rejected: rejectedCount + 312,
-      total: yearlyServed + rejectedCount + 312,
+      rejected: queueStats.year.rejected,
+      total: yearlyServed + queueStats.year.rejected,
       subKey: "statsSubMonthly",
       chartData: yearlyMonthData,
       chartLabels: monthLabels,
