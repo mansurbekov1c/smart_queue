@@ -17,7 +17,7 @@ import { fonts, radius } from "../theme/typography";
 export default function MyQueueScreen({ navigation }) {
   const { colors } = useAppTheme();
   const { t } = useI18n();
-  const { myQueue, places, leaveQueue } = useApp();
+  const { myQueue, places, leaveQueue, queueCancelledInfo, clearQueueCancelledInfo } = useApp();
   const insets = useSafeAreaInsets();
   const [delayOpen, setDelayOpen] = useState(false);
 
@@ -26,15 +26,35 @@ export default function MyQueueScreen({ navigation }) {
       <LinearGradient colors={colors.bgGradient} style={styles.fill}>
         <HeaderBar title={t("myQueue")} showThemeToggle={false} />
         <View style={styles.emptyWrap}>
-          <Ionicons name="clipboard-outline" size={46} color={colors.text3} />
-          <Text style={[styles.emptyTitle, { color: colors.text, fontFamily: fonts.bold }]}>{t("myQueueNoActive")}</Text>
-          <Text style={[styles.emptySub, { color: colors.text3 }]}>{t("myQueueFind")}</Text>
-          <TouchableOpacity
-            onPress={() => navigation.navigate("Search")}
-            style={[styles.findBtn, { backgroundColor: colors.accent }]}
-          >
-            <Text style={[styles.findBtnText, { fontFamily: fonts.bold }]}>{t("myQueueSearchBtn")}</Text>
-          </TouchableOpacity>
+          {queueCancelledInfo ? (
+            <>
+              <Ionicons name="alert-circle-outline" size={46} color={colors.danger} />
+              <Text style={[styles.emptyTitle, { color: colors.text, fontFamily: fonts.bold }]}>
+                {t("queueCancelledNoticeTitle")}
+              </Text>
+              <Text style={[styles.emptySub, { color: colors.text3 }]}>
+                {queueCancelledInfo.placeName} — {t("queueCancelledNoticeBody")}
+              </Text>
+              <TouchableOpacity
+                onPress={clearQueueCancelledInfo}
+                style={[styles.findBtn, { backgroundColor: colors.accent }]}
+              >
+                <Text style={[styles.findBtnText, { fontFamily: fonts.bold }]}>{t("btnConfirm")}</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <>
+              <Ionicons name="clipboard-outline" size={46} color={colors.text3} />
+              <Text style={[styles.emptyTitle, { color: colors.text, fontFamily: fonts.bold }]}>{t("myQueueNoActive")}</Text>
+              <Text style={[styles.emptySub, { color: colors.text3 }]}>{t("myQueueFind")}</Text>
+              <TouchableOpacity
+                onPress={() => navigation.navigate("Search")}
+                style={[styles.findBtn, { backgroundColor: colors.accent }]}
+              >
+                <Text style={[styles.findBtnText, { fontFamily: fonts.bold }]}>{t("myQueueSearchBtn")}</Text>
+              </TouchableOpacity>
+            </>
+          )}
         </View>
       </LinearGradient>
     );

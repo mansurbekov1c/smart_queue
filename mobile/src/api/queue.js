@@ -12,6 +12,7 @@ export function mapTicket(row) {
     status: row.status,
     sortOrder: row.sort_order,
     userId: row.user_id,
+    delayCount: row.delay_count ?? 0,
     done: row.status === "done",
     current: row.status === "current",
     rejected: row.status === "rejected",

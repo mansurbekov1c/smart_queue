@@ -53,8 +53,8 @@ export default function AdminPanelScreen({ navigation }) {
     }, [adminPlace]),
   );
 
-  const current = useMemo(() => adminQueue.find((q) => q.current && !q.done && !q.rejected), [adminQueue]);
-  const waiting = useMemo(() => adminQueue.filter((q) => !q.done && !q.rejected && !q.current), [adminQueue]);
+  const current = useMemo(() => adminQueue.find((q) => q.status === "current"), [adminQueue]);
+  const waiting = useMemo(() => adminQueue.filter((q) => q.status === "waiting"), [adminQueue]);
   const next = waiting[0];
 
   if (!adminPlace) return null;

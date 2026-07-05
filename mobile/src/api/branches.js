@@ -17,14 +17,34 @@ function mapBranchRow(row, waitingCount = 0) {
     reviewCount: row.review_count,
     hours: row.hours,
     queueCount: waitingCount,
-    waitMin: waitingCount * 2,
+    avgServiceMinutes: row.avg_service_minutes,
+    waitMin: waitingCount * row.avg_service_minutes,
     currentNum: 0,
     isOpen: row.is_open,
     isFeatured: row.is_featured,
+    weeklySchedule: row.weekly_schedule,
+    serviceSampleCount: row.service_sample_count,
+    scheduleCalibratedAt: row.schedule_calibrated_at,
     distanceKm: null,
     queue: [],
     reviews: [],
     hourlyData: [0, 0, 0, 0, 0, 0, 0, 0],
+  };
+}
+
+/* Bitta filialning "branches" qatoridagi o'zgarishlariga (masalan
+   avg_service_minutes avtomatik kalibrovka qilinganda) real-time obuna. */
+export function subscribeBranchCalibration(branchId, onChange) {
+  const channel = supabase
+    .channel(`branch-calibration:${branchId}`)
+    .on(
+      "postgres_changes",
+      { event: "UPDATE", schema: "public", table: "branches", filter: `id=eq.${branchId}` },
+      (payload) => onChange(payload.new),
+    )
+    .subscribe();
+  return () => {
+    supabase.removeChannel(channel);
   };
 }
 

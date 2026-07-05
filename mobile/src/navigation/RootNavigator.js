@@ -8,6 +8,7 @@ import AdminTabs from "./AdminTabs";
 import PlaceDetailScreen from "../screens/PlaceDetailScreen";
 import DisplayScreen from "../screens/DisplayScreen";
 import SuperAdminDashboardScreen from "../screens/SuperAdminDashboardScreen";
+import WorkScheduleScreen from "../screens/WorkScheduleScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -25,6 +26,7 @@ export default function RootNavigator() {
       <Stack.Screen name="SuperAdminDashboard" component={SuperAdminDashboardScreen} options={{ animation: "fade" }} />
       <Stack.Screen name="PlaceDetail" component={PlaceDetailScreen} />
       <Stack.Screen name="Display" component={DisplayScreen} />
+      <Stack.Screen name="WorkSchedule" component={WorkScheduleScreen} />
     </Stack.Navigator>
   );
 }

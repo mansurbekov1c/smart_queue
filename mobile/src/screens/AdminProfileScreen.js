@@ -16,7 +16,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 export default function AdminProfileScreen({ navigation }) {
   const { colors, isDark, toggleTheme } = useAppTheme();
   const { t, lang, langName } = useI18n();
-  const { adminPlace, adminLogout, updatePlaceName } = useApp();
+  const { adminPlace, adminLogout, updatePlaceName, setBranchEmergencyClosed } = useApp();
   const insets = useSafeAreaInsets();
 
   const [langOpen, setLangOpen] = useState(false);
@@ -31,6 +31,21 @@ export default function AdminProfileScreen({ navigation }) {
 
   const saveName = () => {
     if (updatePlaceName(nameValue)) setEditingName(false);
+  };
+
+  const onToggleEmergencyClose = () => {
+    if (adminPlace?.isOpen) {
+      Alert.alert(t("confirmEmergencyCloseTitle"), t("confirmEmergencyCloseMsg"), [
+        { text: t("btnCancel"), style: "cancel" },
+        {
+          text: t("btnConfirm"),
+          style: "destructive",
+          onPress: () => setBranchEmergencyClosed(true),
+        },
+      ]);
+    } else {
+      setBranchEmergencyClosed(false);
+    }
   };
 
   const onLogout = () => {
@@ -116,12 +131,41 @@ export default function AdminProfileScreen({ navigation }) {
               <Text style={[styles.rowValue, { color: colors.text3 }]}>{langName(lang)} ›</Text>
             </TouchableOpacity>
 
+            <TouchableOpacity
+              onPress={() => navigation.navigate("WorkSchedule")}
+              style={[styles.row, { borderBottomWidth: 1, borderBottomColor: colors.border }]}
+            >
+              <Ionicons name="calendar-outline" size={19} color={colors.accent} />
+              <Text style={[styles.rowLabel, { color: colors.text, fontFamily: fonts.semibold }]}>
+                {t("workScheduleTitle")}
+              </Text>
+              <Ionicons name="chevron-forward" size={16} color={colors.text3} />
+            </TouchableOpacity>
+
             <TouchableOpacity onPress={() => setCredOpen(true)} style={styles.row}>
               <Ionicons name="settings-outline" size={19} color={colors.accent} />
               <Text style={[styles.rowLabel, { color: colors.text, fontFamily: fonts.semibold }]}>
                 {t("settingsBtnLabel")}
               </Text>
               <Ionicons name="chevron-forward" size={16} color={colors.text3} />
+            </TouchableOpacity>
+          </GlassCard>
+
+          <GlassCard style={styles.settingsCard}>
+            <TouchableOpacity onPress={onToggleEmergencyClose} style={styles.row}>
+              <Ionicons
+                name={adminPlace?.isOpen ? "close-circle-outline" : "checkmark-circle-outline"}
+                size={19}
+                color={adminPlace?.isOpen ? colors.danger : colors.success}
+              />
+              <Text
+                style={[
+                  styles.rowLabel,
+                  { color: adminPlace?.isOpen ? colors.danger : colors.success, fontFamily: fonts.semibold },
+                ]}
+              >
+                {adminPlace?.isOpen ? t("btnEmergencyClose") : t("btnReopenBranch")}
+              </Text>
             </TouchableOpacity>
           </GlassCard>
 

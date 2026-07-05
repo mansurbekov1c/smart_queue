@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { fetchBranches } from "../api/branches";
+import { fetchBranches, subscribeBranchCalibration } from "../api/branches";
 import { fetchProfile, fetchUserCoins } from "../api/profile";
 import { fetchLikedBranchIds, addLike, removeLike } from "../api/likes";
 import { fetchQueueStats, fetchHourlySeries, fetchWeeklySeries, fetchMonthlySeries, fetchYearlySeries } from "../api/stats";
@@ -44,6 +44,7 @@ export function AppProvider({ children }) {
   const [user, setUser] = useState(null);
   const [currentPlaceId, setCurrentPlaceId] = useState(null);
   const [myQueue, setMyQueue] = useState(null);
+  const [queueCancelledInfo, setQueueCancelledInfo] = useState(null);
   const [selectedRating, setSelectedRating] = useState(0);
   const [homeFilter, setHomeFilter] = useState("all");
   const [marketFilter, setMarketFilter] = useState("all");
@@ -181,6 +182,35 @@ export function AppProvider({ children }) {
     };
   }, [adminPlaceId]);
 
+  /* ---------- Admin: o'rtacha xizmat vaqti avtomatik kalibrovka bildirishnomasi ---------- */
+  useEffect(() => {
+    if (!adminPlaceId) return;
+    const unsub = subscribeBranchCalibration(adminPlaceId, (row) => {
+      setPlaces((prev) => {
+        const current = prev.find((p) => p.id === adminPlaceId);
+        const changed =
+          row.schedule_calibrated_at &&
+          row.schedule_calibrated_at !== current?.scheduleCalibratedAt;
+        if (changed) {
+          showToast(
+            t("toastAvgServiceUpdated").replace("{n}", String(row.avg_service_minutes)),
+          );
+        }
+        return prev.map((p) =>
+          p.id === adminPlaceId
+            ? {
+                ...p,
+                avgServiceMinutes: row.avg_service_minutes,
+                serviceSampleCount: row.service_sample_count,
+                scheduleCalibratedAt: row.schedule_calibrated_at,
+              }
+            : p,
+        );
+      });
+    });
+    return unsub;
+  }, [adminPlaceId, showToast, t]);
+
   /* ---------- Mijoz ko'rayotgan filial navbati: yuklash + realtime ---------- */
   useEffect(() => {
     if (!currentPlaceId) {
@@ -213,19 +243,37 @@ export function AppProvider({ children }) {
     if (!mq || mq.placeId !== currentPlaceId) return;
 
     const mine = currentQueue.find((q) => q.id === mq.ticketId);
-    if (!mine || mine.status === "done" || mine.status === "rejected") {
+    if (!mine || mine.status === "done" || mine.status === "rejected" || mine.status === "cancelled_by_branch") {
+      if (mine?.status === "cancelled_by_branch") {
+        setQueueCancelledInfo({ placeName: mq.placeName });
+        showToast(t("toastQueueCancelledByBranch"));
+      }
       // Xizmat ko'rsatildi yoki rad etildi/chiqib ketildi → navbatdan chiqarildi
       setMyQueue(null);
       return;
     }
+    const branch = places.find((p) => p.id === currentPlaceId);
+    const avgMinutes = branch?.avgServiceMinutes || 15;
     const activeList = currentQueue.filter((q) => q.status === "waiting" || q.status === "current");
     const idx = activeList.findIndex((q) => q.id === mq.ticketId);
     const ahead = idx < 0 ? 0 : idx;
+    const waitingAfter = currentQueue.filter(
+      (q) => q.status === "waiting" && q.sortOrder > mine.sortOrder,
+    ).length;
     setMyQueue((prev) =>
-      prev ? { ...prev, position: ahead, waitMin: ahead * 2, currentNum: currentMeta.currentNum } : prev,
+      prev
+        ? {
+            ...prev,
+            position: ahead,
+            waitMin: ahead * avgMinutes,
+            currentNum: currentMeta.currentNum,
+            delayCount: mine.delayCount,
+            maxDelayPositions: waitingAfter,
+          }
+        : prev,
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentQueue, currentMeta, currentPlaceId]);
+  }, [currentQueue, currentMeta, currentPlaceId, places]);
 
   /* ---------- Derived ---------- */
   const currentPlace = useMemo(() => {
@@ -237,7 +285,7 @@ export function AppProvider({ children }) {
       queue: activeList,
       queueCount: activeList.length,
       currentNum: currentMeta.currentNum,
-      waitMin: activeList.length * 2,
+      waitMin: activeList.length * (branch.avgServiceMinutes || 15),
       isOpen: currentMeta.isOpen && branch.isOpen,
     };
   }, [places, currentPlaceId, currentQueue, currentMeta]);
@@ -507,6 +555,69 @@ export function AppProvider({ children }) {
     [adminPlaceId],
   );
 
+  const updateBranchSchedule = useCallback(
+    async (weeklySchedule) => {
+      if (!adminPlaceId) return false;
+      const { error } = await supabase
+        .from("branches")
+        .update({ weekly_schedule: weeklySchedule })
+        .eq("id", adminPlaceId);
+      if (error) {
+        console.error("Ish jadvalini yangilash xatosi:", error);
+        showToast(t("toastActionFailed", "Amal bajarilmadi"));
+        return false;
+      }
+      setPlaces((prev) => prev.map((p) => (p.id === adminPlaceId ? { ...p, weeklySchedule } : p)));
+      showToast(t("toastCredSaved"));
+      return true;
+    },
+    [adminPlaceId, showToast, t],
+  );
+
+  const updateAvgServiceMinutes = useCallback(
+    async (minutes) => {
+      if (!adminPlaceId || !minutes || minutes < 1) return false;
+      const { error } = await supabase
+        .from("branches")
+        .update({ avg_service_minutes: minutes })
+        .eq("id", adminPlaceId);
+      if (error) {
+        console.error("O'rtacha xizmat vaqtini yangilash xatosi:", error);
+        showToast(t("toastActionFailed", "Amal bajarilmadi"));
+        return false;
+      }
+      setPlaces((prev) =>
+        prev.map((p) =>
+          p.id === adminPlaceId
+            ? { ...p, avgServiceMinutes: minutes, serviceSampleCount: 0, scheduleCalibratedAt: null }
+            : p,
+        ),
+      );
+      showToast(t("toastCredSaved"));
+      return true;
+    },
+    [adminPlaceId, showToast, t],
+  );
+
+  const setBranchEmergencyClosed = useCallback(
+    async (isClosed) => {
+      if (!adminPlaceId) return false;
+      const { error } = await supabase
+        .from("branches")
+        .update({ is_open: !isClosed })
+        .eq("id", adminPlaceId);
+      if (error) {
+        console.error("Filial holatini yangilash xatosi:", error);
+        showToast(t("toastActionFailed", "Amal bajarilmadi"));
+        return false;
+      }
+      setPlaces((prev) => prev.map((p) => (p.id === adminPlaceId ? { ...p, isOpen: !isClosed } : p)));
+      showToast(isClosed ? t("toastBranchClosedToday") : t("toastBranchReopened"));
+      return true;
+    },
+    [adminPlaceId, showToast, t],
+  );
+
   /* ---------- Joylar / qidiruv ---------- */
   const openPlace = useCallback((placeId) => {
     setCurrentPlaceId(placeId);
@@ -530,9 +641,10 @@ export function AppProvider({ children }) {
 
   const joinPreview = useMemo(() => {
     if (!currentPlaceId) return null;
+    const branch = places.find((p) => p.id === currentPlaceId);
     const activeList = currentQueue.filter((q) => q.status === "waiting" || q.status === "current");
-    return { num: currentMeta.nextNum, waitMin: activeList.length * 2 };
-  }, [currentPlaceId, currentQueue, currentMeta]);
+    return { num: currentMeta.nextNum, waitMin: activeList.length * (branch?.avgServiceMinutes || 15) };
+  }, [currentPlaceId, currentQueue, currentMeta, places]);
 
   const confirmJoin = useCallback(async () => {
     if (!currentPlaceId || !user) return;
@@ -542,6 +654,7 @@ export function AppProvider({ children }) {
       const ticket = await rpcJoinQueue(currentPlaceId, `${user.first} ${user.last}`, "online");
       if (!ticket) return;
       setJoinedPlaceIds((prev) => (prev.includes(currentPlaceId) ? prev : [...prev, currentPlaceId]));
+      setQueueCancelledInfo(null);
       setMyQueue({
         placeId: currentPlaceId,
         placeName: branch.name,
@@ -550,13 +663,26 @@ export function AppProvider({ children }) {
         position: 0,
         waitMin: 0,
         currentNum: currentMeta.currentNum,
+        delayCount: ticket.delayCount,
+        maxDelayPositions: 0,
       });
       showToast(`${t("toastJoinQueueSuccess")}: #${ticket.num}`);
     } catch (e) {
       console.error("Navbatga yozilish xatosi:", e);
-      showToast(t("toastActionFailed", "Amal bajarilmadi"));
+      const closedMessages = [
+        "Filial bugun texnik sabablarga ko'ra ishlamaydi",
+        "Filial bugun ishlamaydi",
+        "Bugun dam olish kuni",
+      ];
+      if (closedMessages.includes(e.message)) {
+        showToast(e.message);
+      } else {
+        showToast(t("toastActionFailed", "Amal bajarilmadi"));
+      }
     }
   }, [currentPlaceId, user, places, currentMeta, showToast, t]);
+
+  const clearQueueCancelledInfo = useCallback(() => setQueueCancelledInfo(null), []);
 
   const leaveQueue = useCallback(async () => {
     const mq = myQueueRef.current;
@@ -584,6 +710,10 @@ export function AppProvider({ children }) {
         console.error("Kechiktirish xatosi:", e);
         if (e.message?.includes("Yetarli coin yo'q")) {
           showToast(t("toastNotEnoughCoins"));
+        } else if (e.message?.includes("kechiktirish limitiga yetdingiz")) {
+          showToast(t("toastDelayLimitReached"));
+        } else if (e.message?.includes("navbatda faqat")) {
+          showToast(e.message);
         } else {
           showToast(t("toastActionFailed", "Amal bajarilmadi"));
         }
@@ -741,6 +871,7 @@ export function AppProvider({ children }) {
       user,
       currentPlace,
       myQueue,
+      queueCancelledInfo,
       selectedRating,
       homeFilter,
       marketFilter,
@@ -773,6 +904,7 @@ export function AppProvider({ children }) {
       canJoinQueue,
       confirmJoin,
       leaveQueue,
+      clearQueueCancelledInfo,
       doDelay,
       setRating,
       submitReview,
@@ -786,6 +918,9 @@ export function AppProvider({ children }) {
       verifyUserPass,
       toggleLike,
       updatePlaceName,
+      updateBranchSchedule,
+      updateAvgServiceMinutes,
+      setBranchEmergencyClosed,
     }),
     [
       places,
@@ -794,6 +929,7 @@ export function AppProvider({ children }) {
       user,
       currentPlace,
       myQueue,
+      queueCancelledInfo,
       selectedRating,
       homeFilter,
       marketFilter,
@@ -824,6 +960,7 @@ export function AppProvider({ children }) {
       canJoinQueue,
       confirmJoin,
       leaveQueue,
+      clearQueueCancelledInfo,
       doDelay,
       setRating,
       submitReview,
@@ -837,6 +974,9 @@ export function AppProvider({ children }) {
       verifyUserPass,
       toggleLike,
       updatePlaceName,
+      updateBranchSchedule,
+      updateAvgServiceMinutes,
+      setBranchEmergencyClosed,
     ],
   );
 
