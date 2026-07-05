@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useI18n } from "../context/I18nContext";
 import { fonts, radius } from "../theme/typography";
 
 const COUNTRY_CODES = [
@@ -24,6 +25,7 @@ const COUNTRY_CODES = [
 export { COUNTRY_CODES };
 
 export default function PhoneField({ label, onChangeText, colors, placeholder = "901234567" }) {
+  const { t } = useI18n();
   const [pickerVisible, setPickerVisible] = useState(false);
   const [search, setSearch] = useState("");
   const [selectedCountry, setSelectedCountry] = useState(COUNTRY_CODES[0]);
@@ -88,7 +90,7 @@ export default function PhoneField({ label, onChangeText, colors, placeholder = 
               <TextInput
                 value={search}
                 onChangeText={setSearch}
-                placeholder="Qidirish..."
+                placeholder={t("genericSearchPlaceholder")}
                 placeholderTextColor={colors.placeholder}
                 style={[styles.modalSearchInput, { color: colors.text, fontFamily: fonts.medium }]}
               />

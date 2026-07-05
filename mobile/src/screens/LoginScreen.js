@@ -17,12 +17,15 @@ import PhoneField from "../components/PhoneField";
 import { useAppTheme } from "../context/ThemeContext";
 import { useI18n } from "../context/I18nContext";
 import { useApp } from "../context/AppContext";
+import { useToast } from "../context/ToastContext";
+import { isLatinName } from "../utils/validation";
 import { fonts, radius } from "../theme/typography";
 
 export default function LoginScreen({ navigation }) {
   const { colors } = useAppTheme();
   const { t } = useI18n();
   const { doLogin, doRegister } = useApp();
+  const { showToast } = useToast();
 
   const [tab, setTab] = useState("login");
   const [email, setEmail] = useState("");
@@ -44,6 +47,10 @@ export default function LoginScreen({ navigation }) {
 
   const onRegister = async () => {
     if (submitting) return;
+    if (!isLatinName(first) || !isLatinName(last)) {
+      showToast(t("toastLatinOnly"));
+      return;
+    }
     setSubmitting(true);
     const ok = await doRegister(first, last, regPhone, regEmail, regPass);
     setSubmitting(false);
@@ -131,6 +138,7 @@ export default function LoginScreen({ navigation }) {
                   style={[styles.field, styles.half]}
                 />
               </View>
+              <Text style={[styles.hint, { color: colors.text3 }]}>{t("hintLatinOnly")}</Text>
               <PhoneField
                 label={t("labelPhone")}
                 onChangeText={setRegPhone}
@@ -180,6 +188,7 @@ const styles = StyleSheet.create({
   tabBtn: { flex: 1, paddingVertical: 11, borderRadius: 10, alignItems: "center" },
   tabText: { fontSize: 13.5 },
   field: { marginBottom: 14 },
+  hint: { fontSize: 11.5, marginTop: -6, marginBottom: 14 },
   row2: { flexDirection: "row", gap: 12 },
   half: { flex: 1 },
   submitBtn: { marginTop: 6 },

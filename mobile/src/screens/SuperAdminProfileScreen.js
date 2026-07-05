@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Alert, BackHandler, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, BackHandler, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { CommonActions, useFocusEffect } from "@react-navigation/native";
@@ -13,40 +13,14 @@ import { useApp } from "../context/AppContext";
 import { fonts, radius } from "../theme/typography";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-export default function AdminProfileScreen({ navigation }) {
+export default function SuperAdminProfileScreen({ navigation }) {
   const { colors, isDark, toggleTheme } = useAppTheme();
   const { t, lang, langName } = useI18n();
-  const { adminPlace, adminLogout, updatePlaceName, setBranchEmergencyClosed } = useApp();
+  const { adminEmail, adminLogout } = useApp();
   const insets = useSafeAreaInsets();
 
   const [langOpen, setLangOpen] = useState(false);
   const [credOpen, setCredOpen] = useState(false);
-  const [editingName, setEditingName] = useState(false);
-  const [nameValue, setNameValue] = useState("");
-
-  const startEditName = () => {
-    setNameValue(adminPlace?.name || "");
-    setEditingName(true);
-  };
-
-  const saveName = () => {
-    if (updatePlaceName(nameValue)) setEditingName(false);
-  };
-
-  const onToggleEmergencyClose = () => {
-    if (adminPlace?.isOpen) {
-      Alert.alert(t("confirmEmergencyCloseTitle"), t("confirmEmergencyCloseMsg"), [
-        { text: t("btnCancel"), style: "cancel" },
-        {
-          text: t("btnConfirm"),
-          style: "destructive",
-          onPress: () => setBranchEmergencyClosed(true),
-        },
-      ]);
-    } else {
-      setBranchEmergencyClosed(false);
-    }
-  };
 
   const onLogout = () => {
     Alert.alert(t("confirmLogout"), t("confirmLogoutMsg"), [
@@ -70,43 +44,28 @@ export default function AdminProfileScreen({ navigation }) {
       };
       const sub = BackHandler.addEventListener("hardwareBackPress", onBack);
       return () => sub.remove();
-    }, [adminPlace]),
+    }, []),
   );
 
   return (
     <LinearGradient colors={colors.bgGradient} style={styles.fill}>
       <FadeInView>
         <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
-          <Text style={[styles.headerTitle, { color: colors.text, fontFamily: fonts.extrabold }]}>{t("adminProfile")}</Text>
+          <Text style={[styles.headerTitle, { color: colors.text, fontFamily: fonts.extrabold }]}>
+            {t("superAdminDashboardTitle", "Super Admin")}
+          </Text>
         </View>
 
         <ScrollView contentContainerStyle={styles.content}>
           <View style={[styles.adminCard, { backgroundColor: colors.accentSoft, borderColor: colors.accentBorder }]}>
             <LinearGradient colors={[colors.gradientStart, colors.gradientEnd]} style={styles.adminAvatar}>
-              <Ionicons name="business" size={28} color="#fff" />
+              <Ionicons name="shield-checkmark" size={28} color="#fff" />
             </LinearGradient>
             <View style={styles.adminInfo}>
-              {editingName ? (
-                <TextInput
-                  value={nameValue}
-                  onChangeText={setNameValue}
-                  autoFocus
-                  onSubmitEditing={saveName}
-                  onBlur={saveName}
-                  style={[
-                    styles.adminName,
-                    styles.adminNameInput,
-                    { color: colors.text, fontFamily: fonts.extrabold, borderBottomColor: colors.accent },
-                  ]}
-                />
-              ) : (
-                <TouchableOpacity onPress={startEditName} activeOpacity={0.7}>
-                  <Text style={[styles.adminName, { color: colors.text, fontFamily: fonts.extrabold }]}>
-                    {adminPlace?.name || "—"}
-                  </Text>
-                </TouchableOpacity>
-              )}
-              <Text style={[styles.adminRole, { color: colors.accent, fontFamily: fonts.bold }]}>{t("adminRoleLabel")}</Text>
+              <Text style={[styles.adminName, { color: colors.text, fontFamily: fonts.extrabold }]} numberOfLines={1}>
+                {adminEmail || "—"}
+              </Text>
+              <Text style={[styles.adminRole, { color: colors.accent, fontFamily: fonts.bold }]}>{t("superAdminRoleLabel")}</Text>
             </View>
           </View>
 
@@ -131,41 +90,12 @@ export default function AdminProfileScreen({ navigation }) {
               <Text style={[styles.rowValue, { color: colors.text3 }]}>{langName(lang)} ›</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              onPress={() => navigation.navigate("WorkSchedule")}
-              style={[styles.row, { borderBottomWidth: 1, borderBottomColor: colors.border }]}
-            >
-              <Ionicons name="calendar-outline" size={19} color={colors.accent} />
-              <Text style={[styles.rowLabel, { color: colors.text, fontFamily: fonts.semibold }]}>
-                {t("workScheduleTitle")}
-              </Text>
-              <Ionicons name="chevron-forward" size={16} color={colors.text3} />
-            </TouchableOpacity>
-
             <TouchableOpacity onPress={() => setCredOpen(true)} style={styles.row}>
               <Ionicons name="settings-outline" size={19} color={colors.accent} />
               <Text style={[styles.rowLabel, { color: colors.text, fontFamily: fonts.semibold }]}>
                 {t("settingsBtnLabel")}
               </Text>
               <Ionicons name="chevron-forward" size={16} color={colors.text3} />
-            </TouchableOpacity>
-          </GlassCard>
-
-          <GlassCard style={styles.settingsCard}>
-            <TouchableOpacity onPress={onToggleEmergencyClose} style={styles.row}>
-              <Ionicons
-                name={adminPlace?.isOpen ? "close-circle-outline" : "checkmark-circle-outline"}
-                size={19}
-                color={adminPlace?.isOpen ? colors.danger : colors.success}
-              />
-              <Text
-                style={[
-                  styles.rowLabel,
-                  { color: adminPlace?.isOpen ? colors.danger : colors.success, fontFamily: fonts.semibold },
-                ]}
-              >
-                {adminPlace?.isOpen ? t("btnEmergencyClose") : t("btnReopenBranch")}
-              </Text>
             </TouchableOpacity>
           </GlassCard>
 
@@ -205,9 +135,8 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   adminAvatar: { width: 56, height: 56, borderRadius: 18, alignItems: "center", justifyContent: "center" },
-  adminInfo: { flex: 1 },
+  adminInfo: { flex: 1, minWidth: 0 },
   adminName: { fontSize: 16 },
-  adminNameInput: { paddingVertical: 2, borderBottomWidth: 1 },
   adminRole: { fontSize: 13, marginTop: 2 },
   settingsCard: { marginBottom: 12, paddingVertical: 4 },
   row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 14 },

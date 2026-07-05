@@ -9,6 +9,7 @@ import { useI18n } from "../context/I18nContext";
 import { useToast } from "../context/ToastContext";
 import { useApp } from "../context/AppContext";
 import { supabase } from "../lib/supabase";
+import { isLatinName } from "../utils/validation";
 import { fonts, radius } from "../theme/typography";
 
 export default function SettingsModal({ visible, onClose }) {
@@ -47,6 +48,10 @@ export default function SettingsModal({ visible, onClose }) {
   };
 
   const onSaveName = async () => {
+    if (!isLatinName(firstName) || !isLatinName(lastName)) {
+      showToast(t("toastLatinOnly"));
+      return;
+    }
     if (await editUserName(firstName, lastName)) {
       reset();
     }
@@ -54,7 +59,7 @@ export default function SettingsModal({ visible, onClose }) {
 
   const onSavePassword = async () => {
     if (!oldPass.trim()) {
-      showToast("❌ " + t("oldPass") + " kiriting");
+      showToast(t("toastOldPassRequired"));
       return;
     }
     if (!(await verifyUserPass(oldPass.trim()))) {
@@ -80,7 +85,7 @@ export default function SettingsModal({ visible, onClose }) {
 
   const onSavePhone = async () => {
     if (!newPhone.trim()) {
-      showToast("❌ " + t("newPhone") + " kiriting");
+      showToast(t("toastNewPhoneRequired"));
       return;
     }
     if (await updateUserPhone(newPhone)) {
@@ -167,6 +172,7 @@ export default function SettingsModal({ visible, onClose }) {
                 onChangeText={setLastName}
                 style={styles.field}
               />
+              <Text style={[styles.hint, { color: colors.text3 }]}>{t("hintLatinOnly")}</Text>
               <View style={styles.actions}>
                 <TouchableOpacity
                   onPress={() => setStep("menu")}
@@ -243,6 +249,7 @@ const styles = StyleSheet.create({
   menuIcon: { width: 40, height: 40, borderRadius: 12, alignItems: "center", justifyContent: "center" },
   menuLabel: { flex: 1, fontSize: 15 },
   field: { marginBottom: 12 },
+  hint: { fontSize: 11, marginTop: -4, marginBottom: 12 },
   actions: { flexDirection: "row", gap: 10, marginTop: 6 },
   cancelBtn: { borderWidth: 1, borderRadius: radius.md, alignItems: "center", justifyContent: "center", paddingVertical: 14, marginTop: 6 },
   cancelHalf: { flex: 1, borderWidth: 1, borderRadius: radius.md, alignItems: "center", justifyContent: "center", paddingVertical: 14 },

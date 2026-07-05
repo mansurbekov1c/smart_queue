@@ -35,7 +35,7 @@ export default function DelayModal({ visible, onClose }) {
 
   const onPressDelay = () => {
     if (!canDelay) return;
-    Alert.alert(t("confirmDelayTitle"), t("confirmDelayMsg", `Kechiktirish uchun ${DELAY_COST} coin sarflanadi. Davom etasizmi?`), [
+    Alert.alert(t("confirmDelayTitle"), t("confirmDelayMsg"), [
       { text: t("btnCancel"), style: "cancel" },
       {
         text: t("btnConfirm"),

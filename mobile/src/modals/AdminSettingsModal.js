@@ -37,7 +37,7 @@ export default function AdminSettingsModal({ visible, onClose }) {
 
   const onSaveLogin = () => {
     if (!newLogin.trim()) {
-      showToast("❌ " + t("newLogin") + " kiriting");
+      showToast(t("toastNewLoginRequired"));
       return;
     }
     showToast(t("toastCredSaved"));
@@ -46,7 +46,7 @@ export default function AdminSettingsModal({ visible, onClose }) {
 
   const onSavePassword = async () => {
     if (!oldPass.trim()) {
-      showToast("❌ " + t("oldPass") + " kiriting");
+      showToast(t("toastOldPassRequired"));
       return;
     }
     if (!(await verifyAdminPass(oldPass.trim()))) {
@@ -138,6 +138,7 @@ export default function AdminSettingsModal({ visible, onClose }) {
                 value={newLogin}
                 onChangeText={setNewLogin}
                 autoCapitalize="none"
+                keyboardType="email-address"
                 style={styles.field}
               />
               <View style={styles.actions}>

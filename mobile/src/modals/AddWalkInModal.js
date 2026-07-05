@@ -7,17 +7,24 @@ import SecondaryButton from "../components/SecondaryButton";
 import { useAppTheme } from "../context/ThemeContext";
 import { useI18n } from "../context/I18nContext";
 import { useApp } from "../context/AppContext";
+import { useToast } from "../context/ToastContext";
+import { isLatinName } from "../utils/validation";
 import { fonts } from "../theme/typography";
 
 export default function AddWalkInModal({ visible, onClose }) {
   const { colors } = useAppTheme();
   const { t } = useI18n();
+  const { showToast } = useToast();
   const { addWalkIn } = useApp();
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
 
   const onSubmit = async () => {
+    if (!isLatinName(name)) {
+      showToast(t("toastLatinOnly"));
+      return;
+    }
     if (await addWalkIn(name)) {
       setName("");
       setPhone("");
@@ -37,6 +44,7 @@ export default function AddWalkInModal({ visible, onClose }) {
         onChangeText={setName}
         style={styles.field}
       />
+      <Text style={[styles.hint, { color: colors.text3 }]}>{t("hintLatinOnly")}</Text>
       <InputField
         label={t("labelPhoneOpt")}
         placeholder={t("walkinPhonePlaceholder")}
@@ -56,5 +64,6 @@ const styles = StyleSheet.create({
   title: { fontSize: 19 },
   sub: { fontSize: 13.5, marginTop: 4, marginBottom: 18 },
   field: { marginBottom: 14 },
+  hint: { fontSize: 11, marginTop: -8, marginBottom: 14 },
   confirmBtn: { marginBottom: 10 },
 });

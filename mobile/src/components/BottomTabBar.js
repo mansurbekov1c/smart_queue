@@ -14,6 +14,9 @@ const ICONS = {
   AdminHome: ["home", "home-outline"],
   AdminStats: ["bar-chart", "bar-chart-outline"],
   AdminProfile: ["person-circle", "person-circle-outline"],
+  SuperAdminHome: ["home", "home-outline"],
+  SuperAdminStats: ["bar-chart", "bar-chart-outline"],
+  SuperAdminProfile: ["person-circle", "person-circle-outline"],
 };
 
 const LABEL_KEYS = {
@@ -24,6 +27,9 @@ const LABEL_KEYS = {
   AdminHome: "navHome",
   AdminStats: "navAdminStats",
   AdminProfile: "navProfile",
+  SuperAdminHome: "navHome",
+  SuperAdminStats: "navAdminStats",
+  SuperAdminProfile: "navProfile",
 };
 
 export default function BottomTabBar({ state, navigation }) {
@@ -81,6 +87,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 8 },
     elevation: 10,
   },
-  tab: { alignItems: "center", gap: 3, paddingVertical: 2, paddingHorizontal: 8 },
+  tab: { flex: 1, alignItems: "center", gap: 3, paddingVertical: 2, paddingHorizontal: 8 },
   label: { fontSize: 10.5 },
 });
