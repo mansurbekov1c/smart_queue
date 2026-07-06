@@ -23,7 +23,7 @@ export default function PlaceDetailScreen({ route, navigation }) {
   const { placeId } = route.params;
   const { colors } = useAppTheme();
   const { t } = useI18n();
-  const { openPlace, currentPlace, myQueue, user, selectedRating, setRating, submitReview, canJoinQueue, joinedPlaceIds, likedPlaceIds, toggleLike } = useApp();
+  const { openPlace, currentPlace, myQueues, user, selectedRating, setRating, submitReview, canJoinQueue, joinedPlaceIds, likedPlaceIds, toggleLike } = useApp();
   const insets = useSafeAreaInsets();
 
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -162,7 +162,7 @@ export default function PlaceDetailScreen({ route, navigation }) {
               <Text style={{ color: colors.text3, textAlign: "center", padding: 12 }}>{t("emptyQueue")}</Text>
             ) : (
               place.queue.slice(0, 8).map((q, i) => {
-                const isMe = myQueue && myQueue.placeId === place.id && myQueue.num === q.num;
+                const isMe = myQueues.some((mq) => mq.placeId === place.id && mq.num === q.num);
                 return (
                   <QueueRow
                     key={q.num}

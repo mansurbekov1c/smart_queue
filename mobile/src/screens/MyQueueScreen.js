@@ -17,11 +17,11 @@ import { fonts, radius } from "../theme/typography";
 export default function MyQueueScreen({ navigation }) {
   const { colors } = useAppTheme();
   const { t } = useI18n();
-  const { myQueue, places, leaveQueue, queueCancelledInfo, clearQueueCancelledInfo } = useApp();
+  const { myQueues, places, leaveQueue, queueCancelledInfo, clearQueueCancelledInfo } = useApp();
   const insets = useSafeAreaInsets();
-  const [delayOpen, setDelayOpen] = useState(false);
+  const [delayQueue, setDelayQueue] = useState(null);
 
-  if (!myQueue) {
+  if (myQueues.length === 0) {
     return (
       <LinearGradient colors={colors.bgGradient} style={styles.fill}>
         <HeaderBar title={t("myQueue")} showThemeToggle={false} />
@@ -60,75 +60,80 @@ export default function MyQueueScreen({ navigation }) {
     );
   }
 
-  const place = places.find((p) => p.id === myQueue.placeId);
-  const ahead = Math.max(0, myQueue.position);
-  const progress = Math.min(1, Math.max(0.06, 1 - ahead / Math.max(1, myQueue.num)));
-
   return (
     <View style={[styles.fill, { backgroundColor: colors.bgGradient[0] }]}>
       <LinearGradient colors={colors.bgGradient} style={styles.fill}>
         <HeaderBar title={t("myQueue")} />
         <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 110 }}>
-          <LinearGradient colors={[colors.gradientStart, colors.gradientMid, colors.gradientEnd]} style={styles.hero}>
-            <View style={styles.heroTop}>
-              <Text style={styles.heroPlace} numberOfLines={1}>
-                {myQueue.placeName.toUpperCase()}
-              </Text>
-              <View style={styles.liveWrap}>
-                <LiveDot size={7} />
-                <Text style={styles.liveText}>{t("live")}</Text>
-              </View>
-            </View>
-            <View style={styles.numRow}>
-              <Text style={[styles.bigNum, { fontFamily: fonts.mono }]}>#{myQueue.num}</Text>
-              <Text style={styles.yourPos}>{t("yourPlace")}</Text>
-            </View>
-            <View style={styles.aheadRow}>
-              <Text style={styles.aheadText}>
-                {t("peopleAhead")} {ahead} {t("peopleAheadSuffix")}
-              </Text>
-              <Text style={styles.aheadText}>
-                {t("nowNum")}: #{myQueue.currentNum ?? "—"}
-              </Text>
-            </View>
-            <View style={styles.progressTrack}>
-              <View style={[styles.progressFill, { width: `${Math.round(progress * 100)}%` }]} />
-            </View>
-            <View style={styles.statsRow}>
-              <View style={styles.statBox}>
-                <Text style={[styles.statVal, { fontFamily: fonts.mono }]}>~{myQueue.waitMin}</Text>
-                <Text style={styles.statLbl}>{t("minutesWaitWord")}</Text>
-              </View>
-              <View style={styles.statBox}>
-                <Text style={[styles.statVal, { fontFamily: fonts.mono }]}>{place?.hours?.split("–")[0]?.trim() || "—"}</Text>
-                <Text style={styles.statLbl}>{t("approxTime")}</Text>
-              </View>
-            </View>
-          </LinearGradient>
+          {myQueues.map((mq) => {
+            const place = places.find((p) => p.id === mq.placeId);
+            const ahead = Math.max(0, mq.position);
+            const progress = Math.min(1, Math.max(0.06, 1 - ahead / Math.max(1, mq.num)));
+            return (
+              <View key={mq.ticketId} style={styles.queueBlock}>
+                <LinearGradient colors={[colors.gradientStart, colors.gradientMid, colors.gradientEnd]} style={styles.hero}>
+                  <View style={styles.heroTop}>
+                    <Text style={styles.heroPlace} numberOfLines={1}>
+                      {mq.placeName.toUpperCase()}
+                    </Text>
+                    <View style={styles.liveWrap}>
+                      <LiveDot size={7} />
+                      <Text style={styles.liveText}>{t("live")}</Text>
+                    </View>
+                  </View>
+                  <View style={styles.numRow}>
+                    <Text style={[styles.bigNum, { fontFamily: fonts.mono }]}>#{mq.num}</Text>
+                    <Text style={styles.yourPos}>{t("yourPlace")}</Text>
+                  </View>
+                  <View style={styles.aheadRow}>
+                    <Text style={styles.aheadText}>
+                      {t("peopleAhead")} {ahead} {t("peopleAheadSuffix")}
+                    </Text>
+                    <Text style={styles.aheadText}>
+                      {t("nowNum")}: #{mq.currentNum ?? "—"}
+                    </Text>
+                  </View>
+                  <View style={styles.progressTrack}>
+                    <View style={[styles.progressFill, { width: `${Math.round(progress * 100)}%` }]} />
+                  </View>
+                  <View style={styles.statsRow}>
+                    <View style={styles.statBox}>
+                      <Text style={[styles.statVal, { fontFamily: fonts.mono }]}>~{mq.waitMin}</Text>
+                      <Text style={styles.statLbl}>{t("minutesWaitWord")}</Text>
+                    </View>
+                    <View style={styles.statBox}>
+                      <Text style={[styles.statVal, { fontFamily: fonts.mono }]}>{place?.hours?.split("–")[0]?.trim() || "—"}</Text>
+                      <Text style={styles.statLbl}>{t("approxTime")}</Text>
+                    </View>
+                  </View>
+                </LinearGradient>
 
-          <View style={styles.actionsRow}>
-            <SecondaryButton label={t("myQueueDelay")} icon="time-outline" onPress={() => setDelayOpen(true)} style={styles.flex1} />
-            <SecondaryButton label={t("myQueueLeave")} icon="close" danger onPress={leaveQueue} style={styles.flex1} />
-          </View>
+                <View style={styles.actionsRow}>
+                  <SecondaryButton label={t("myQueueDelay")} icon="time-outline" onPress={() => setDelayQueue(mq)} style={styles.flex1} />
+                  <SecondaryButton label={t("myQueueLeave")} icon="close" danger onPress={() => leaveQueue(mq.ticketId)} style={styles.flex1} />
+                </View>
 
-          {place ? (
-            <GlassCard style={styles.placeCard}>
-              <TouchableOpacity
-                style={styles.placeRow}
-                onPress={() => navigation.navigate("PlaceDetail", { placeId: place.id })}
-              >
-                <View style={[styles.placeIcon, { backgroundColor: colors.iconChipBgStart }]}>
-                  <Ionicons name={CAT_ICONS[place.cat] || "business"} size={22} color={colors.accent} />
-                </View>
-                <View style={styles.flex1}>
-                  <Text style={[styles.placeName, { color: colors.text, fontFamily: fonts.bold }]}>{place.name}</Text>
-                  <Text style={[styles.placeMeta, { color: colors.text2 }]}>{place.location.district}</Text>
-                  <Text style={[styles.placeMeta, { color: colors.text2 }]}>{place.hours}</Text>
-                </View>
-                <Ionicons name="chevron-forward" size={18} color={colors.text3} />
-              </TouchableOpacity>
-            </GlassCard>
-          ) : null}
+                {place ? (
+                  <GlassCard style={styles.placeCard}>
+                    <TouchableOpacity
+                      style={styles.placeRow}
+                      onPress={() => navigation.navigate("PlaceDetail", { placeId: place.id })}
+                    >
+                      <View style={[styles.placeIcon, { backgroundColor: colors.iconChipBgStart }]}>
+                        <Ionicons name={CAT_ICONS[place.cat] || "business"} size={22} color={colors.accent} />
+                      </View>
+                      <View style={styles.flex1}>
+                        <Text style={[styles.placeName, { color: colors.text, fontFamily: fonts.bold }]}>{place.name}</Text>
+                        <Text style={[styles.placeMeta, { color: colors.text2 }]}>{place.location.district}</Text>
+                        <Text style={[styles.placeMeta, { color: colors.text2 }]}>{place.hours}</Text>
+                      </View>
+                      <Ionicons name="chevron-forward" size={18} color={colors.text3} />
+                    </TouchableOpacity>
+                  </GlassCard>
+                ) : null}
+              </View>
+            );
+          })}
 
           <View style={[styles.notice, { backgroundColor: colors.glassBg, borderColor: colors.glassBorder }]}>
             <View style={[styles.noticeIcon, { backgroundColor: colors.iconChipBgStart }]}>
@@ -139,7 +144,7 @@ export default function MyQueueScreen({ navigation }) {
         </ScrollView>
       </LinearGradient>
 
-      <DelayModal visible={delayOpen} onClose={() => setDelayOpen(false)} />
+      <DelayModal visible={!!delayQueue} queue={delayQueue} onClose={() => setDelayQueue(null)} />
     </View>
   );
 }
@@ -151,6 +156,7 @@ const styles = StyleSheet.create({
   emptySub: { fontSize: 13, textAlign: "center", marginBottom: 18 },
   findBtn: { paddingVertical: 12, paddingHorizontal: 26, borderRadius: radius.md },
   findBtnText: { color: "#fff", fontSize: 14 },
+  queueBlock: { marginBottom: 20 },
   hero: { borderRadius: radius.xxl, padding: 22, marginBottom: 14 },
   heroTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 6 },
   heroPlace: { color: "rgba(255,255,255,0.85)", fontSize: 11.5, fontWeight: "700", letterSpacing: 0.4, flex: 1 },
@@ -169,7 +175,7 @@ const styles = StyleSheet.create({
   statLbl: { color: "rgba(255,255,255,0.8)", fontSize: 10.5, marginTop: 2 },
   actionsRow: { flexDirection: "row", gap: 10, marginBottom: 14 },
   flex1: { flex: 1 },
-  placeCard: { marginBottom: 14 },
+  placeCard: { marginBottom: 0 },
   placeRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   placeIcon: { width: 48, height: 48, borderRadius: 14, alignItems: "center", justifyContent: "center" },
   placeName: { fontSize: 15 },

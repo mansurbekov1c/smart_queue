@@ -12,13 +12,13 @@ const OPTIONS = [1, 2, 3];
 const DELAY_COST = 10;
 const MAX_DELAYS_PER_TICKET = 2;
 
-export default function DelayModal({ visible, onClose }) {
+export default function DelayModal({ visible, queue, onClose }) {
   const { colors } = useAppTheme();
   const { t } = useI18n();
-  const { myQueue, doDelay } = useApp();
+  const { doDelay } = useApp();
 
-  const delayCount = myQueue?.delayCount ?? 0;
-  const maxDelayPositions = myQueue?.maxDelayPositions ?? 0;
+  const delayCount = queue?.delayCount ?? 0;
+  const maxDelayPositions = queue?.maxDelayPositions ?? 0;
   const limitReached = delayCount >= MAX_DELAYS_PER_TICKET;
   const availableOptions = OPTIONS.filter((n) => n <= maxDelayPositions);
 
@@ -40,7 +40,7 @@ export default function DelayModal({ visible, onClose }) {
       {
         text: t("btnConfirm"),
         onPress: async () => {
-          const ok = await doDelay(selected);
+          const ok = await doDelay(queue?.ticketId, selected);
           if (ok) onClose();
         },
       },

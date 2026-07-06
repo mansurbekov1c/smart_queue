@@ -6,6 +6,7 @@ import { fetchLikedBranchIds, addLike, removeLike } from "../api/likes";
 import { fetchQueueStats, fetchHourlySeries, fetchWeeklySeries, fetchMonthlySeries, fetchYearlySeries } from "../api/stats";
 import {
   fetchBranchQueue,
+  fetchMyActiveTickets,
   subscribeBranchQueue,
   rpcJoinQueue,
   rpcAdvanceQueue,
@@ -45,7 +46,7 @@ export function AppProvider({ children }) {
   const [role, setRole] = useState("customer");
   const [user, setUser] = useState(null);
   const [currentPlaceId, setCurrentPlaceId] = useState(null);
-  const [myQueue, setMyQueue] = useState(null);
+  const [myQueues, setMyQueues] = useState([]);
   const [queueCancelledInfo, setQueueCancelledInfo] = useState(null);
   const [selectedRating, setSelectedRating] = useState(0);
   const [homeFilter, setHomeFilter] = useState("all");
@@ -61,11 +62,17 @@ export function AppProvider({ children }) {
   const [likedPlaceIds, setLikedPlaceIds] = useState([]);
   const [joinedPlaceIds, setJoinedPlaceIds] = useState([]);
 
-  // myQueue'ning eng so'nggi qiymatini effektlar/callbacklardan o'qish uchun (loopsiz)
-  const myQueueRef = useRef(null);
+  // myQueues'ning eng so'nggi qiymatini effektlar/callbacklardan o'qish uchun (loopsiz)
+  const myQueuesRef = useRef([]);
   useEffect(() => {
-    myQueueRef.current = myQueue;
-  }, [myQueue]);
+    myQueuesRef.current = myQueues;
+  }, [myQueues]);
+
+  // places'ning eng so'nggi qiymatini re-subscribe qilmasdan o'qish uchun
+  const placesRef = useRef([]);
+  useEffect(() => {
+    placesRef.current = places;
+  }, [places]);
 
   /* ---------- Mavjud Supabase sessiyasini tiklash (ilova qayta ochilganda) ----------
      Supabase klienti sessiyani AsyncStorage'da saqlaydi (lib/supabase.js).
@@ -254,46 +261,105 @@ export function AppProvider({ children }) {
     };
   }, [currentPlaceId]);
 
-  /* ---------- myQueue'ni jonli yangilash (mijoz ko'rayotgan filial bo'yicha) ---------- */
-  useEffect(() => {
-    const mq = myQueueRef.current;
-    if (!mq || mq.placeId !== currentPlaceId) return;
+  /* ---------- Foydalanuvchining barcha faol navbatlarini yuklash
+     (login / sessiya tiklanganda), logout'da tozalash ---------- */
+  const refreshMyQueues = useCallback(async (userId) => {
+    try {
+      const tickets = await fetchMyActiveTickets(userId);
+      setMyQueues((prev) =>
+        tickets.map((tk) => {
+          const existing = prev.find((q) => q.ticketId === tk.id);
+          if (existing) return existing;
+          const branch = placesRef.current.find((p) => p.id === tk.branchId);
+          return {
+            placeId: tk.branchId,
+            placeName: branch?.name || "",
+            ticketId: tk.id,
+            num: tk.num,
+            position: 0,
+            waitMin: 0,
+            currentNum: 0,
+            delayCount: tk.delayCount,
+            maxDelayPositions: 0,
+          };
+        }),
+      );
+    } catch (e) {
+      console.error("Faol navbatlarni yuklash xatosi:", e);
+    }
+  }, []);
 
-    const mine = currentQueue.find((q) => q.id === mq.ticketId);
-    if (!mine || mine.status === "done" || mine.status === "rejected" || mine.status === "cancelled_by_branch") {
-      if (mine?.status === "cancelled_by_branch") {
-        setQueueCancelledInfo({ placeName: mq.placeName });
-        showToast(t("toastQueueCancelledByBranch"));
-      }
-      if (mine?.status === "done") {
-        refreshUserStats();
-      }
-      // Xizmat ko'rsatildi yoki rad etildi/chiqib ketildi → navbatdan chiqarildi
-      setMyQueue(null);
+  useEffect(() => {
+    if (!user?.id) {
+      setMyQueues([]);
       return;
     }
-    const branch = places.find((p) => p.id === currentPlaceId);
-    const avgMinutes = branch?.avgServiceMinutes || 15;
-    const activeList = currentQueue.filter((q) => q.status === "waiting" || q.status === "current");
-    const idx = activeList.findIndex((q) => q.id === mq.ticketId);
-    const ahead = idx < 0 ? 0 : idx;
-    const waitingAfter = currentQueue.filter(
-      (q) => q.status === "waiting" && q.sortOrder > mine.sortOrder,
-    ).length;
-    setMyQueue((prev) =>
-      prev
-        ? {
-            ...prev,
-            position: ahead,
-            waitMin: ahead * avgMinutes,
-            currentNum: currentMeta.currentNum,
-            delayCount: mine.delayCount,
-            maxDelayPositions: waitingAfter,
+    refreshMyQueues(user.id);
+  }, [user?.id, refreshMyQueues]);
+
+  /* ---------- Har bir faol navbatni mustaqil ravishda jonli yangilash.
+     myQueues'dagi har bir filialga alohida realtime obuna; o'zgarishda
+     shu filialning navbati qayta hisoblanadi. Chipta done/rejected/
+     cancelled bo'lsa — ro'yxatdan olib tashlanadi. ---------- */
+  const myQueueBranchIds = useMemo(
+    () => [...new Set(myQueues.map((q) => q.placeId))].sort().join(","),
+    [myQueues],
+  );
+
+  useEffect(() => {
+    if (!user?.id || !myQueueBranchIds) return;
+    const branchIds = myQueueBranchIds.split(",").filter(Boolean);
+
+    const recompute = (branchId) =>
+      fetchBranchQueue(branchId)
+        .then(({ tickets, currentNum }) => {
+          const entry = myQueuesRef.current.find((q) => q.placeId === branchId);
+          if (!entry) return;
+          const mine = tickets.find((tk) => tk.id === entry.ticketId);
+          if (!mine || mine.status === "done" || mine.status === "rejected" || mine.status === "cancelled_by_branch") {
+            if (mine?.status === "cancelled_by_branch") {
+              setQueueCancelledInfo({ placeName: entry.placeName });
+              showToast(t("toastQueueCancelledByBranch"));
+            }
+            if (mine?.status === "done") {
+              refreshUserStats();
+            }
+            setMyQueues((prev) => prev.filter((q) => q.ticketId !== entry.ticketId));
+            return;
           }
-        : prev,
-    );
+          const branch = placesRef.current.find((p) => p.id === branchId);
+          const avgMinutes = branch?.avgServiceMinutes || 15;
+          const activeList = tickets.filter((tk) => tk.status === "waiting" || tk.status === "current");
+          const idx = activeList.findIndex((tk) => tk.id === entry.ticketId);
+          const ahead = idx < 0 ? 0 : idx;
+          const waitingAfter = tickets.filter(
+            (tk) => tk.status === "waiting" && tk.sortOrder > mine.sortOrder,
+          ).length;
+          setMyQueues((prev) =>
+            prev.map((q) =>
+              q.ticketId === entry.ticketId
+                ? {
+                    ...q,
+                    placeName: branch?.name || q.placeName,
+                    position: ahead,
+                    waitMin: ahead * avgMinutes,
+                    currentNum,
+                    delayCount: mine.delayCount,
+                    maxDelayPositions: waitingAfter,
+                  }
+                : q,
+            ),
+          );
+        })
+        .catch((e) => console.error("Navbatni jonli yangilash xatosi:", e));
+
+    const unsubs = branchIds.map((branchId) => {
+      recompute(branchId);
+      return subscribeBranchQueue(branchId, () => recompute(branchId), `myq-${branchId}`);
+    });
+    return () => unsubs.forEach((u) => u());
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentQueue, currentMeta, currentPlaceId, places]);
+  }, [myQueueBranchIds, user?.id]);
 
   /* ---------- Derived ---------- */
   const currentPlace = useMemo(() => {
@@ -432,7 +498,7 @@ export function AppProvider({ children }) {
   const logoutUser = useCallback(async () => {
     await supabase.auth.signOut();
     setUser(null);
-    setMyQueue(null);
+    setMyQueues([]);
     setJoinedPlaceIds([]);
   }, []);
 
@@ -682,12 +748,12 @@ export function AppProvider({ children }) {
       showToast(t("toastPlaceClosed"));
       return { ok: false, reason: "closed" };
     }
-    if (myQueue) {
+    if (myQueues.some((q) => q.placeId === currentPlace.id)) {
       showToast(t("toastQueueAlreadyActive"));
       return { ok: false, reason: "active" };
     }
     return { ok: true };
-  }, [user, currentPlace, myQueue, showToast, t]);
+  }, [user, currentPlace, myQueues, showToast, t]);
 
   const joinPreview = useMemo(() => {
     if (!currentPlaceId) return null;
@@ -705,17 +771,20 @@ export function AppProvider({ children }) {
       if (!ticket) return;
       setJoinedPlaceIds((prev) => (prev.includes(currentPlaceId) ? prev : [...prev, currentPlaceId]));
       setQueueCancelledInfo(null);
-      setMyQueue({
-        placeId: currentPlaceId,
-        placeName: branch.name,
-        ticketId: ticket.id,
-        num: ticket.num,
-        position: 0,
-        waitMin: 0,
-        currentNum: currentMeta.currentNum,
-        delayCount: ticket.delayCount,
-        maxDelayPositions: 0,
-      });
+      setMyQueues((prev) => [
+        ...prev.filter((q) => q.placeId !== currentPlaceId),
+        {
+          placeId: currentPlaceId,
+          placeName: branch.name,
+          ticketId: ticket.id,
+          num: ticket.num,
+          position: 0,
+          waitMin: 0,
+          currentNum: currentMeta.currentNum,
+          delayCount: ticket.delayCount,
+          maxDelayPositions: 0,
+        },
+      ]);
       showToast(`${t("toastJoinQueueSuccess")}: #${ticket.num}`);
     } catch (e) {
       console.error("Navbatga yozilish xatosi:", e);
@@ -734,25 +803,24 @@ export function AppProvider({ children }) {
 
   const clearQueueCancelledInfo = useCallback(() => setQueueCancelledInfo(null), []);
 
-  const leaveQueue = useCallback(async () => {
-    const mq = myQueueRef.current;
-    if (mq?.ticketId) {
-      try {
-        await rpcLeaveQueue(mq.ticketId);
-      } catch (e) {
-        console.error("Navbatdan chiqish xatosi:", e);
-      }
+  const leaveQueue = useCallback(async (ticketId) => {
+    const target = ticketId || myQueuesRef.current[0]?.ticketId;
+    if (!target) return;
+    try {
+      await rpcLeaveQueue(target);
+    } catch (e) {
+      console.error("Navbatdan chiqish xatosi:", e);
     }
-    setMyQueue(null);
+    setMyQueues((prev) => prev.filter((q) => q.ticketId !== target));
     showToast(t("toastLeaveQueue"));
   }, [showToast, t]);
 
   const doDelay = useCallback(
-    async (positions) => {
-      const mq = myQueueRef.current;
-      if (!mq?.ticketId) return false;
+    async (ticketId, positions) => {
+      const target = ticketId || myQueuesRef.current[0]?.ticketId;
+      if (!target) return false;
       try {
-        await rpcDelayTicket(mq.ticketId, positions);
+        await rpcDelayTicket(target, positions);
         showToast(`${t("toastDelaySuccess")} (+${positions} ${t("slot")})`);
         refreshUserStats();
         return true;
@@ -922,7 +990,7 @@ export function AppProvider({ children }) {
       role,
       user,
       currentPlace,
-      myQueue,
+      myQueues,
       queueCancelledInfo,
       selectedRating,
       homeFilter,
@@ -951,6 +1019,7 @@ export function AppProvider({ children }) {
       editUserName,
       updateUserPhone,
       refreshUserStats,
+      refreshMyQueues,
       doAdminLogin,
       adminLogout,
       openPlace,
@@ -984,7 +1053,7 @@ export function AppProvider({ children }) {
       role,
       user,
       currentPlace,
-      myQueue,
+      myQueues,
       queueCancelledInfo,
       selectedRating,
       homeFilter,
@@ -1011,6 +1080,7 @@ export function AppProvider({ children }) {
       editUserName,
       updateUserPhone,
       refreshUserStats,
+      refreshMyQueues,
       doAdminLogin,
       adminLogout,
       openPlace,

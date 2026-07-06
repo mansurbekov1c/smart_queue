@@ -43,9 +43,11 @@ export async function deleteCategory(id) {
 }
 
 export async function reorderCategories(orderedIds) {
-  await Promise.all(
+  const results = await Promise.all(
     orderedIds.map((id, index) =>
       supabase.from("categories").update({ sort_order: index + 1 }).eq("id", id),
     ),
   );
+  const firstError = results.find((r) => r.error)?.error;
+  if (firstError) throw firstError;
 }

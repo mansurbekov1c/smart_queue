@@ -6,6 +6,7 @@ export function mapTicket(row) {
   if (!row) return null;
   return {
     id: row.id,
+    branchId: row.branch_id,
     num: row.number,
     name: row.customer_name,
     type: row.type,
@@ -17,6 +18,18 @@ export function mapTicket(row) {
     current: row.status === "current",
     rejected: row.status === "rejected",
   };
+}
+
+/* Foydalanuvchining barcha filiallar bo'yicha faol (waiting/current)
+   chiptalari — ko'p-filialli navbatni tiklash uchun. */
+export async function fetchMyActiveTickets(userId) {
+  const { data, error } = await supabase
+    .from("tickets")
+    .select("*")
+    .eq("user_id", userId)
+    .in("status", ["waiting", "current"]);
+  if (error) throw error;
+  return (data || []).map(mapTicket);
 }
 
 /* Bitta filialning to'liq navbat holati: barcha ticketlar + queues meta. */

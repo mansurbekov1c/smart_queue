@@ -16,7 +16,7 @@ import { fonts, radius } from "../theme/typography";
 export default function HomeScreen({ navigation }) {
   const { colors } = useAppTheme();
   const { t } = useI18n();
-  const { places, homeFilter, setHomeFilter, user, myQueue, logoutUser, categories } = useApp();
+  const { places, homeFilter, setHomeFilter, user, myQueues, logoutUser, categories } = useApp();
   const insets = useSafeAreaInsets();
 
   const cats = useMemo(
@@ -78,27 +78,36 @@ export default function HomeScreen({ navigation }) {
               {fullName || initials} 👋
             </Text>
 
-            {myQueue ? (
-              <View style={styles.heroCard}>
-                <View style={styles.heroCardTop}>
-                  <Text style={styles.heroCardLabel}>
-                    <Ionicons name="clipboard" size={11} color="rgba(255,255,255,0.9)" /> {t("activeQueue")}
-                  </Text>
-                </View>
-                <Text style={styles.heroPlaceName} numberOfLines={1}>
-                  {myQueue.placeName}
-                </Text>
-                <View style={styles.heroNumRow}>
-                  <Text style={[styles.heroNum, { fontFamily: fonts.mono }]}>#{myQueue.num}</Text>
-                  <Text style={styles.heroDot}>·</Text>
-                  <Text style={styles.heroWait}>
-                    ~{myQueue.waitMin} {t("minutesFull")}
-                  </Text>
-                  <View style={styles.liveWrap}>
-                    <LiveDot size={7} />
-                    <Text style={styles.liveText}>{t("live")}</Text>
-                  </View>
-                </View>
+            {myQueues.length > 0 ? (
+              <View style={styles.heroCardList}>
+                {myQueues.map((mq) => (
+                  <TouchableOpacity
+                    key={mq.ticketId}
+                    activeOpacity={0.85}
+                    onPress={() => navigation.navigate("MyQueue")}
+                    style={styles.heroCard}
+                  >
+                    <View style={styles.heroCardTop}>
+                      <Text style={styles.heroCardLabel}>
+                        <Ionicons name="clipboard" size={11} color="rgba(255,255,255,0.9)" /> {t("activeQueue")}
+                      </Text>
+                    </View>
+                    <Text style={styles.heroPlaceName} numberOfLines={1}>
+                      {mq.placeName}
+                    </Text>
+                    <View style={styles.heroNumRow}>
+                      <Text style={[styles.heroNum, { fontFamily: fonts.mono }]}>#{mq.num}</Text>
+                      <Text style={styles.heroDot}>·</Text>
+                      <Text style={styles.heroWait}>
+                        ~{mq.waitMin} {t("minutesFull")}
+                      </Text>
+                      <View style={styles.liveWrap}>
+                        <LiveDot size={7} />
+                        <Text style={styles.liveText}>{t("live")}</Text>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                ))}
               </View>
             ) : (
               <Text style={styles.heroEmpty}>{t("heroNoQueue")}</Text>
@@ -150,6 +159,7 @@ const styles = StyleSheet.create({
   heroGreeting: { color: "rgba(255,255,255,0.85)", fontSize: 13.5 },
   heroName: { color: "#fff", fontSize: 21, marginTop: 2, marginBottom: 14 },
   heroEmpty: { color: "rgba(255,255,255,0.9)", fontSize: 13, lineHeight: 19 },
+  heroCardList: { gap: 10 },
   heroCard: { backgroundColor: "rgba(255,255,255,0.16)", borderRadius: 16, padding: 13, borderWidth: 1, borderColor: "rgba(255,255,255,0.28)" },
   heroCardTop: { marginBottom: 6 },
   heroCardLabel: { color: "rgba(255,255,255,0.9)", fontSize: 11, fontWeight: "700", textTransform: "uppercase" },

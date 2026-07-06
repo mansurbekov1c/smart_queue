@@ -69,10 +69,9 @@ export async function createAdmin({ firstName, lastName, email, password, branch
 
   if (!newUserId) throw new Error("Yangi foydalanuvchi yaratilmadi");
 
-  const { error: promoteError } = await supabase
-    .from("profiles")
-    .update({ role: "admin" })
-    .eq("id", newUserId);
+  // 13_security_hardening.sql: role ustuni endi to'g'ridan-to'g'ri yangilanmaydi,
+  // faqat is_super_admin() tekshiruvli SECURITY DEFINER RPC orqali
+  const { error: promoteError } = await supabase.rpc("promote_to_admin", { p_user_id: newUserId });
   if (promoteError) throw promoteError;
 
   if (branchId) {
@@ -92,22 +91,19 @@ export async function deleteBranch(branchId) {
   if (error) throw error;
 }
 
-/* Filialga admin biriktirish — avval shu filialda turgan boshqa adminni
-   bo'shatadi (bitta filialda bir vaqtda bitta admin bo'lishi kutiladi),
-   so'ng tanlangan adminning branch_id'sini yangilaydi. */
+/* Filialga admin biriktirish — server tomonda (13_security_hardening.sql)
+   bitta tranzaksiyada: shu filialdagi eski adminni bo'shatadi va tanlangan
+   adminning branch_id'sini o'rnatadi. branch_id ustuni endi to'g'ridan-to'g'ri
+   yangilanmaydi, faqat is_super_admin() tekshiruvli RPC orqali. */
 export async function assignAdminToBranch(adminId, branchId) {
-  const { error: clearError } = await supabase
-    .from("profiles")
-    .update({ branch_id: null })
-    .eq("branch_id", branchId)
-    .neq("id", adminId);
-  if (clearError) throw clearError;
-
-  const { error } = await supabase.from("profiles").update({ branch_id: branchId }).eq("id", adminId);
+  const { error } = await supabase.rpc("assign_admin_branch", {
+    p_admin_id: adminId,
+    p_branch_id: branchId,
+  });
   if (error) throw error;
 }
 
 export async function unassignAdmin(adminId) {
-  const { error } = await supabase.from("profiles").update({ branch_id: null }).eq("id", adminId);
+  const { error } = await supabase.rpc("unassign_admin_branch", { p_admin_id: adminId });
   if (error) throw error;
 }
