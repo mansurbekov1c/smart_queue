@@ -1,9 +1,12 @@
 import React, { useState } from "react";
-import { ScrollView, StyleSheet, Switch, Text, TextInput, View } from "react-native";
+import { Alert, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import HeaderBar from "../components/HeaderBar";
 import GlassCard from "../components/GlassCard";
 import InputField from "../components/InputField";
 import PrimaryButton from "../components/PrimaryButton";
+import BranchMapPreview from "../components/BranchMapPreview";
+import NoBranchNotice from "../components/NoBranchNotice";
 import { useAppTheme } from "../context/ThemeContext";
 import { useI18n } from "../context/I18nContext";
 import { useApp } from "../context/AppContext";
@@ -32,16 +35,32 @@ function buildDefaultSchedule(existing) {
   return schedule;
 }
 
-export default function WorkScheduleScreen({ navigation }) {
+/* Bu ekran filial admini uchun ham (o'z filiali, branchId parametrsiz —
+   adminPlaceId'ga tushadi), super admin uchun ham (istalgan filial,
+   route.params.branchId orqali, SuperAdminBranchDetailScreen'dan) ishlaydi. */
+export default function WorkScheduleScreen({ route, navigation }) {
   const { colors } = useAppTheme();
   const { t } = useI18n();
   const { showToast } = useToast();
-  const { adminPlace, updateBranchSchedule, updateAvgServiceMinutes } = useApp();
+  const {
+    places,
+    adminPlaceId,
+    updateBranchSchedule,
+    updateAvgServiceMinutes,
+    setBranchEmergencyClosed,
+    updateBranchLocation,
+  } = useApp();
 
-  const [schedule, setSchedule] = useState(() => buildDefaultSchedule(adminPlace?.weeklySchedule));
+  const branchId = route?.params?.branchId || adminPlaceId;
+  const place = places.find((p) => p.id === branchId) || null;
+
+  const [schedule, setSchedule] = useState(() => buildDefaultSchedule(place?.weeklySchedule));
   const [saving, setSaving] = useState(false);
-  const [avgMinutesText, setAvgMinutesText] = useState(String(adminPlace?.avgServiceMinutes ?? 15));
+  const [avgMinutesText, setAvgMinutesText] = useState(String(place?.avgServiceMinutes ?? 15));
   const [savingAvg, setSavingAvg] = useState(false);
+  const [latText, setLatText] = useState(place?.location?.coords?.lat != null ? String(place.location.coords.lat) : "");
+  const [lngText, setLngText] = useState(place?.location?.coords?.lng != null ? String(place.location.coords.lng) : "");
+  const [savingLocation, setSavingLocation] = useState(false);
 
   const setDay = (key, patch) => {
     setSchedule((prev) => ({ ...prev, [key]: { ...prev[key], ...patch } }));
@@ -56,7 +75,7 @@ export default function WorkScheduleScreen({ navigation }) {
       }
     }
     setSaving(true);
-    await updateBranchSchedule(schedule);
+    await updateBranchSchedule(branchId, schedule);
     setSaving(false);
   };
 
@@ -67,15 +86,52 @@ export default function WorkScheduleScreen({ navigation }) {
       return;
     }
     setSavingAvg(true);
-    await updateAvgServiceMinutes(minutes);
+    await updateAvgServiceMinutes(branchId, minutes);
     setSavingAvg(false);
   };
 
-  if (!adminPlace) return null;
+  const onToggleEmergencyClose = () => {
+    if (place?.isOpen) {
+      Alert.alert(t("confirmEmergencyCloseTitle"), t("confirmEmergencyCloseMsg"), [
+        { text: t("btnCancel"), style: "cancel" },
+        {
+          text: t("btnConfirm"),
+          style: "destructive",
+          onPress: () => setBranchEmergencyClosed(branchId, true),
+        },
+      ]);
+    } else {
+      setBranchEmergencyClosed(branchId, false);
+    }
+  };
+
+  const onSaveLocation = async () => {
+    const lat = latText.trim() ? parseFloat(latText) : null;
+    const lng = lngText.trim() ? parseFloat(lngText) : null;
+    if ((latText.trim() && !Number.isFinite(lat)) || (lngText.trim() && !Number.isFinite(lng))) {
+      showToast(t("toastInvalidTimeFormat"));
+      return;
+    }
+    setSavingLocation(true);
+    await updateBranchLocation(branchId, lat, lng);
+    setSavingLocation(false);
+  };
+
+  if (!place) {
+    return (
+      <View style={styles.fill}>
+        <HeaderBar title={route?.params?.branchName || t("workScheduleTitle")} onBack={() => navigation.goBack()} showThemeToggle={false} />
+        <NoBranchNotice />
+      </View>
+    );
+  }
+
+  const previewLat = latText.trim() ? parseFloat(latText) : null;
+  const previewLng = lngText.trim() ? parseFloat(lngText) : null;
 
   return (
     <View style={[styles.fill, { backgroundColor: colors.bgGradient[0] }]}>
-      <HeaderBar title={t("workScheduleTitle")} onBack={() => navigation.goBack()} showThemeToggle={false} />
+      <HeaderBar title={route?.params?.branchName || t("workScheduleTitle")} onBack={() => navigation.goBack()} showThemeToggle={false} />
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={[styles.sub, { color: colors.text2 }]}>{t("workScheduleSub")}</Text>
 
@@ -146,6 +202,54 @@ export default function WorkScheduleScreen({ navigation }) {
         </GlassCard>
 
         <PrimaryButton label={t("btnSave")} onPress={onSave} loading={saving} disabled={saving} style={styles.saveBtn} />
+
+        <GlassCard style={styles.card}>
+          <TouchableOpacity onPress={onToggleEmergencyClose} style={styles.emergencyRow}>
+            <Ionicons
+              name={place.isOpen ? "close-circle-outline" : "checkmark-circle-outline"}
+              size={19}
+              color={place.isOpen ? colors.danger : colors.success}
+            />
+            <Text
+              style={[
+                styles.emergencyLabel,
+                { color: place.isOpen ? colors.danger : colors.success, fontFamily: fonts.semibold },
+              ]}
+            >
+              {place.isOpen ? t("btnEmergencyClose") : t("btnReopenBranch")}
+            </Text>
+          </TouchableOpacity>
+        </GlassCard>
+
+        <GlassCard style={styles.card}>
+          <Text style={[styles.sectionTitle, { color: colors.text, fontFamily: fonts.bold }]}>
+            {t("sectionLocation")}
+          </Text>
+          <Text style={[styles.hint, { color: colors.text3 }]}>{t("hintLatLngOptional")}</Text>
+          <View style={styles.locRow}>
+            <InputField
+              label={t("labelLat")}
+              value={latText}
+              onChangeText={setLatText}
+              keyboardType="numbers-and-punctuation"
+              style={styles.locInput}
+            />
+            <InputField
+              label={t("labelLng")}
+              value={lngText}
+              onChangeText={setLngText}
+              keyboardType="numbers-and-punctuation"
+              style={styles.locInput}
+            />
+          </View>
+          <BranchMapPreview lat={previewLat} lng={previewLng} style={styles.mapPreview} />
+          <PrimaryButton
+            label={t("btnSave")}
+            onPress={onSaveLocation}
+            loading={savingLocation}
+            disabled={savingLocation}
+          />
+        </GlassCard>
       </ScrollView>
     </View>
   );
@@ -166,5 +270,12 @@ const styles = StyleSheet.create({
   timeInput: { flex: 1, borderWidth: 1, borderRadius: radius.md, paddingVertical: 8, paddingHorizontal: 10, fontSize: 14, textAlign: "center" },
   timeDash: { fontSize: 14 },
   closedLabel: { fontSize: 12.5, marginTop: 4 },
-  saveBtn: { marginTop: 4 },
+  saveBtn: { marginTop: -8, marginBottom: 4 },
+  emergencyRow: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 12 },
+  emergencyLabel: { fontSize: 14.5 },
+  sectionTitle: { fontSize: 14, marginTop: 8, marginBottom: 4 },
+  hint: { fontSize: 11, marginBottom: 12 },
+  locRow: { flexDirection: "row", gap: 10, marginBottom: 12 },
+  locInput: { flex: 1 },
+  mapPreview: { marginBottom: 12 },
 });

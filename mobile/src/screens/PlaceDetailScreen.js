@@ -11,10 +11,12 @@ import PrimaryButton from "../components/PrimaryButton";
 import SecondaryButton from "../components/SecondaryButton";
 import LiveDot from "../components/LiveDot";
 import JoinQueueModal from "../modals/JoinQueueModal";
+import BranchMapPreview from "../components/BranchMapPreview";
 import { useAppTheme } from "../context/ThemeContext";
 import { useI18n } from "../context/I18nContext";
 import { useApp } from "../context/AppContext";
 import { CAT_ICONS } from "../data/categoryIcons";
+import { openInDeviceMaps } from "../utils/maps";
 import { fonts, radius } from "../theme/typography";
 
 export default function PlaceDetailScreen({ route, navigation }) {
@@ -122,7 +124,14 @@ export default function PlaceDetailScreen({ route, navigation }) {
             </View>
           </View>
 
-          <View style={[styles.locRow, { backgroundColor: colors.glassBg, borderColor: colors.glassBorder }]}>
+          <TouchableOpacity
+            activeOpacity={place.location.coords?.lat != null ? 0.75 : 1}
+            onPress={() => {
+              const { lat, lng } = place.location.coords || {};
+              if (lat != null && lng != null) openInDeviceMaps(lat, lng);
+            }}
+            style={[styles.locRow, { backgroundColor: colors.glassBg, borderColor: colors.glassBorder }]}
+          >
             <View style={[styles.locIcon, { backgroundColor: colors.iconChipBgStart }]}>
               <Ionicons name="location" size={19} color={colors.accent} />
             </View>
@@ -130,8 +139,16 @@ export default function PlaceDetailScreen({ route, navigation }) {
               <Text style={[styles.locTitle, { color: colors.text, fontFamily: fonts.bold }]}>{place.location.district}</Text>
               <Text style={[styles.locSub, { color: colors.text3 }]}>{place.location.address}</Text>
             </View>
-            <Text style={[styles.mapLink, { color: colors.accent, fontFamily: fonts.bold }]}>{t("viewMap")}</Text>
-          </View>
+            {place.location.coords?.lat != null ? (
+              <Text style={[styles.mapLink, { color: colors.accent, fontFamily: fonts.bold }]}>{t("viewMap")}</Text>
+            ) : null}
+          </TouchableOpacity>
+
+          <BranchMapPreview
+            lat={place.location.coords?.lat}
+            lng={place.location.coords?.lng}
+            style={styles.mapPreview}
+          />
 
           <View style={styles.sectionHead}>
             <Text style={[styles.sectionTitle, { color: colors.text, fontFamily: fonts.extrabold }]}>{t("queueList")}</Text>
@@ -271,6 +288,7 @@ const styles = StyleSheet.create({
   locTitle: { fontSize: 13.5 },
   locSub: { fontSize: 12, marginTop: 1 },
   mapLink: { fontSize: 12.5 },
+  mapPreview: { marginBottom: 18 },
   sectionHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 },
   sectionTitle: { fontSize: 14.5 },
   sectionCount: { fontSize: 12 },

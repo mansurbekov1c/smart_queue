@@ -4,6 +4,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { CommonActions, useFocusEffect } from "@react-navigation/native";
 import GlassCard from "../components/GlassCard";
 import FadeInView from "../components/FadeInView";
+import NoBranchNotice from "../components/NoBranchNotice";
 import { useAppTheme } from "../context/ThemeContext";
 import { useI18n } from "../context/I18nContext";
 import { useApp } from "../context/AppContext";
@@ -83,7 +84,7 @@ export default function AdminStatsScreen({ navigation }) {
     }, [adminPlace]),
   );
 
-  if (!adminPlace) return null;
+  if (!adminPlace) return <NoBranchNotice />;
 
   // Chart data — tickets jadvalidan real guruhlangan (AppContext -> api/stats.js)
   const hourlyData = queueSeries.hourly;

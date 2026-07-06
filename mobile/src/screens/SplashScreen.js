@@ -6,6 +6,7 @@ import { useAppTheme } from "../context/ThemeContext";
 import { useI18n } from "../context/I18nContext";
 import { useApp } from "../context/AppContext";
 import PrimaryButton from "../components/PrimaryButton";
+import { appVersion } from "../utils/appVersion";
 import { fonts, radius } from "../theme/typography";
 
 export default function SplashScreen({ navigation }) {
@@ -66,7 +67,7 @@ export default function SplashScreen({ navigation }) {
 
         <PrimaryButton label={t("btnLogin")} onPress={goToLogin} style={styles.fullBtn} />
 
-        <Text style={[styles.footer, { color: colors.text3 }]}>Navbat v2.5 · {t("appFooter")}</Text>
+        <Text style={[styles.footer, { color: colors.text3 }]}>Navbat v{appVersion} · {t("appFooter")}</Text>
       </SafeAreaView>
     </LinearGradient>
   );

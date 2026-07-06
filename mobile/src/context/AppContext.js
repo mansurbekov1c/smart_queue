@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { fetchBranches, subscribeBranchCalibration } from "../api/branches";
-import { fetchProfile, fetchUserCoins } from "../api/profile";
+import { fetchCategories, subscribeCategories } from "../api/categories";
+import { fetchProfile, fetchUserCoins, fetchUserServedCount } from "../api/profile";
 import { fetchLikedBranchIds, addLike, removeLike } from "../api/likes";
 import { fetchQueueStats, fetchHourlySeries, fetchWeeklySeries, fetchMonthlySeries, fetchYearlySeries } from "../api/stats";
 import {
@@ -40,6 +41,7 @@ export function AppProvider({ children }) {
 
   const [places, setPlaces] = useState([]);
   const [placesLoading, setPlacesLoading] = useState(true);
+  const [categories, setCategories] = useState([]);
   const [role, setRole] = useState("customer");
   const [user, setUser] = useState(null);
   const [currentPlaceId, setCurrentPlaceId] = useState(null);
@@ -93,6 +95,7 @@ export function AppProvider({ children }) {
             phone: profile.phone || "",
             email: session.user.email,
             coins: profile.coins || 0,
+            totalServed: 0,
             isAdmin: false,
           });
         }
@@ -142,6 +145,20 @@ export function AppProvider({ children }) {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  /* ---------- Kategoriyalar: yuklash + realtime (super admin o'zgartirsa
+     mijoz Bosh sahifasi va qidiruvda ham jonli yangilanadi) ---------- */
+  const refreshCategories = useCallback(() => {
+    fetchCategories()
+      .then((rows) => setCategories(rows))
+      .catch((e) => console.error("Kategoriyalarni yuklash xatosi:", e));
+  }, []);
+
+  useEffect(() => {
+    refreshCategories();
+    const unsub = subscribeCategories(() => refreshCategories());
+    return unsub;
+  }, [refreshCategories]);
 
   /* ---------- Admin navbati: yuklash + realtime ---------- */
   useEffect(() => {
@@ -248,6 +265,9 @@ export function AppProvider({ children }) {
         setQueueCancelledInfo({ placeName: mq.placeName });
         showToast(t("toastQueueCancelledByBranch"));
       }
+      if (mine?.status === "done") {
+        refreshUserStats();
+      }
       // Xizmat ko'rsatildi yoki rad etildi/chiqib ketildi → navbatdan chiqarildi
       setMyQueue(null);
       return;
@@ -330,6 +350,7 @@ export function AppProvider({ children }) {
           phone: profile.phone || "",
           email: authData.user.email,
           coins: profile.coins || 0,
+          totalServed: 0,
           isAdmin: false,
         });
         showToast(t("toastLoginWelcome"));
@@ -399,6 +420,7 @@ export function AppProvider({ children }) {
         phone: normalizedPhone,
         email: email.trim(),
         coins: 0,
+        totalServed: 0,
         isAdmin: false,
       });
       showToast(t("toastRegisterSuccess"));
@@ -458,13 +480,16 @@ export function AppProvider({ children }) {
     [user, showToast, t],
   );
 
-  const refreshUserCoins = useCallback(async () => {
+  const refreshUserStats = useCallback(async () => {
     if (!user?.id) return;
     try {
-      const coins = await fetchUserCoins(user.id);
-      setUser((u) => (u ? { ...u, coins } : u));
+      const [coins, totalServed] = await Promise.all([
+        fetchUserCoins(user.id),
+        fetchUserServedCount(user.id),
+      ]);
+      setUser((u) => (u ? { ...u, coins, totalServed } : u));
     } catch (e) {
-      console.error("Coin balansini yangilash xatosi:", e);
+      console.error("Profil statistikasini yangilash xatosi:", e);
     }
   }, [user?.id]);
 
@@ -556,31 +581,31 @@ export function AppProvider({ children }) {
   );
 
   const updateBranchSchedule = useCallback(
-    async (weeklySchedule) => {
-      if (!adminPlaceId) return false;
+    async (branchId, weeklySchedule) => {
+      if (!branchId) return false;
       const { error } = await supabase
         .from("branches")
         .update({ weekly_schedule: weeklySchedule })
-        .eq("id", adminPlaceId);
+        .eq("id", branchId);
       if (error) {
         console.error("Ish jadvalini yangilash xatosi:", error);
         showToast(t("toastActionFailed", "Amal bajarilmadi"));
         return false;
       }
-      setPlaces((prev) => prev.map((p) => (p.id === adminPlaceId ? { ...p, weeklySchedule } : p)));
+      setPlaces((prev) => prev.map((p) => (p.id === branchId ? { ...p, weeklySchedule } : p)));
       showToast(t("toastCredSaved"));
       return true;
     },
-    [adminPlaceId, showToast, t],
+    [showToast, t],
   );
 
   const updateAvgServiceMinutes = useCallback(
-    async (minutes) => {
-      if (!adminPlaceId || !minutes || minutes < 1) return false;
+    async (branchId, minutes) => {
+      if (!branchId || !minutes || minutes < 1) return false;
       const { error } = await supabase
         .from("branches")
         .update({ avg_service_minutes: minutes })
-        .eq("id", adminPlaceId);
+        .eq("id", branchId);
       if (error) {
         console.error("O'rtacha xizmat vaqtini yangilash xatosi:", error);
         showToast(t("toastActionFailed", "Amal bajarilmadi"));
@@ -588,7 +613,7 @@ export function AppProvider({ children }) {
       }
       setPlaces((prev) =>
         prev.map((p) =>
-          p.id === adminPlaceId
+          p.id === branchId
             ? { ...p, avgServiceMinutes: minutes, serviceSampleCount: 0, scheduleCalibratedAt: null }
             : p,
         ),
@@ -596,26 +621,51 @@ export function AppProvider({ children }) {
       showToast(t("toastCredSaved"));
       return true;
     },
-    [adminPlaceId, showToast, t],
+    [showToast, t],
   );
 
   const setBranchEmergencyClosed = useCallback(
-    async (isClosed) => {
-      if (!adminPlaceId) return false;
+    async (branchId, isClosed) => {
+      if (!branchId) return false;
       const { error } = await supabase
         .from("branches")
         .update({ is_open: !isClosed })
-        .eq("id", adminPlaceId);
+        .eq("id", branchId);
       if (error) {
         console.error("Filial holatini yangilash xatosi:", error);
         showToast(t("toastActionFailed", "Amal bajarilmadi"));
         return false;
       }
-      setPlaces((prev) => prev.map((p) => (p.id === adminPlaceId ? { ...p, isOpen: !isClosed } : p)));
+      setPlaces((prev) => prev.map((p) => (p.id === branchId ? { ...p, isOpen: !isClosed } : p)));
       showToast(isClosed ? t("toastBranchClosedToday") : t("toastBranchReopened"));
       return true;
     },
-    [adminPlaceId, showToast, t],
+    [showToast, t],
+  );
+
+  /* Filial koordinatalari — oddiy/vaqtinchalik xarita yechimi uchun
+     (kelajakda joy tanlash imkoniyati bo'lgan interaktiv xaritaga
+     almashtiriladi). Admin o'z filiali, super admin istalgan filial
+     uchun o'zgartira oladi (branches_update_own_admin RLS siyosati). */
+  const updateBranchLocation = useCallback(
+    async (branchId, lat, lng) => {
+      if (!branchId) return false;
+      const { error } = await supabase
+        .from("branches")
+        .update({ lat, lng })
+        .eq("id", branchId);
+      if (error) {
+        console.error("Filial joylashuvini yangilash xatosi:", error);
+        showToast(t("toastActionFailed", "Amal bajarilmadi"));
+        return false;
+      }
+      setPlaces((prev) =>
+        prev.map((p) => (p.id === branchId ? { ...p, location: { ...p.location, coords: { lat, lng } } } : p)),
+      );
+      showToast(t("toastCredSaved"));
+      return true;
+    },
+    [showToast, t],
   );
 
   /* ---------- Joylar / qidiruv ---------- */
@@ -704,7 +754,7 @@ export function AppProvider({ children }) {
       try {
         await rpcDelayTicket(mq.ticketId, positions);
         showToast(`${t("toastDelaySuccess")} (+${positions} ${t("slot")})`);
-        refreshUserCoins();
+        refreshUserStats();
         return true;
       } catch (e) {
         console.error("Kechiktirish xatosi:", e);
@@ -720,7 +770,7 @@ export function AppProvider({ children }) {
         return false;
       }
     },
-    [showToast, t, refreshUserCoins],
+    [showToast, t, refreshUserStats],
   );
 
   /* ---------- Sharhlar (hozircha local) ---------- */
@@ -867,6 +917,8 @@ export function AppProvider({ children }) {
     () => ({
       places,
       placesLoading,
+      categories,
+      refreshCategories,
       role,
       user,
       currentPlace,
@@ -898,7 +950,7 @@ export function AppProvider({ children }) {
       logoutUser,
       editUserName,
       updateUserPhone,
-      refreshUserCoins,
+      refreshUserStats,
       doAdminLogin,
       adminLogout,
       openPlace,
@@ -922,10 +974,13 @@ export function AppProvider({ children }) {
       updateBranchSchedule,
       updateAvgServiceMinutes,
       setBranchEmergencyClosed,
+      updateBranchLocation,
     }),
     [
       places,
       placesLoading,
+      categories,
+      refreshCategories,
       role,
       user,
       currentPlace,
@@ -955,7 +1010,7 @@ export function AppProvider({ children }) {
       logoutUser,
       editUserName,
       updateUserPhone,
-      refreshUserCoins,
+      refreshUserStats,
       doAdminLogin,
       adminLogout,
       openPlace,
@@ -979,6 +1034,7 @@ export function AppProvider({ children }) {
       updateBranchSchedule,
       updateAvgServiceMinutes,
       setBranchEmergencyClosed,
+      updateBranchLocation,
     ],
   );
 

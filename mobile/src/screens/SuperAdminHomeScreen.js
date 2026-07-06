@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   FlatList,
   ScrollView,
@@ -15,23 +15,18 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAppTheme } from "../context/ThemeContext";
 import { useI18n } from "../context/I18nContext";
 import { useToast } from "../context/ToastContext";
+import { useApp } from "../context/AppContext";
 import GlassCard from "../components/GlassCard";
 import InputField from "../components/InputField";
 import PrimaryButton from "../components/PrimaryButton";
 import BottomSheetModal from "../components/BottomSheetModal";
+import ManageableCategoryPicker from "../components/ManageableCategoryPicker";
+import PickerOverlay from "../components/PickerOverlay";
 import { CAT_ICONS } from "../data/categoryIcons";
 import { fetchBranches } from "../api/branches";
-import { fetchAllAdmins, createBranch } from "../api/superadmin";
+import { fetchAllAdmins, createBranch, createAdmin } from "../api/superadmin";
 import { isLatinName } from "../utils/validation";
 import { fonts, radius } from "../theme/typography";
-
-const CATEGORY_OPTIONS = [
-  { key: "barber", labelKey: "catBarber" },
-  { key: "clinic", labelKey: "catClinic" },
-  { key: "bank", labelKey: "catBank" },
-  { key: "carwash", labelKey: "catCarwash" },
-  { key: "gov", labelKey: "catGov" },
-];
 
 export default function SuperAdminHomeScreen({ navigation }) {
   const { colors } = useAppTheme();
@@ -46,6 +41,7 @@ export default function SuperAdminHomeScreen({ navigation }) {
   const [branchSearch, setBranchSearch] = useState("");
   const [adminSearch, setAdminSearch] = useState("");
   const [addBranchOpen, setAddBranchOpen] = useState(false);
+  const [addAdminOpen, setAddAdminOpen] = useState(false);
 
   const scrollRef = useRef(null);
 
@@ -198,7 +194,7 @@ export default function SuperAdminHomeScreen({ navigation }) {
             <PrimaryButton
               label={t("saAddAdmin", "Admin qo'shish")}
               icon="person-add"
-              onPress={() => showToast(t("saComingSoon", "Tez orada"))}
+              onPress={() => setAddAdminOpen(true)}
             />
           </View>
           <SearchBar value={adminSearch} onChangeText={setAdminSearch} colors={colors} />
@@ -256,6 +252,13 @@ export default function SuperAdminHomeScreen({ navigation }) {
         onClose={() => setAddBranchOpen(false)}
         onCreated={loadAll}
       />
+
+      <AddAdminModal
+        visible={addAdminOpen}
+        branches={branches}
+        onClose={() => setAddAdminOpen(false)}
+        onCreated={loadAll}
+      />
     </LinearGradient>
   );
 }
@@ -280,23 +283,32 @@ function AddBranchModal({ visible, onClose, onCreated }) {
   const { colors } = useAppTheme();
   const { t } = useI18n();
   const { showToast } = useToast();
+  const { categories, refreshCategories } = useApp();
   const [name, setName] = useState("");
   const [city, setCity] = useState("");
   const [district, setDistrict] = useState("");
   const [address, setAddress] = useState("");
-  const [category, setCategory] = useState(CATEGORY_OPTIONS[0].key);
+  const [latText, setLatText] = useState("");
+  const [lngText, setLngText] = useState("");
+  const [category, setCategory] = useState(categories[0]?.key || "");
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!category && categories.length > 0) setCategory(categories[0].key);
+  }, [categories, category]);
 
   const reset = () => {
     setName("");
     setCity("");
     setDistrict("");
     setAddress("");
-    setCategory(CATEGORY_OPTIONS[0].key);
+    setLatText("");
+    setLngText("");
+    setCategory(categories[0]?.key || "");
   };
 
   const onSubmit = async () => {
-    if (!name.trim() || !city.trim() || !district.trim() || !address.trim()) {
+    if (!name.trim() || !city.trim() || !district.trim() || !address.trim() || !category) {
       showToast(t("saFillAllFields", "Barcha maydonlarni to'ldiring"));
       return;
     }
@@ -304,9 +316,15 @@ function AddBranchModal({ visible, onClose, onCreated }) {
       showToast(t("toastLatinOnly"));
       return;
     }
+    const lat = latText.trim() ? parseFloat(latText) : null;
+    const lng = lngText.trim() ? parseFloat(lngText) : null;
+    if ((latText.trim() && !Number.isFinite(lat)) || (lngText.trim() && !Number.isFinite(lng))) {
+      showToast(t("toastInvalidTimeFormat"));
+      return;
+    }
     setSaving(true);
     try {
-      await createBranch({ name, category, city, district, address });
+      await createBranch({ name, category, city, district, address, lat, lng });
       showToast(t("toastCredSaved"));
       reset();
       onClose();
@@ -330,35 +348,144 @@ function AddBranchModal({ visible, onClose, onCreated }) {
       <InputField label={t("saDistrict", "Tuman")} value={district} onChangeText={setDistrict} style={styles.field} />
       <InputField label={t("saAddress", "Manzil")} value={address} onChangeText={setAddress} style={styles.field} />
 
-      <Text style={[styles.catLabel, { color: colors.text2 }]}>{t("saCategory", "Kategoriya")}</Text>
-      <View style={styles.catRow}>
-        {CATEGORY_OPTIONS.map((opt) => {
-          const active = opt.key === category;
-          return (
-            <TouchableOpacity
-              key={opt.key}
-              onPress={() => setCategory(opt.key)}
-              style={[
-                styles.catChip,
-                {
-                  backgroundColor: active ? colors.accentSoft : colors.inputBg,
-                  borderColor: active ? colors.accentBorder : colors.inputBorder,
-                },
-              ]}
-            >
-              <Text style={{ color: active ? colors.accent : colors.text2, fontFamily: fonts.bold, fontSize: 12 }}>
-                {t(opt.labelKey)}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
+      <Text style={[styles.hint, { color: colors.text3, marginTop: -4 }]}>{t("hintLatLngOptional")}</Text>
+      <View style={styles.locRow}>
+        <InputField label={t("labelLat")} value={latText} onChangeText={setLatText} keyboardType="numbers-and-punctuation" style={styles.locInput} />
+        <InputField label={t("labelLng")} value={lngText} onChangeText={setLngText} keyboardType="numbers-and-punctuation" style={styles.locInput} />
       </View>
+
+      <Text style={[styles.catLabel, { color: colors.text2 }]}>{t("saCategory", "Kategoriya")}</Text>
+      <ManageableCategoryPicker
+        categories={categories}
+        value={category}
+        onSelect={setCategory}
+        onChanged={refreshCategories}
+      />
 
       <PrimaryButton
         label={t("save", "Saqlash")}
         onPress={onSubmit}
         loading={saving}
         style={styles.submitBtn}
+      />
+    </BottomSheetModal>
+  );
+}
+
+function AddAdminModal({ visible, branches, onClose, onCreated }) {
+  const { colors } = useAppTheme();
+  const { t } = useI18n();
+  const { showToast } = useToast();
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [pass, setPass] = useState("");
+  const [branchId, setBranchId] = useState(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerSearch, setPickerSearch] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const reset = () => {
+    setFirstName("");
+    setLastName("");
+    setEmail("");
+    setPass("");
+    setBranchId(null);
+  };
+
+  const selectedBranch = branches.find((b) => b.id === branchId);
+
+  const onSubmit = async () => {
+    if (!firstName.trim() || !lastName.trim() || !email.trim() || !pass.trim()) {
+      showToast(t("saFillAllFields", "Barcha maydonlarni to'ldiring"));
+      return;
+    }
+    if (!isLatinName(firstName) || !isLatinName(lastName)) {
+      showToast(t("toastLatinOnly"));
+      return;
+    }
+    if (pass.length < 6) {
+      showToast(t("toastPassTooShort"));
+      return;
+    }
+    setSaving(true);
+    try {
+      await createAdmin({ firstName, lastName, email, password: pass, branchId });
+      showToast(t("toastCredSaved"));
+      reset();
+      onClose();
+      onCreated?.();
+    } catch (e) {
+      console.error("Admin qo'shish xatosi:", e);
+      showToast(e?.message?.includes("registered") ? t("toastEmailTaken", "Bu email band") : t("toastActionFailed", "Amal bajarilmadi"));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const pickerItems = branches
+    .filter((b) => b.name.toLowerCase().includes(pickerSearch.trim().toLowerCase()))
+    .map((b) => ({ id: b.id, label: b.name, sublabel: b.location?.city, icon: CAT_ICONS[b.cat] || "business" }));
+
+  return (
+    <BottomSheetModal visible={visible} onClose={onClose}>
+      <Text style={[styles.modalTitle, { color: colors.text, fontFamily: fonts.extrabold }]}>
+        {t("saAddAdminTitle", "Yangi admin")}
+      </Text>
+      <InputField label={t("labelFirstname")} value={firstName} onChangeText={setFirstName} placeholder={t("firstNamePlaceholder")} style={styles.field} />
+      <InputField label={t("labelLastname")} value={lastName} onChangeText={setLastName} placeholder={t("lastNamePlaceholder")} style={styles.field} />
+      <Text style={[styles.hint, { color: colors.text3 }]}>{t("hintLatinOnly")}</Text>
+      <InputField
+        label={t("labelEmail")}
+        value={email}
+        onChangeText={setEmail}
+        autoCapitalize="none"
+        keyboardType="email-address"
+        style={styles.field}
+      />
+      <InputField
+        label={t("labelPass")}
+        value={pass}
+        onChangeText={setPass}
+        secureTextEntry
+        style={styles.field}
+      />
+
+      <Text style={[styles.catLabel, { color: colors.text2 }]}>{t("saAssignBranch", "Filialga biriktirish")}</Text>
+      <TouchableOpacity
+        onPress={() => setPickerOpen(true)}
+        style={[styles.branchPickBtn, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder }]}
+      >
+        <Ionicons name="business-outline" size={16} color={colors.accent} />
+        <Text style={{ color: selectedBranch ? colors.text : colors.placeholder, fontSize: 13, fontFamily: fonts.medium, flex: 1, marginLeft: 8 }} numberOfLines={1}>
+          {selectedBranch ? selectedBranch.name : t("saUnassigned", "Biriktirilmagan")}
+        </Text>
+        <Ionicons name="chevron-forward" size={15} color={colors.text3} />
+      </TouchableOpacity>
+
+      <PrimaryButton
+        label={t("save", "Saqlash")}
+        onPress={onSubmit}
+        loading={saving}
+        style={styles.submitBtn}
+      />
+
+      <PickerOverlay
+        visible={pickerOpen}
+        title={t("saPickBranch", "Filial tanlash")}
+        items={pickerItems}
+        selectedId={branchId}
+        search={pickerSearch}
+        onSearchChange={setPickerSearch}
+        onSelect={(item) => {
+          setBranchId(item.id);
+          setPickerOpen(false);
+          setPickerSearch("");
+        }}
+        onClose={() => {
+          setPickerOpen(false);
+          setPickerSearch("");
+        }}
       />
     </BottomSheetModal>
   );
@@ -407,8 +534,16 @@ const styles = StyleSheet.create({
   modalTitle: { fontSize: 17, marginBottom: 14 },
   field: { marginBottom: 12 },
   hint: { fontSize: 11, marginTop: -6, marginBottom: 12 },
+  locRow: { flexDirection: "row", gap: 10, marginBottom: 12 },
+  locInput: { flex: 1 },
   catLabel: { fontSize: 12.5, fontWeight: "700", marginBottom: 8 },
-  catRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 18 },
-  catChip: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: radius.pill, borderWidth: 1 },
-  submitBtn: { marginBottom: 4 },
+  submitBtn: { marginBottom: 4, marginTop: 18 },
+  branchPickBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 13,
+    paddingVertical: 13,
+    borderRadius: radius.md,
+    borderWidth: 1,
+  },
 });

@@ -10,6 +10,7 @@ import SecondaryButton from "../components/SecondaryButton";
 import FadeInView from "../components/FadeInView";
 import AddWalkInModal from "../modals/AddWalkInModal";
 import ServedTodayModal from "../modals/ServedTodayModal";
+import NoBranchNotice from "../components/NoBranchNotice";
 import { useAppTheme } from "../context/ThemeContext";
 import { useI18n } from "../context/I18nContext";
 import { useApp } from "../context/AppContext";
@@ -57,7 +58,7 @@ export default function AdminPanelScreen({ navigation }) {
   const waiting = useMemo(() => adminQueue.filter((q) => q.status === "waiting"), [adminQueue]);
   const next = waiting[0];
 
-  if (!adminPlace) return null;
+  if (!adminPlace) return <NoBranchNotice />;
 
   const onReset = () => {
     Alert.alert(t("queue"), t("confirmClearQueue"), [

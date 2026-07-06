@@ -7,19 +7,24 @@ import GlassCard from "../components/GlassCard";
 import Avatar from "../components/Avatar";
 import FadeInView from "../components/FadeInView";
 import LanguagePickerModal from "../modals/LanguagePickerModal";
+import ThemePickerModal from "../modals/ThemePickerModal";
 import SettingsModal from "../modals/SettingsModal";
 import { useAppTheme } from "../context/ThemeContext";
 import { useI18n } from "../context/I18nContext";
 import { useApp } from "../context/AppContext";
+import { appVersion } from "../utils/appVersion";
 import { fonts, radius } from "../theme/typography";
 
+const THEME_LABEL_KEYS = { system: "themeModeSystem", light: "themeModeLight", dark: "themeModeDark" };
+
 export default function ProfileScreen({ navigation }) {
-  const { colors, isDark, toggleTheme } = useAppTheme();
+  const { colors, isDark, themeMode } = useAppTheme();
   const { t, lang, langName } = useI18n();
-  const { user, logoutUser, refreshUserCoins } = useApp();
+  const { user, logoutUser, refreshUserStats } = useApp();
 
   const [notifEnabled, setNotifEnabled] = useState(true);
   const [langOpen, setLangOpen] = useState(false);
+  const [themeOpen, setThemeOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   const fullName = user ? `${user.first} ${user.last}` : "—";
@@ -55,8 +60,8 @@ export default function ProfileScreen({ navigation }) {
 
   useFocusEffect(
     React.useCallback(() => {
-      refreshUserCoins();
-    }, [refreshUserCoins]),
+      refreshUserStats();
+    }, [refreshUserStats]),
   );
 
   return (
@@ -83,14 +88,10 @@ export default function ProfileScreen({ navigation }) {
 
           <View style={styles.statsRow}>
             <GlassCard style={styles.statBox}>
-              <Text style={[styles.statVal, { color: colors.accent, fontFamily: fonts.mono }]}>24</Text>
-              <Text style={[styles.statLbl, { color: colors.text3 }]}>{t("statTotal")}</Text>
-            </GlassCard>
-            <GlassCard style={styles.statBox}>
               <Text style={[styles.statVal, { color: colors.accent, fontFamily: fonts.mono }]}>
-                2.4<Text style={{ fontSize: 14 }}> {t("hourUnit")}</Text>
+                {user?.totalServed ?? 0}
               </Text>
-              <Text style={[styles.statLbl, { color: colors.text3 }]}>{t("statSaved")}</Text>
+              <Text style={[styles.statLbl, { color: colors.text3 }]}>{t("statTotal")}</Text>
             </GlassCard>
           </View>
 
@@ -109,13 +110,13 @@ export default function ProfileScreen({ navigation }) {
             </View>
 
             <TouchableOpacity
-              onPress={toggleTheme}
+              onPress={() => setThemeOpen(true)}
               style={[styles.settingRow, { borderBottomWidth: 1, borderBottomColor: colors.border }]}
             >
               <Ionicons name={isDark ? "sunny" : "moon"} size={19} color={colors.accent} />
               <Text style={[styles.settingLabel, { color: colors.text, fontFamily: fonts.semibold }]}>{t("darkMode")}</Text>
               <Text style={[styles.settingValue, { color: colors.text3 }]}>
-                {isDark ? t("themeNightMode") : t("themeDayMode")} ›
+                {t(THEME_LABEL_KEYS[themeMode])} ›
               </Text>
             </TouchableOpacity>
 
@@ -144,11 +145,12 @@ export default function ProfileScreen({ navigation }) {
             </TouchableOpacity>
           </GlassCard>
 
-          <Text style={[styles.footer, { color: colors.text3 }]}>Navbat v2.5 · {t("appFooter")}</Text>
+          <Text style={[styles.footer, { color: colors.text3 }]}>Navbat v{appVersion} · {t("appFooter")}</Text>
         </ScrollView>
       </FadeInView>
 
       <LanguagePickerModal visible={langOpen} onClose={() => setLangOpen(false)} />
+      <ThemePickerModal visible={themeOpen} onClose={() => setThemeOpen(false)} />
       <SettingsModal visible={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </LinearGradient>
   );

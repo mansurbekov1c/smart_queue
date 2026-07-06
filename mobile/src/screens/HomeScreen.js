@@ -10,23 +10,27 @@ import { useApp } from "../context/AppContext";
 import PlaceCard from "../components/PlaceCard";
 import CategoryChip from "../components/CategoryChip";
 import LiveDot from "../components/LiveDot";
-import { CAT_ICONS } from "../data/categoryIcons";
+import { CAT_ICONS, categoryLabelKey } from "../data/categoryIcons";
 import { fonts, radius } from "../theme/typography";
-
-const CATS = [
-  { key: "all", labelKey: "catAll", icon: null },
-  { key: "barber", labelKey: "catBarber", icon: CAT_ICONS.barber },
-  { key: "clinic", labelKey: "catClinic", icon: CAT_ICONS.clinic },
-  { key: "bank", labelKey: "catBank", icon: CAT_ICONS.bank },
-  { key: "carwash", labelKey: "catCarwash", icon: CAT_ICONS.carwash },
-  { key: "gov", labelKey: "catGov", icon: CAT_ICONS.gov },
-];
 
 export default function HomeScreen({ navigation }) {
   const { colors } = useAppTheme();
   const { t } = useI18n();
-  const { places, homeFilter, setHomeFilter, user, myQueue, logoutUser } = useApp();
+  const { places, homeFilter, setHomeFilter, user, myQueue, logoutUser, categories } = useApp();
   const insets = useSafeAreaInsets();
+
+  const cats = useMemo(
+    () => [
+      { key: "all", labelKey: "catAll", icon: null },
+      ...categories.map((c) => ({
+        key: c.key,
+        labelKey: categoryLabelKey(c.key),
+        fallback: c.key,
+        icon: CAT_ICONS[c.key] || "business",
+      })),
+    ],
+    [categories],
+  );
 
   useFocusEffect(
     React.useCallback(() => {
@@ -102,10 +106,10 @@ export default function HomeScreen({ navigation }) {
           </LinearGradient>
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipsRow} contentContainerStyle={{ paddingHorizontal: 16 }}>
-            {CATS.map((c) => (
+            {cats.map((c) => (
               <CategoryChip
                 key={c.key}
-                label={t(c.labelKey)}
+                label={t(c.labelKey, c.fallback)}
                 icon={c.icon}
                 active={homeFilter === c.key}
                 onPress={() => setHomeFilter(c.key)}

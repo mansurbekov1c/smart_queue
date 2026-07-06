@@ -6,20 +6,25 @@ import { CommonActions, useFocusEffect } from "@react-navigation/native";
 import GlassCard from "../components/GlassCard";
 import FadeInView from "../components/FadeInView";
 import LanguagePickerModal from "../modals/LanguagePickerModal";
+import ThemePickerModal from "../modals/ThemePickerModal";
 import AdminSettingsModal from "../modals/AdminSettingsModal";
 import { useAppTheme } from "../context/ThemeContext";
 import { useI18n } from "../context/I18nContext";
 import { useApp } from "../context/AppContext";
+import { appVersion } from "../utils/appVersion";
 import { fonts, radius } from "../theme/typography";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+const THEME_LABEL_KEYS = { system: "themeModeSystem", light: "themeModeLight", dark: "themeModeDark" };
+
 export default function SuperAdminProfileScreen({ navigation }) {
-  const { colors, isDark, toggleTheme } = useAppTheme();
+  const { colors, isDark, themeMode } = useAppTheme();
   const { t, lang, langName } = useI18n();
   const { adminEmail, adminLogout } = useApp();
   const insets = useSafeAreaInsets();
 
   const [langOpen, setLangOpen] = useState(false);
+  const [themeOpen, setThemeOpen] = useState(false);
   const [credOpen, setCredOpen] = useState(false);
 
   const onLogout = () => {
@@ -71,13 +76,13 @@ export default function SuperAdminProfileScreen({ navigation }) {
 
           <GlassCard style={styles.settingsCard}>
             <TouchableOpacity
-              onPress={toggleTheme}
+              onPress={() => setThemeOpen(true)}
               style={[styles.row, { borderBottomWidth: 1, borderBottomColor: colors.border }]}
             >
               <Ionicons name={isDark ? "sunny" : "moon"} size={19} color={colors.accent} />
               <Text style={[styles.rowLabel, { color: colors.text, fontFamily: fonts.semibold }]}>{t("darkMode")}</Text>
               <Text style={[styles.rowValue, { color: colors.text3 }]}>
-                {isDark ? t("themeNightMode") : t("themeDayMode")} ›
+                {t(THEME_LABEL_KEYS[themeMode])} ›
               </Text>
             </TouchableOpacity>
 
@@ -106,11 +111,12 @@ export default function SuperAdminProfileScreen({ navigation }) {
             </TouchableOpacity>
           </GlassCard>
 
-          <Text style={[styles.footer, { color: colors.text3 }]}>Navbat v2.5 · {t("appFooter")}</Text>
+          <Text style={[styles.footer, { color: colors.text3 }]}>Navbat v{appVersion} · {t("appFooter")}</Text>
         </ScrollView>
       </FadeInView>
 
       <LanguagePickerModal visible={langOpen} onClose={() => setLangOpen(false)} />
+      <ThemePickerModal visible={themeOpen} onClose={() => setThemeOpen(false)} />
       <AdminSettingsModal visible={credOpen} onClose={() => setCredOpen(false)} />
     </LinearGradient>
   );

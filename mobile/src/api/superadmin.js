@@ -21,7 +21,7 @@ export async function fetchAllAdmins() {
   return (data || []).map(mapAdminRow);
 }
 
-export async function createBranch({ name, category, city, district, address }) {
+export async function createBranch({ name, category, city, district, address, lat, lng }) {
   const { data, error } = await supabase
     .from("branches")
     .insert({
@@ -30,11 +30,56 @@ export async function createBranch({ name, category, city, district, address }) 
       city: city.trim(),
       district: district.trim(),
       address: address.trim(),
+      lat: lat ?? null,
+      lng: lng ?? null,
     })
     .select()
     .single();
   if (error) throw error;
   return data;
+}
+
+/* Yangi admin yaratish. supabase.auth.signUp() joriy mijoz sessiyasini
+   yangi foydalanuvchinikiga almashtirib qo'yadi — shu sababli avval super
+   adminning sessiyasi saqlab olinadi, yangi hisob yaratilgach super admin
+   sessiyasi tiklanadi, so'ng (endi yana super admin sifatida) profiles
+   qatoridagi role='admin' va branch_id o'rnatiladi (profiles_update_super_admin
+   RLS siyosati orqali ruxsat etiladi). */
+export async function createAdmin({ firstName, lastName, email, password, branchId }) {
+  const {
+    data: { session: superSession },
+  } = await supabase.auth.getSession();
+  if (!superSession) throw new Error("Sessiya topilmadi");
+
+  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+    email: email.trim(),
+    password,
+    options: {
+      data: { first_name: firstName.trim(), last_name: lastName.trim() },
+    },
+  });
+  if (signUpError) throw signUpError;
+  const newUserId = signUpData.user?.id;
+
+  const { error: restoreError } = await supabase.auth.setSession({
+    access_token: superSession.access_token,
+    refresh_token: superSession.refresh_token,
+  });
+  if (restoreError) throw restoreError;
+
+  if (!newUserId) throw new Error("Yangi foydalanuvchi yaratilmadi");
+
+  const { error: promoteError } = await supabase
+    .from("profiles")
+    .update({ role: "admin" })
+    .eq("id", newUserId);
+  if (promoteError) throw promoteError;
+
+  if (branchId) {
+    await assignAdminToBranch(newUserId, branchId);
+  }
+
+  return newUserId;
 }
 
 export async function updateBranch(branchId, fields) {

@@ -9,6 +9,7 @@ import InputField from "../components/InputField";
 import PrimaryButton from "../components/PrimaryButton";
 import SecondaryButton from "../components/SecondaryButton";
 import PickerOverlay from "../components/PickerOverlay";
+import BranchMapPreview from "../components/BranchMapPreview";
 import { useAppTheme } from "../context/ThemeContext";
 import { useI18n } from "../context/I18nContext";
 import { useToast } from "../context/ToastContext";
@@ -35,6 +36,8 @@ export default function SuperAdminBranchDetailScreen({ route, navigation }) {
 
   const [name, setName] = useState(branch?.name || "");
   const [address, setAddress] = useState(branch?.location?.address || "");
+  const [latText, setLatText] = useState(branch?.location?.coords?.lat != null ? String(branch.location.coords.lat) : "");
+  const [lngText, setLngText] = useState(branch?.location?.coords?.lng != null ? String(branch.location.coords.lng) : "");
   const [saving, setSaving] = useState(false);
   const [admins, setAdmins] = useState([]);
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -74,9 +77,15 @@ export default function SuperAdminBranchDetailScreen({ route, navigation }) {
       showToast(t("toastLatinOnly"));
       return;
     }
+    const lat = latText.trim() ? parseFloat(latText) : null;
+    const lng = lngText.trim() ? parseFloat(lngText) : null;
+    if ((latText.trim() && !Number.isFinite(lat)) || (lngText.trim() && !Number.isFinite(lng))) {
+      showToast(t("toastInvalidTimeFormat"));
+      return;
+    }
     setSaving(true);
     try {
-      await updateBranch(branch.id, { name: name.trim(), address: address.trim() });
+      await updateBranch(branch.id, { name: name.trim(), address: address.trim(), lat, lng });
       showToast(t("toastCredSaved"));
     } catch (e) {
       console.error("Filialni yangilash xatosi:", e);
@@ -169,6 +178,11 @@ export default function SuperAdminBranchDetailScreen({ route, navigation }) {
               {branch.isOpen ? t("saOpen", "Ochiq") : t("saClosed", "Yopiq")}
             </Text>
           </View>
+          <BranchMapPreview
+            lat={latText.trim() ? parseFloat(latText) : null}
+            lng={lngText.trim() ? parseFloat(lngText) : null}
+            style={styles.mapPreview}
+          />
         </GlassCard>
 
         <GlassCard style={styles.card}>
@@ -193,7 +207,7 @@ export default function SuperAdminBranchDetailScreen({ route, navigation }) {
             <Text style={{ color: colors.text3, fontSize: 12 }}>{t("saNotConfigured", "Sozlanmagan")}</Text>
           )}
           <TouchableOpacity
-            onPress={() => showToast(t("saComingSoon", "Tez orada"))}
+            onPress={() => navigation.navigate("WorkSchedule", { branchId: branch.id, branchName: branch.name })}
             style={[styles.scheduleBtn, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder }]}
           >
             <Ionicons name="calendar-outline" size={13} color={colors.accent} />
@@ -210,6 +224,11 @@ export default function SuperAdminBranchDetailScreen({ route, navigation }) {
           <InputField label={t("saBranchName", "Filial nomi")} value={name} onChangeText={setName} style={styles.field} />
           <Text style={[styles.hint, { color: colors.text3 }]}>{t("hintLatinOnly")}</Text>
           <InputField label={t("saAddress", "Manzil")} value={address} onChangeText={setAddress} style={styles.field} />
+          <Text style={[styles.hint, { color: colors.text3 }]}>{t("hintLatLngOptional")}</Text>
+          <View style={styles.locRow}>
+            <InputField label={t("labelLat")} value={latText} onChangeText={setLatText} keyboardType="numbers-and-punctuation" style={styles.locInput} />
+            <InputField label={t("labelLng")} value={lngText} onChangeText={setLngText} keyboardType="numbers-and-punctuation" style={styles.locInput} />
+          </View>
           <PrimaryButton label={t("save", "Saqlash")} onPress={onSaveInfo} loading={saving} />
         </GlassCard>
 
@@ -316,6 +335,9 @@ const styles = StyleSheet.create({
   },
   field: { marginBottom: 4 },
   hint: { fontSize: 11, marginBottom: 8 },
+  locRow: { flexDirection: "row", gap: 10, marginBottom: 8 },
+  locInput: { flex: 1 },
+  mapPreview: { marginTop: 10 },
   adminInfoRow: { flexDirection: "row", alignItems: "center", gap: 10 },
   adminAvatar: { width: 36, height: 36, borderRadius: 12, alignItems: "center", justifyContent: "center" },
   adminActionsRow: { flexDirection: "row", gap: 8, marginTop: 6 },
