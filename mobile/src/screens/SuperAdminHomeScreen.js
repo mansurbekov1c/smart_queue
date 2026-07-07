@@ -417,7 +417,16 @@ function AddAdminModal({ visible, branches, onClose, onCreated }) {
       onCreated?.();
     } catch (e) {
       console.error("Admin qo'shish xatosi:", e);
-      showToast(e?.message?.includes("registered") ? t("toastEmailTaken", "Bu email band") : t("toastActionFailed", "Amal bajarilmadi"));
+      // Edge Function aniq (o'zbekcha) xabar qaytaradi — uni ko'rsatamiz;
+      // aks holda umumiy xabar
+      const msg = e?.message || "";
+      if (msg.includes("band") || msg.includes("registered")) {
+        showToast(t("toastEmailTaken", "Bu email band"));
+      } else if (msg && !msg.toLowerCase().includes("failed") && !msg.toLowerCase().includes("network")) {
+        showToast(msg);
+      } else {
+        showToast(t("toastActionFailed", "Amal bajarilmadi"));
+      }
     } finally {
       setSaving(false);
     }

@@ -788,12 +788,13 @@ export function AppProvider({ children }) {
       showToast(`${t("toastJoinQueueSuccess")}: #${ticket.num}`);
     } catch (e) {
       console.error("Navbatga yozilish xatosi:", e);
-      const closedMessages = [
+      const knownMessages = [
         "Filial bugun texnik sabablarga ko'ra ishlamaydi",
         "Filial bugun ishlamaydi",
         "Bugun dam olish kuni",
+        "Sizda bu filialda allaqachon faol navbat bor",
       ];
-      if (closedMessages.includes(e.message)) {
+      if (knownMessages.includes(e.message) || e.message?.startsWith("Filial hozir yopiq") || e.message?.startsWith("Bu filialga bugun")) {
         showToast(e.message);
       } else {
         showToast(t("toastActionFailed", "Amal bajarilmadi"));

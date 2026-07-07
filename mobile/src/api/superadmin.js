@@ -39,46 +39,29 @@ export async function createBranch({ name, category, city, district, address, la
   return data;
 }
 
-/* Yangi admin yaratish. supabase.auth.signUp() joriy mijoz sessiyasini
-   yangi foydalanuvchinikiga almashtirib qo'yadi — shu sababli avval super
-   adminning sessiyasi saqlab olinadi, yangi hisob yaratilgach super admin
-   sessiyasi tiklanadi, so'ng (endi yana super admin sifatida) profiles
-   qatoridagi role='admin' va branch_id o'rnatiladi (profiles_update_super_admin
-   RLS siyosati orqali ruxsat etiladi). */
+/* Yangi admin yaratish — "create-admin" Edge Function orqali (service_role
+   kaliti bilan serverda ishlaydi). Mobil ilova sessiyasiga umuman tegmaydi,
+   avvalgi mo'rt "sessiyani saqlab-tiklash" hiylasi endi kerak emas.
+   Funksiya hisobni yaratadi, role='admin' va (berilsa) branch_id belgilaydi. */
 export async function createAdmin({ firstName, lastName, email, password, branchId }) {
-  const {
-    data: { session: superSession },
-  } = await supabase.auth.getSession();
-  if (!superSession) throw new Error("Sessiya topilmadi");
-
-  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-    email: email.trim(),
-    password,
-    options: {
-      data: { first_name: firstName.trim(), last_name: lastName.trim() },
-    },
+  const { data, error } = await supabase.functions.invoke("create-admin", {
+    body: { firstName, lastName, email, password, branchId: branchId || null },
   });
-  if (signUpError) throw signUpError;
-  const newUserId = signUpData.user?.id;
 
-  const { error: restoreError } = await supabase.auth.setSession({
-    access_token: superSession.access_token,
-    refresh_token: superSession.refresh_token,
-  });
-  if (restoreError) throw restoreError;
-
-  if (!newUserId) throw new Error("Yangi foydalanuvchi yaratilmadi");
-
-  // 13_security_hardening.sql: role ustuni endi to'g'ridan-to'g'ri yangilanmaydi,
-  // faqat is_super_admin() tekshiruvli SECURITY DEFINER RPC orqali
-  const { error: promoteError } = await supabase.rpc("promote_to_admin", { p_user_id: newUserId });
-  if (promoteError) throw promoteError;
-
-  if (branchId) {
-    await assignAdminToBranch(newUserId, branchId);
+  if (error) {
+    // Edge Function 4xx/5xx qaytarsa — javob tanasidagi aniq xabarni chiqaramiz
+    let message = error.message;
+    try {
+      const body = await error.context?.json?.();
+      if (body?.error) message = body.error;
+    } catch (_) {
+      // javob tanasini o'qib bo'lmadi — asl xabar qoladi
+    }
+    throw new Error(message);
   }
+  if (data?.error) throw new Error(data.error);
 
-  return newUserId;
+  return data?.userId;
 }
 
 export async function updateBranch(branchId, fields) {
