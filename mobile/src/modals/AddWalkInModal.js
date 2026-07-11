@@ -19,13 +19,18 @@ export default function AddWalkInModal({ visible, onClose }) {
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const onSubmit = async () => {
+    if (submitting) return;
     if (!isLatinName(name)) {
       showToast(t("toastLatinOnly"));
       return;
     }
-    if (await addWalkIn(name)) {
+    setSubmitting(true);
+    const ok = await addWalkIn(name);
+    setSubmitting(false);
+    if (ok) {
       setName("");
       setPhone("");
       onClose();
@@ -54,8 +59,14 @@ export default function AddWalkInModal({ visible, onClose }) {
         style={styles.field}
       />
 
-      <PrimaryButton label={t("btnAddToQueue")} onPress={onSubmit} style={styles.confirmBtn} />
-      <SecondaryButton label={t("btnCancel")} onPress={onClose} />
+      <PrimaryButton
+        label={t("btnAddToQueue")}
+        onPress={onSubmit}
+        loading={submitting}
+        disabled={submitting}
+        style={styles.confirmBtn}
+      />
+      <SecondaryButton label={t("btnCancel")} onPress={onClose} disabled={submitting} />
     </BottomSheetModal>
   );
 }

@@ -39,6 +39,7 @@ export default function SuperAdminBranchDetailScreen({ route, navigation }) {
   const [latText, setLatText] = useState(branch?.location?.coords?.lat != null ? String(branch.location.coords.lat) : "");
   const [lngText, setLngText] = useState(branch?.location?.coords?.lng != null ? String(branch.location.coords.lng) : "");
   const [saving, setSaving] = useState(false);
+  const [busy, setBusy] = useState(false);
   const [admins, setAdmins] = useState([]);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerSearch, setPickerSearch] = useState("");
@@ -96,27 +97,34 @@ export default function SuperAdminBranchDetailScreen({ route, navigation }) {
   };
 
   const onUnassign = async () => {
-    if (!currentAdmin) return;
+    if (!currentAdmin || busy) return;
+    setBusy(true);
     try {
       await unassignAdmin(currentAdmin.id);
       showToast(t("toastCredSaved"));
-      load();
+      await load();
     } catch (e) {
       console.error("Adminni bo'shatish xatosi:", e);
       showToast(t("toastActionFailed", "Amal bajarilmadi"));
+    } finally {
+      setBusy(false);
     }
   };
 
   const onSelectAdmin = async (item) => {
+    if (busy) return;
+    setBusy(true);
     try {
       await assignAdminToBranch(item.id, branch.id);
       showToast(t("toastCredSaved"));
       setPickerOpen(false);
       setPickerSearch("");
-      load();
+      await load();
     } catch (e) {
       console.error("Admin biriktirish xatosi:", e);
       showToast(t("toastActionFailed", "Amal bajarilmadi"));
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -254,8 +262,8 @@ export default function SuperAdminBranchDetailScreen({ route, navigation }) {
                 </View>
               </View>
               <View style={styles.adminActionsRow}>
-                <SecondaryButton label={t("saReplace", "Almashtirish")} onPress={() => setPickerOpen(true)} style={styles.flex1} />
-                <SecondaryButton label={t("saUnassignBtn", "Olib tashlash")} danger onPress={onUnassign} style={styles.flex1} />
+                <SecondaryButton label={t("saReplace", "Almashtirish")} onPress={() => setPickerOpen(true)} disabled={busy} style={styles.flex1} />
+                <SecondaryButton label={t("saUnassignBtn", "Olib tashlash")} danger onPress={onUnassign} loading={busy} disabled={busy} style={styles.flex1} />
               </View>
             </>
           ) : (
@@ -263,7 +271,7 @@ export default function SuperAdminBranchDetailScreen({ route, navigation }) {
               <Text style={{ color: colors.text3, fontSize: 12, marginBottom: 10 }}>
                 {t("saUnassigned", "Biriktirilmagan")}
               </Text>
-              <SecondaryButton label={t("saAssignAdmin", "Admin biriktirish")} onPress={() => setPickerOpen(true)} />
+              <SecondaryButton label={t("saAssignAdmin", "Admin biriktirish")} onPress={() => setPickerOpen(true)} loading={busy} disabled={busy} />
             </>
           )}
         </GlassCard>

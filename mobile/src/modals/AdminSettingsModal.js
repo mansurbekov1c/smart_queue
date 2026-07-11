@@ -21,6 +21,7 @@ export default function AdminSettingsModal({ visible, onClose }) {
   const [newPass, setNewPass] = useState("");
   const [confirmPass, setConfirmPass] = useState("");
   const [newLogin, setNewLogin] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const reset = () => {
     setStep("menu");
@@ -28,6 +29,7 @@ export default function AdminSettingsModal({ visible, onClose }) {
     setNewPass("");
     setConfirmPass("");
     setNewLogin("");
+    setSubmitting(false);
   };
 
   const handleClose = () => {
@@ -45,29 +47,35 @@ export default function AdminSettingsModal({ visible, onClose }) {
   };
 
   const onSavePassword = async () => {
+    if (submitting) return;
     if (!oldPass.trim()) {
       showToast(t("toastOldPassRequired"));
       return;
     }
-    if (!(await verifyAdminPass(oldPass.trim()))) {
-      showToast(t("toastOldPassWrong"));
-      return;
+    setSubmitting(true);
+    try {
+      if (!(await verifyAdminPass(oldPass.trim()))) {
+        showToast(t("toastOldPassWrong"));
+        return;
+      }
+      if (newPass.length < 6) {
+        showToast(t("toastPassTooShort"));
+        return;
+      }
+      if (newPass !== confirmPass) {
+        showToast(t("toastPassMismatch"));
+        return;
+      }
+      const { error } = await supabase.auth.updateUser({ password: newPass });
+      if (error) {
+        showToast(t("toastOldPassWrong"));
+        return;
+      }
+      showToast(t("toastCredSaved"));
+      handleClose();
+    } finally {
+      setSubmitting(false);
     }
-    if (newPass.length < 6) {
-      showToast(t("toastPassTooShort"));
-      return;
-    }
-    if (newPass !== confirmPass) {
-      showToast(t("toastPassMismatch"));
-      return;
-    }
-    const { error } = await supabase.auth.updateUser({ password: newPass });
-    if (error) {
-      showToast(t("toastOldPassWrong"));
-      return;
-    }
-    showToast(t("toastCredSaved"));
-    handleClose();
   };
 
   return (
@@ -201,7 +209,7 @@ export default function AdminSettingsModal({ visible, onClose }) {
                     {t("btnCancel")}
                   </Text>
                 </TouchableOpacity>
-                <PrimaryButton label={t("btnSave")} onPress={onSavePassword} style={styles.saveBtn} />
+                <PrimaryButton label={t("btnSave")} onPress={onSavePassword} loading={submitting} disabled={submitting} style={styles.saveBtn} />
               </View>
             </>
           )}

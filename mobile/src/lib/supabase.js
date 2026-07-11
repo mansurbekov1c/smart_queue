@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { AppState } from "react-native";
 import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
@@ -17,4 +18,17 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     persistSession: true,
     detectSessionInUrl: false,
   },
+});
+
+/* Supabase'ning React Native uchun MAJBURIY talabi: ilova old planда (active)
+   bo'lганda access tokenni avtomatik yangilab turish, fon rejimida to'xtatish.
+   Busiz standalone build'da sessiya ishonchli tiklanmaydi — token muddati
+   o'tgach yangilanmay qoladi va ilova qayta ochilganда qayta login so'raydi.
+   https://supabase.com/docs/guides/auth/quickstarts/react-native */
+AppState.addEventListener("change", (state) => {
+  if (state === "active") {
+    supabase.auth.startAutoRefresh();
+  } else {
+    supabase.auth.stopAutoRefresh();
+  }
 });

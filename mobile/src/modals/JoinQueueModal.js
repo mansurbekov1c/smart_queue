@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import BottomSheetModal from "../components/BottomSheetModal";
 import PrimaryButton from "../components/PrimaryButton";
@@ -12,11 +12,15 @@ export default function JoinQueueModal({ visible, onClose, navigation }) {
   const { colors } = useAppTheme();
   const { t } = useI18n();
   const { currentPlace, joinPreview, confirmJoin } = useApp();
+  const [submitting, setSubmitting] = useState(false);
 
   if (!currentPlace || !joinPreview) return null;
 
   const onConfirm = async () => {
+    if (submitting) return;
+    setSubmitting(true);
     await confirmJoin();
+    setSubmitting(false);
     onClose();
     setTimeout(() => navigation.navigate("MainTabs", { screen: "MyQueue" }), 400);
   };
@@ -41,8 +45,15 @@ export default function JoinQueueModal({ visible, onClose, navigation }) {
         </Text>
       </View>
 
-      <PrimaryButton label={t("btnConfirm")} icon="checkmark" onPress={onConfirm} style={styles.confirmBtn} />
-      <SecondaryButton label={t("btnCancel")} onPress={onClose} />
+      <PrimaryButton
+        label={t("btnConfirm")}
+        icon="checkmark"
+        onPress={onConfirm}
+        loading={submitting}
+        disabled={submitting}
+        style={styles.confirmBtn}
+      />
+      <SecondaryButton label={t("btnCancel")} onPress={onClose} disabled={submitting} />
     </BottomSheetModal>
   );
 }

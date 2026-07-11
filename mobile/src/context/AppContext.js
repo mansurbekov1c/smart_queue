@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { fetchBranches, subscribeBranchCalibration } from "../api/branches";
 import { fetchCategories, subscribeCategories } from "../api/categories";
 import { fetchProfile, fetchUserCoins, fetchUserServedCount } from "../api/profile";
@@ -61,6 +62,8 @@ export function AppProvider({ children }) {
   const [currentMeta, setCurrentMeta] = useState(EMPTY_META);
   const [likedPlaceIds, setLikedPlaceIds] = useState([]);
   const [joinedPlaceIds, setJoinedPlaceIds] = useState([]);
+  // Sessiya tiklash tekshiruvi tugadimi? (Splash shu tugagach navigatsiya qiladi)
+  const [authReady, setAuthReady] = useState(false);
 
   // myQueues'ning eng so'nggi qiymatini effektlar/callbacklardan o'qish uchun (loopsiz)
   const myQueuesRef = useRef([]);
@@ -82,10 +85,8 @@ export function AppProvider({ children }) {
      rejim tanlash oqimiga mos keladi. */
   useEffect(() => {
     let cancelled = false;
-    (async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+
+    const restore = async (session) => {
       if (cancelled || !session?.user) return;
       try {
         const profile = await fetchProfile(session.user.id);
@@ -109,9 +110,40 @@ export function AppProvider({ children }) {
       } catch (e) {
         console.error("Sessiyani tiklashda xatolik:", e);
       }
-    })();
+    };
+
+    // --- VAQTINCHALIK DEBUG: AsyncStorage'da sessiya kaliti bor-yo'qligini
+    //     tekshirish (yozilyaptimi yoki o'qilmayaptimi aniqlash uchun).
+    //     Sinovdan keyin bu blokni olib tashlash mumkin. ---
+    AsyncStorage.getAllKeys()
+      .then((keys) => {
+        const authKeys = keys.filter((k) => k.includes("supabase") || k.includes("auth-token") || k.startsWith("sb-"));
+        console.log("[SESSION DEBUG] AsyncStorage auth kalitlari:", authKeys);
+      })
+      .catch((e) => console.log("[SESSION DEBUG] AsyncStorage o'qish xatosi:", e?.message));
+
+    // 1) Darhol mavjud sessiyani tekshiramiz (tez yo'l)
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      console.log("[SESSION DEBUG] getSession user:", session?.user?.id ?? null);
+      await restore(session);
+      if (!cancelled) setAuthReady(true); // sessiya bor/yo'qligidan qat'i nazar, tekshiruv tugadi
+    });
+
+    // 2) Klient tayyor bo'lganда (INITIAL_SESSION) va token yangilanganда
+    //    (TOKEN_REFRESHED) ham tiklaymiz — standalone build'da getSession
+    //    ba'zan muddati o'tgan sessiyani qaytaradi; token yangilangач bu
+    //    yerda haqiqiy sessiya bilan qayta tiklanadi.
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("[SESSION DEBUG] onAuthStateChange:", event, "user:", session?.user?.id ?? null);
+      if (event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED") {
+        restore(session);
+        if (!cancelled) setAuthReady(true);
+      }
+    });
+
     return () => {
       cancelled = true;
+      sub.subscription.unsubscribe();
     };
   }, []);
 
@@ -986,6 +1018,7 @@ export function AppProvider({ children }) {
     () => ({
       places,
       placesLoading,
+      authReady,
       categories,
       refreshCategories,
       role,
@@ -1049,6 +1082,7 @@ export function AppProvider({ children }) {
     [
       places,
       placesLoading,
+      authReady,
       categories,
       refreshCategories,
       role,

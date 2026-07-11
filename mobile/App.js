@@ -20,6 +20,7 @@ import { ThemeProvider, useAppTheme } from "./src/context/ThemeContext";
 import { ToastProvider } from "./src/context/ToastContext";
 import { AppProvider } from "./src/context/AppContext";
 import RootNavigator from "./src/navigation/RootNavigator";
+import OfflineBanner from "./src/components/OfflineBanner";
 
 function Root() {
   const { isDark } = useAppTheme();
@@ -29,6 +30,7 @@ function Root() {
       <ToastProvider>
         <AppProvider>
           <RootNavigator />
+          <OfflineBanner />
         </AppProvider>
       </ToastProvider>
     </NavigationContainer>

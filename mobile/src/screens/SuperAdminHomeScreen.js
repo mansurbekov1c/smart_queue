@@ -1,5 +1,6 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
+  Alert,
   FlatList,
   ScrollView,
   StyleSheet,
@@ -19,7 +20,8 @@ import { useApp } from "../context/AppContext";
 import GlassCard from "../components/GlassCard";
 import InputField from "../components/InputField";
 import PrimaryButton from "../components/PrimaryButton";
-import BottomSheetModal from "../components/BottomSheetModal";
+import SecondaryButton from "../components/SecondaryButton";
+import BottomSheetModal, { BottomSheetScrollContext } from "../components/BottomSheetModal";
 import ManageableCategoryPicker from "../components/ManageableCategoryPicker";
 import PickerOverlay from "../components/PickerOverlay";
 import { CAT_ICONS } from "../data/categoryIcons";
@@ -279,6 +281,22 @@ function SearchBar({ value, onChangeText, colors }) {
   );
 }
 
+/* Fokuslanganда formani pastga scroll qiladigan input — klaviatura ostidagi
+   maydonlar (masalan lat/lng) ko'rinib turishi uchun. BottomSheetModal ichida
+   (scrollable) ishlaydi. */
+function ScrollAwareField({ onFocus, ...props }) {
+  const scroll = useContext(BottomSheetScrollContext);
+  return (
+    <InputField
+      {...props}
+      onFocus={(e) => {
+        onFocus?.(e);
+        scroll?.scrollToEnd?.();
+      }}
+    />
+  );
+}
+
 function AddBranchModal({ visible, onClose, onCreated }) {
   const { colors } = useAppTheme();
   const { t } = useI18n();
@@ -305,6 +323,42 @@ function AddBranchModal({ visible, onClose, onCreated }) {
     setLatText("");
     setLngText("");
     setCategory(categories[0]?.key || "");
+  };
+
+  // Formada kamida bitta maydon to'ldirilganmi? (kategoriya default bo'lgani
+  // uchun hisobga olinmaydi)
+  const isDirty = !!(
+    name.trim() ||
+    city.trim() ||
+    district.trim() ||
+    address.trim() ||
+    latText.trim() ||
+    lngText.trim()
+  );
+
+  // #3 — chiqishда tasdiqlash (ma'lumot o'chirilmaydi, faqat ogohlantirish)
+  const handleClose = () => {
+    if (saving) return;
+    if (isDirty) {
+      Alert.alert(t("confirmLeaveFormTitle"), t("confirmLeaveFormMsg"), [
+        { text: t("btnStayForm"), style: "cancel" },
+        { text: t("btnLeaveForm"), style: "destructive", onPress: onClose },
+      ]);
+    } else {
+      onClose();
+    }
+  };
+
+  // #4 — barcha maydonlarni tozalash (forma yopilmaydi)
+  const onClearAll = () => {
+    if (!isDirty) {
+      reset();
+      return;
+    }
+    Alert.alert(t("confirmClearFormTitle"), t("confirmClearFormMsg"), [
+      { text: t("btnCancel"), style: "cancel" },
+      { text: t("btnConfirm"), style: "destructive", onPress: reset },
+    ]);
   };
 
   const onSubmit = async () => {
@@ -338,7 +392,7 @@ function AddBranchModal({ visible, onClose, onCreated }) {
   };
 
   return (
-    <BottomSheetModal visible={visible} onClose={onClose}>
+    <BottomSheetModal visible={visible} onClose={handleClose} scrollable>
       <Text style={[styles.modalTitle, { color: colors.text, fontFamily: fonts.extrabold }]}>
         {t("saAddBranchTitle", "Yangi filial")}
       </Text>
@@ -350,8 +404,8 @@ function AddBranchModal({ visible, onClose, onCreated }) {
 
       <Text style={[styles.hint, { color: colors.text3, marginTop: -4 }]}>{t("hintLatLngOptional")}</Text>
       <View style={styles.locRow}>
-        <InputField label={t("labelLat")} value={latText} onChangeText={setLatText} keyboardType="numbers-and-punctuation" style={styles.locInput} />
-        <InputField label={t("labelLng")} value={lngText} onChangeText={setLngText} keyboardType="numbers-and-punctuation" style={styles.locInput} />
+        <ScrollAwareField label={t("labelLat")} value={latText} onChangeText={setLatText} keyboardType="numbers-and-punctuation" style={styles.locInput} />
+        <ScrollAwareField label={t("labelLng")} value={lngText} onChangeText={setLngText} keyboardType="numbers-and-punctuation" style={styles.locInput} />
       </View>
 
       <Text style={[styles.catLabel, { color: colors.text2 }]}>{t("saCategory", "Kategoriya")}</Text>
@@ -366,7 +420,15 @@ function AddBranchModal({ visible, onClose, onCreated }) {
         label={t("save", "Saqlash")}
         onPress={onSubmit}
         loading={saving}
+        disabled={saving}
         style={styles.submitBtn}
+      />
+      <SecondaryButton
+        label={t("btnClearAll")}
+        icon="trash-outline"
+        onPress={onClearAll}
+        disabled={saving}
+        style={styles.clearBtn}
       />
     </BottomSheetModal>
   );
@@ -394,6 +456,31 @@ function AddAdminModal({ visible, branches, onClose, onCreated }) {
   };
 
   const selectedBranch = branches.find((b) => b.id === branchId);
+
+  const isDirty = !!(firstName.trim() || lastName.trim() || email.trim() || pass.trim() || branchId);
+
+  const handleClose = () => {
+    if (saving) return;
+    if (isDirty) {
+      Alert.alert(t("confirmLeaveFormTitle"), t("confirmLeaveFormMsg"), [
+        { text: t("btnStayForm"), style: "cancel" },
+        { text: t("btnLeaveForm"), style: "destructive", onPress: onClose },
+      ]);
+    } else {
+      onClose();
+    }
+  };
+
+  const onClearAll = () => {
+    if (!isDirty) {
+      reset();
+      return;
+    }
+    Alert.alert(t("confirmClearFormTitle"), t("confirmClearFormMsg"), [
+      { text: t("btnCancel"), style: "cancel" },
+      { text: t("btnConfirm"), style: "destructive", onPress: reset },
+    ]);
+  };
 
   const onSubmit = async () => {
     if (!firstName.trim() || !lastName.trim() || !email.trim() || !pass.trim()) {
@@ -437,14 +524,14 @@ function AddAdminModal({ visible, branches, onClose, onCreated }) {
     .map((b) => ({ id: b.id, label: b.name, sublabel: b.location?.city, icon: CAT_ICONS[b.cat] || "business" }));
 
   return (
-    <BottomSheetModal visible={visible} onClose={onClose}>
+    <BottomSheetModal visible={visible} onClose={handleClose} scrollable>
       <Text style={[styles.modalTitle, { color: colors.text, fontFamily: fonts.extrabold }]}>
         {t("saAddAdminTitle", "Yangi admin")}
       </Text>
       <InputField label={t("labelFirstname")} value={firstName} onChangeText={setFirstName} placeholder={t("firstNamePlaceholder")} style={styles.field} />
       <InputField label={t("labelLastname")} value={lastName} onChangeText={setLastName} placeholder={t("lastNamePlaceholder")} style={styles.field} />
       <Text style={[styles.hint, { color: colors.text3 }]}>{t("hintLatinOnly")}</Text>
-      <InputField
+      <ScrollAwareField
         label={t("labelEmail")}
         value={email}
         onChangeText={setEmail}
@@ -452,7 +539,7 @@ function AddAdminModal({ visible, branches, onClose, onCreated }) {
         keyboardType="email-address"
         style={styles.field}
       />
-      <InputField
+      <ScrollAwareField
         label={t("labelPass")}
         value={pass}
         onChangeText={setPass}
@@ -476,7 +563,15 @@ function AddAdminModal({ visible, branches, onClose, onCreated }) {
         label={t("save", "Saqlash")}
         onPress={onSubmit}
         loading={saving}
+        disabled={saving}
         style={styles.submitBtn}
+      />
+      <SecondaryButton
+        label={t("btnClearAll")}
+        icon="trash-outline"
+        onPress={onClearAll}
+        disabled={saving}
+        style={styles.clearBtn}
       />
 
       <PickerOverlay
@@ -547,6 +642,7 @@ const styles = StyleSheet.create({
   locInput: { flex: 1 },
   catLabel: { fontSize: 12.5, fontWeight: "700", marginBottom: 8 },
   submitBtn: { marginBottom: 4, marginTop: 18 },
+  clearBtn: { marginTop: 10, opacity: 0.9 },
   branchPickBtn: {
     flexDirection: "row",
     alignItems: "center",

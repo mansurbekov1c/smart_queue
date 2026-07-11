@@ -25,6 +25,7 @@ export default function SettingsModal({ visible, onClose }) {
   const [newPass, setNewPass] = useState("");
   const [confirmPass, setConfirmPass] = useState("");
   const [newPhone, setNewPhone] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const reset = () => {
     setStep("menu");
@@ -34,6 +35,7 @@ export default function SettingsModal({ visible, onClose }) {
     setNewPass("");
     setConfirmPass("");
     setNewPhone("");
+    setSubmitting(false);
   };
 
   const handleClose = () => {
@@ -48,49 +50,59 @@ export default function SettingsModal({ visible, onClose }) {
   };
 
   const onSaveName = async () => {
+    if (submitting) return;
     if (!isLatinName(firstName) || !isLatinName(lastName)) {
       showToast(t("toastLatinOnly"));
       return;
     }
-    if (await editUserName(firstName, lastName)) {
-      reset();
-    }
+    setSubmitting(true);
+    const ok = await editUserName(firstName, lastName);
+    setSubmitting(false);
+    if (ok) reset();
   };
 
   const onSavePassword = async () => {
+    if (submitting) return;
     if (!oldPass.trim()) {
       showToast(t("toastOldPassRequired"));
       return;
     }
-    if (!(await verifyUserPass(oldPass.trim()))) {
-      showToast(t("toastOldPassWrong"));
-      return;
+    setSubmitting(true);
+    try {
+      if (!(await verifyUserPass(oldPass.trim()))) {
+        showToast(t("toastOldPassWrong"));
+        return;
+      }
+      if (newPass.length < 6) {
+        showToast(t("toastPassTooShort"));
+        return;
+      }
+      if (newPass !== confirmPass) {
+        showToast(t("toastPassMismatch"));
+        return;
+      }
+      const { error } = await supabase.auth.updateUser({ password: newPass });
+      if (error) {
+        showToast(t("toastOldPassWrong"));
+        return;
+      }
+      showToast(t("toastCredSaved"));
+      reset();
+    } finally {
+      setSubmitting(false);
     }
-    if (newPass.length < 6) {
-      showToast(t("toastPassTooShort"));
-      return;
-    }
-    if (newPass !== confirmPass) {
-      showToast(t("toastPassMismatch"));
-      return;
-    }
-    const { error } = await supabase.auth.updateUser({ password: newPass });
-    if (error) {
-      showToast(t("toastOldPassWrong"));
-      return;
-    }
-    showToast(t("toastCredSaved"));
-    reset();
   };
 
   const onSavePhone = async () => {
+    if (submitting) return;
     if (!newPhone.trim()) {
       showToast(t("toastNewPhoneRequired"));
       return;
     }
-    if (await updateUserPhone(newPhone)) {
-      reset();
-    }
+    setSubmitting(true);
+    const ok = await updateUserPhone(newPhone);
+    setSubmitting(false);
+    if (ok) reset();
   };
 
   return (
@@ -180,7 +192,7 @@ export default function SettingsModal({ visible, onClose }) {
                 >
                   <Text style={[styles.cancelText, { color: colors.text2, fontFamily: fonts.bold }]}>{t("btnCancel")}</Text>
                 </TouchableOpacity>
-                <PrimaryButton label={t("btnSave")} onPress={onSaveName} style={styles.saveBtn} />
+                <PrimaryButton label={t("btnSave")} onPress={onSaveName} loading={submitting} disabled={submitting} style={styles.saveBtn} />
               </View>
             </>
           )}
@@ -203,7 +215,7 @@ export default function SettingsModal({ visible, onClose }) {
                 >
                   <Text style={[styles.cancelText, { color: colors.text2, fontFamily: fonts.bold }]}>{t("btnCancel")}</Text>
                 </TouchableOpacity>
-                <PrimaryButton label={t("btnSave")} onPress={onSavePassword} style={styles.saveBtn} />
+                <PrimaryButton label={t("btnSave")} onPress={onSavePassword} loading={submitting} disabled={submitting} style={styles.saveBtn} />
               </View>
             </>
           )}
@@ -228,7 +240,7 @@ export default function SettingsModal({ visible, onClose }) {
                 >
                   <Text style={[styles.cancelText, { color: colors.text2, fontFamily: fonts.bold }]}>{t("btnCancel")}</Text>
                 </TouchableOpacity>
-                <PrimaryButton label={t("btnSave")} onPress={onSavePhone} style={styles.saveBtn} />
+                <PrimaryButton label={t("btnSave")} onPress={onSavePhone} loading={submitting} disabled={submitting} style={styles.saveBtn} />
               </View>
             </>
           )}

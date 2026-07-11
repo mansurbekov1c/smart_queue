@@ -1,5 +1,5 @@
-import React from "react";
-import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { useEffect } from "react";
+import { ActivityIndicator, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useAppTheme } from "../context/ThemeContext";
@@ -12,11 +12,35 @@ import { fonts, radius } from "../theme/typography";
 export default function SplashScreen({ navigation }) {
   const { colors, isDark, toggleTheme } = useAppTheme();
   const { t } = useI18n();
-  const { role, selectRole } = useApp();
+  const { role, selectRole, authReady, user, adminRole } = useApp();
 
   const goToLogin = () => {
     navigation.navigate(role === "admin" ? "AdminLogin" : "Login");
   };
+
+  /* Saqlangan sessiya tiklangач — avtomatik to'g'ri ekranga o'tamiz.
+     navigation.isFocused() sharti: faqat Splash faol bo'lganда (ya'ni ilova
+     endigina ochilganda) ishlaydi, normal login oqimiga xalaqit bermaydi. */
+  useEffect(() => {
+    if (!authReady) return;
+    if (!navigation.isFocused()) return;
+    if (user) {
+      navigation.reset({ index: 0, routes: [{ name: "MainTabs" }] });
+    } else if (adminRole === "super_admin") {
+      navigation.reset({ index: 0, routes: [{ name: "SuperAdminDashboard" }] });
+    } else if (adminRole === "admin") {
+      navigation.reset({ index: 0, routes: [{ name: "AdminTabs" }] });
+    }
+  }, [authReady, user, adminRole, navigation]);
+
+  // Sessiya tekshiruvi tugamaguncha — spinner (login ekrani "chaqnab" ketmasligi uchun)
+  if (!authReady) {
+    return (
+      <LinearGradient colors={colors.bgGradient} style={[styles.fill, styles.center]}>
+        <ActivityIndicator size="large" color={colors.accent} />
+      </LinearGradient>
+    );
+  }
 
   return (
     <LinearGradient colors={colors.bgGradient} style={styles.fill}>

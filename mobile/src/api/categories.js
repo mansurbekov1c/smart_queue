@@ -42,12 +42,17 @@ export async function deleteCategory(id) {
   if (error) throw error;
 }
 
+/* Har bir kategoriyaning sort_order'ini yangi tartibga ko'ra yozadi.
+   .select() qo'shildi: agar RLS jimgina bloklasa (xatosiz 0 qator), buni
+   affected orqali aniqlash mumkin — chaqiruvchi shuni tekshiradi. */
 export async function reorderCategories(orderedIds) {
   const results = await Promise.all(
     orderedIds.map((id, index) =>
-      supabase.from("categories").update({ sort_order: index + 1 }).eq("id", id),
+      supabase.from("categories").update({ sort_order: index + 1 }).eq("id", id).select("id"),
     ),
   );
   const firstError = results.find((r) => r.error)?.error;
   if (firstError) throw firstError;
+  const affected = results.reduce((n, r) => n + (r.data?.length || 0), 0);
+  return { affected, total: orderedIds.length };
 }

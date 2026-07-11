@@ -23,6 +23,7 @@ export default function DelayModal({ visible, queue, onClose }) {
   const availableOptions = OPTIONS.filter((n) => n <= maxDelayPositions);
 
   const [selected, setSelected] = React.useState(availableOptions[0] ?? null);
+  const [submitting, setSubmitting] = React.useState(false);
 
   useEffect(() => {
     if (visible) {
@@ -40,7 +41,9 @@ export default function DelayModal({ visible, queue, onClose }) {
       {
         text: t("btnConfirm"),
         onPress: async () => {
+          setSubmitting(true);
           const ok = await doDelay(queue?.ticketId, selected);
+          setSubmitting(false);
           if (ok) onClose();
         },
       },
@@ -106,10 +109,11 @@ export default function DelayModal({ visible, queue, onClose }) {
       <PrimaryButton
         label={limitReached ? t("delayLimitReachedLabel") : t("btnDelayConfirm")}
         onPress={onPressDelay}
-        disabled={!canDelay}
+        disabled={!canDelay || submitting}
+        loading={submitting}
         style={styles.confirmBtn}
       />
-      <SecondaryButton label={t("btnCancel")} onPress={onClose} />
+      <SecondaryButton label={t("btnCancel")} onPress={onClose} disabled={submitting} />
     </BottomSheetModal>
   );
 }
