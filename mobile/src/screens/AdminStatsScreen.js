@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { Alert, BackHandler, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { CommonActions, useFocusEffect } from "@react-navigation/native";
+import useExitConfirmOnBack from "../hooks/useExitConfirmOnBack";
 import GlassCard from "../components/GlassCard";
 import FadeInView from "../components/FadeInView";
 import NoBranchNotice from "../components/NoBranchNotice";
@@ -47,7 +47,6 @@ export default function AdminStatsScreen({ navigation }) {
     adminPlace,
     adminQueue,
     dailyServedCount,
-    adminLogout,
     rejectedCount,
     weeklyServed,
     monthlyServed,
@@ -59,30 +58,7 @@ export default function AdminStatsScreen({ navigation }) {
 
   const [period, setPeriod] = useState("daily");
 
-  const onLogout = () => {
-    Alert.alert(t("confirmLogout"), t("confirmLogoutMsg"), [
-      { text: t("btnCancel"), style: "cancel" },
-      {
-        text: t("logout"),
-        style: "destructive",
-        onPress: () => {
-          adminLogout();
-          navigation.dispatch(CommonActions.reset({ index: 0, routes: [{ name: "Splash" }] }));
-        },
-      },
-    ]);
-  };
-
-  useFocusEffect(
-    React.useCallback(() => {
-      const onBack = () => {
-        onLogout();
-        return true;
-      };
-      const sub = BackHandler.addEventListener("hardwareBackPress", onBack);
-      return () => sub.remove();
-    }, [adminPlace]),
-  );
+  useExitConfirmOnBack();
 
   if (!adminPlace) return <NoBranchNotice />;
 

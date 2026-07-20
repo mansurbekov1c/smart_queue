@@ -11,6 +11,7 @@ const Tab = createBottomTabNavigator();
 export default function MainTabs() {
   return (
     <Tab.Navigator
+      backBehavior="history"
       tabBar={(props) => <BottomTabBar {...props} />}
       screenOptions={{
         headerShown: false,

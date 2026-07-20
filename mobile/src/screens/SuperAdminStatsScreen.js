@@ -4,11 +4,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useAppTheme } from "../context/ThemeContext";
 import { useI18n } from "../context/I18nContext";
+import useExitConfirmOnBack from "../hooks/useExitConfirmOnBack";
 import { fonts } from "../theme/typography";
 
 export default function SuperAdminStatsScreen() {
   const { colors } = useAppTheme();
   const { t } = useI18n();
+
+  useExitConfirmOnBack();
 
   return (
     <LinearGradient colors={colors.bgGradient} style={styles.fill}>

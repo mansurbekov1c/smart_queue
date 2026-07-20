@@ -1,8 +1,8 @@
 import React, { useMemo, useState } from "react";
-import { Alert, BackHandler, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { CommonActions, useFocusEffect } from "@react-navigation/native";
+import useExitConfirmOnBack from "../hooks/useExitConfirmOnBack";
 import GlassCard from "../components/GlassCard";
 import QueueRow from "../components/QueueRow";
 import PrimaryButton from "../components/PrimaryButton";
@@ -22,37 +22,14 @@ const DELAY_OPTIONS = [1, 2, 3, 4, 5];
 export default function AdminPanelScreen({ navigation }) {
   const { colors } = useAppTheme();
   const { t } = useI18n();
-  const { adminPlace, adminQueue, adminNext, adminReject, adminLogout, confirmResetQueue, dailyServedCount, adminRejectItem, adminDelayItem } = useApp();
+  const { adminPlace, adminQueue, adminNext, adminReject, confirmResetQueue, dailyServedCount, adminRejectItem, adminDelayItem } = useApp();
   const insets = useSafeAreaInsets();
 
   const [addOpen, setAddOpen] = useState(false);
   const [servedOpen, setServedOpen] = useState(false);
   const [expandedNum, setExpandedNum] = useState(null);
 
-  const onLogout = () => {
-    Alert.alert(t("confirmLogout"), t("confirmLogoutMsg"), [
-      { text: t("btnCancel"), style: "cancel" },
-      {
-        text: t("logout"),
-        style: "destructive",
-        onPress: () => {
-          adminLogout();
-          navigation.dispatch(CommonActions.reset({ index: 0, routes: [{ name: "Splash" }] }));
-        },
-      },
-    ]);
-  };
-
-  useFocusEffect(
-    React.useCallback(() => {
-      const onBack = () => {
-        onLogout();
-        return true;
-      };
-      const sub = BackHandler.addEventListener("hardwareBackPress", onBack);
-      return () => sub.remove();
-    }, [adminPlace]),
-  );
+  useExitConfirmOnBack();
 
   const current = useMemo(() => adminQueue.find((q) => q.status === "current"), [adminQueue]);
   const waiting = useMemo(() => adminQueue.filter((q) => q.status === "waiting"), [adminQueue]);

@@ -12,6 +12,7 @@ import PickerOverlay from "../components/PickerOverlay";
 import BranchMapPreview from "../components/BranchMapPreview";
 import { useAppTheme } from "../context/ThemeContext";
 import { useI18n } from "../context/I18nContext";
+import { useApp } from "../context/AppContext";
 import { useToast } from "../context/ToastContext";
 import { CAT_ICONS } from "../data/categoryIcons";
 import { fetchAllAdmins, updateBranch, deleteBranch, assignAdminToBranch, unassignAdmin } from "../api/superadmin";
@@ -33,6 +34,7 @@ export default function SuperAdminBranchDetailScreen({ route, navigation }) {
   const { colors } = useAppTheme();
   const { t } = useI18n();
   const { showToast } = useToast();
+  const { categories } = useApp();
 
   const [name, setName] = useState(branch?.name || "");
   const [address, setAddress] = useState(branch?.location?.address || "");
@@ -168,7 +170,8 @@ export default function SuperAdminBranchDetailScreen({ route, navigation }) {
           <Text style={[styles.heroName, { color: colors.text, fontFamily: fonts.extrabold }]}>{branch.name}</Text>
           <View style={[styles.catPill, { backgroundColor: colors.accentSoft }]}>
             <Text style={{ color: colors.accent, fontFamily: fonts.bold, fontSize: 10.5 }}>
-              {t(`cat${branch.cat?.[0]?.toUpperCase()}${branch.cat?.slice(1)}`, branch.cat)}
+              {categories.find((c) => c.key === branch.cat)?.label ||
+                t(`cat${branch.cat?.[0]?.toUpperCase()}${branch.cat?.slice(1)}`, branch.cat)}
             </Text>
           </View>
         </View>

@@ -1,7 +1,10 @@
 import { supabase } from "../lib/supabase";
 
+/* key (name) — ichki barqaror kalit (ikonka/tarjima/branches.category bilan
+   bog'liq, o'zgarmaydi). label — foydalanuvchiga ko'rinadigan, super admin
+   tahrirlaydigan matn. */
 function mapCategoryRow(row) {
-  return { id: row.id, key: row.name, sortOrder: row.sort_order };
+  return { id: row.id, key: row.name, label: row.label || row.name, sortOrder: row.sort_order };
 }
 
 export function subscribeCategories(onChange) {
@@ -30,11 +33,23 @@ export async function createCategory(name) {
   const nextOrder = (lastRow?.sort_order ?? 0) + 1;
   const { data, error } = await supabase
     .from("categories")
-    .insert({ name: name.trim().toLowerCase(), sort_order: nextOrder })
+    // key = kichik harfli barqaror kalit; label = ko'rinadigan matn (asl ko'rinishi)
+    .insert({ name: name.trim().toLowerCase(), label: name.trim(), sort_order: nextOrder })
     .select()
     .single();
   if (error) throw error;
   return mapCategoryRow(data);
+}
+
+/* Faqat label (ko'rinadigan matn) yangilanadi — name/key tegilmaydi. */
+export async function updateCategoryLabel(id, label) {
+  const { data, error } = await supabase
+    .from("categories")
+    .update({ label: label.trim() })
+    .eq("id", id)
+    .select("id");
+  if (error) throw error;
+  return { affected: data?.length || 0 };
 }
 
 export async function deleteCategory(id) {

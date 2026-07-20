@@ -11,6 +11,7 @@ import DelayModal from "../modals/DelayModal";
 import { useAppTheme } from "../context/ThemeContext";
 import { useI18n } from "../context/I18nContext";
 import { useApp } from "../context/AppContext";
+import useExitConfirmOnBack from "../hooks/useExitConfirmOnBack";
 import { CAT_ICONS } from "../data/categoryIcons";
 import { fonts, radius } from "../theme/typography";
 
@@ -20,6 +21,8 @@ export default function MyQueueScreen({ navigation }) {
   const { myQueues, places, leaveQueue, queueCancelledInfo, clearQueueCancelledInfo } = useApp();
   const insets = useSafeAreaInsets();
   const [delayQueue, setDelayQueue] = useState(null);
+
+  useExitConfirmOnBack();
 
   if (myQueues.length === 0) {
     return (

@@ -29,6 +29,7 @@ import { CAT_ICONS } from "../data/categoryIcons";
 import { fetchBranches } from "../api/branches";
 import { fetchAllAdmins, createBranch, createAdmin } from "../api/superadmin";
 import { isLatinName } from "../utils/validation";
+import useExitConfirmOnBack from "../hooks/useExitConfirmOnBack";
 import { fonts, radius } from "../theme/typography";
 
 export default function SuperAdminHomeScreen({ navigation }) {
@@ -36,6 +37,8 @@ export default function SuperAdminHomeScreen({ navigation }) {
   const { t } = useI18n();
   const { showToast } = useToast();
   const insets = useSafeAreaInsets();
+
+  useExitConfirmOnBack();
 
   const [page, setPage] = useState(0);
   const [branches, setBranches] = useState([]);

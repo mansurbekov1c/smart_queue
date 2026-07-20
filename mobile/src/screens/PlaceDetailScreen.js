@@ -23,7 +23,7 @@ export default function PlaceDetailScreen({ route, navigation }) {
   const { placeId } = route.params;
   const { colors } = useAppTheme();
   const { t } = useI18n();
-  const { openPlace, currentPlace, myQueues, user, selectedRating, setRating, submitReview, canJoinQueue, joinedPlaceIds, likedPlaceIds, toggleLike } = useApp();
+  const { openPlace, currentPlace, myQueues, user, selectedRating, setRating, submitReview, canJoinQueue, joinedPlaceIds, likedPlaceIds, toggleLike, categories } = useApp();
   const insets = useSafeAreaInsets();
 
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -86,7 +86,10 @@ export default function PlaceDetailScreen({ route, navigation }) {
                   <Ionicons name={isLiked ? "heart" : "heart-outline"} size={24} color={isLiked ? colors.danger : colors.text3} />
                 </TouchableOpacity>
               </View>
-              <Text style={[styles.placeCat, { color: colors.text3 }]}>{t("category" + place.cat.charAt(0).toUpperCase() + place.cat.slice(1))}</Text>
+              <Text style={[styles.placeCat, { color: colors.text3 }]}>
+                {categories.find((c) => c.key === place.cat)?.label ||
+                  t("category" + place.cat.charAt(0).toUpperCase() + place.cat.slice(1))}
+              </Text>
               <View style={styles.metaRow}>
                 <View style={styles.metaItem}>
                   <Ionicons name="star" size={13} color={colors.amber} />

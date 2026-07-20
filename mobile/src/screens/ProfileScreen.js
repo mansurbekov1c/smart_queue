@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { Alert, BackHandler, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { CommonActions, useFocusEffect } from "@react-navigation/native";
+import useExitConfirmOnBack from "../hooks/useExitConfirmOnBack";
 import GlassCard from "../components/GlassCard";
 import Avatar from "../components/Avatar";
 import FadeInView from "../components/FadeInView";
@@ -47,16 +48,7 @@ export default function ProfileScreen({ navigation }) {
     ]);
   };
 
-  useFocusEffect(
-    React.useCallback(() => {
-      const onBack = () => {
-        onLogout();
-        return true;
-      };
-      const sub = BackHandler.addEventListener("hardwareBackPress", onBack);
-      return () => sub.remove();
-    }, [user]),
-  );
+  useExitConfirmOnBack();
 
   useFocusEffect(
     React.useCallback(() => {

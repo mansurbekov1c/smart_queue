@@ -10,6 +10,7 @@ const Tab = createBottomTabNavigator();
 export default function SuperAdminTabs() {
   return (
     <Tab.Navigator
+      backBehavior="history"
       tabBar={(props) => <BottomTabBar {...props} />}
       screenOptions={{
         headerShown: false,

@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAppTheme } from "../context/ThemeContext";
 import { useI18n } from "../context/I18nContext";
 import { useApp } from "../context/AppContext";
+import useExitConfirmOnBack from "../hooks/useExitConfirmOnBack";
 import PlaceCard from "../components/PlaceCard";
 import CategoryChip from "../components/CategoryChip";
 import { CAT_ICONS, categoryLabelKey } from "../data/categoryIcons";
@@ -19,17 +20,18 @@ export default function SearchScreen({ navigation }) {
   const [query, setQuery] = useState("");
   const [showFavOnly, setShowFavOnly] = useState(false);
 
+  useExitConfirmOnBack();
+
   const cats = useMemo(
     () => [
-      { key: "all", labelKey: "catAll", icon: null },
+      { key: "all", display: t("catAll"), icon: null },
       ...categories.map((c) => ({
         key: c.key,
-        labelKey: categoryLabelKey(c.key),
-        fallback: c.key,
+        display: c.label || t(categoryLabelKey(c.key), c.key),
         icon: CAT_ICONS[c.key] || "business",
       })),
     ],
-    [categories],
+    [categories, t],
   );
 
   const filtered = useMemo(() => {
@@ -91,7 +93,7 @@ export default function SearchScreen({ navigation }) {
           {cats.map((c) => (
             <CategoryChip
               key={c.key}
-              label={t(c.labelKey, c.fallback)}
+              label={c.display}
               icon={c.icon}
               active={marketFilter === c.key}
               onPress={() => setMarketFilter(c.key)}

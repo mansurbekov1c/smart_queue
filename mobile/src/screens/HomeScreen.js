@@ -1,12 +1,12 @@
 import React, { useMemo } from "react";
-import { Alert, BackHandler, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { CommonActions, useFocusEffect } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAppTheme } from "../context/ThemeContext";
 import { useI18n } from "../context/I18nContext";
 import { useApp } from "../context/AppContext";
+import useExitConfirmOnBack from "../hooks/useExitConfirmOnBack";
 import PlaceCard from "../components/PlaceCard";
 import CategoryChip from "../components/CategoryChip";
 import LiveDot from "../components/LiveDot";
@@ -16,42 +16,24 @@ import { fonts, radius } from "../theme/typography";
 export default function HomeScreen({ navigation }) {
   const { colors } = useAppTheme();
   const { t } = useI18n();
-  const { places, homeFilter, setHomeFilter, user, myQueues, logoutUser, categories } = useApp();
+  const { places, homeFilter, setHomeFilter, user, myQueues, categories } = useApp();
   const insets = useSafeAreaInsets();
+
+  useExitConfirmOnBack();
 
   const cats = useMemo(
     () => [
-      { key: "all", labelKey: "catAll", icon: null },
+      { key: "all", display: t("catAll"), icon: null },
       ...categories.map((c) => ({
         key: c.key,
-        labelKey: categoryLabelKey(c.key),
-        fallback: c.key,
+        // label (super admin belgilagan) — mavjud bo'lsa; aks holda eski tarjima
+        display: c.label || t(categoryLabelKey(c.key), c.key),
         icon: CAT_ICONS[c.key] || "business",
       })),
     ],
-    [categories],
+    [categories, t],
   );
 
-  useFocusEffect(
-    React.useCallback(() => {
-      const onBack = () => {
-        Alert.alert(t("confirmLogout"), t("confirmLogoutMsg"), [
-          { text: t("btnCancel"), style: "cancel" },
-          {
-            text: t("logout"),
-            style: "destructive",
-            onPress: () => {
-              logoutUser();
-              navigation.dispatch(CommonActions.reset({ index: 0, routes: [{ name: "Splash" }] }));
-            },
-          },
-        ]);
-        return true;
-      };
-      const sub = BackHandler.addEventListener("hardwareBackPress", onBack);
-      return () => sub.remove();
-    }, [user]),
-  );
 
   const filtered = useMemo(() => {
     const list = homeFilter === "all" ? places : places.filter((p) => p.cat === homeFilter);
@@ -118,7 +100,7 @@ export default function HomeScreen({ navigation }) {
             {cats.map((c) => (
               <CategoryChip
                 key={c.key}
-                label={t(c.labelKey, c.fallback)}
+                label={c.display}
                 icon={c.icon}
                 active={homeFilter === c.key}
                 onPress={() => setHomeFilter(c.key)}
