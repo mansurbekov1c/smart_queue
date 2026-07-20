@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-import { Alert, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import HeaderBar from "../components/HeaderBar";
 import GlassCard from "../components/GlassCard";
 import InputField from "../components/InputField";
@@ -44,6 +45,7 @@ export default function WorkScheduleScreen({ route, navigation }) {
   const { showToast } = useToast();
   const {
     places,
+    placesLoading,
     adminPlaceId,
     updateBranchSchedule,
     updateAvgServiceMinutes,
@@ -61,6 +63,20 @@ export default function WorkScheduleScreen({ route, navigation }) {
   const [latText, setLatText] = useState(place?.location?.coords?.lat != null ? String(place.location.coords.lat) : "");
   const [lngText, setLngText] = useState(place?.location?.coords?.lng != null ? String(place.location.coords.lng) : "");
   const [savingLocation, setSavingLocation] = useState(false);
+
+  /* place ko'pincha ekran ochilganda hali yuklanmagan bo'ladi (places async).
+     Yuklangач formani filial ma'lumotlari bilan bir marta to'ldiramiz —
+     aks holda inputlar bo'sh/default holatda qolib ketardi. */
+  const initedRef = useRef(false);
+  useEffect(() => {
+    if (place && !initedRef.current) {
+      initedRef.current = true;
+      setSchedule(buildDefaultSchedule(place.weeklySchedule));
+      setAvgMinutesText(String(place.avgServiceMinutes ?? 15));
+      setLatText(place.location?.coords?.lat != null ? String(place.location.coords.lat) : "");
+      setLngText(place.location?.coords?.lng != null ? String(place.location.coords.lng) : "");
+    }
+  }, [place]);
 
   const setDay = (key, patch) => {
     setSchedule((prev) => ({ ...prev, [key]: { ...prev[key], ...patch } }));
@@ -117,12 +133,26 @@ export default function WorkScheduleScreen({ route, navigation }) {
     setSavingLocation(false);
   };
 
+  // Filial umuman biriktirilmagan (branchId yo'q) — haqiqiy "filial yo'q" holati
+  if (!branchId) {
+    return (
+      <LinearGradient colors={colors.bgGradient} style={styles.fill}>
+        <HeaderBar title={t("workScheduleTitle")} onBack={() => navigation.goBack()} showThemeToggle={false} />
+        <NoBranchNotice />
+      </LinearGradient>
+    );
+  }
+
+  // Filial biriktirilgan, lekin ma'lumot hali yuklanmoqda — spinner (noto'g'ri
+  // "filial yo'q" xabari o'rniga)
   if (!place) {
     return (
-      <View style={styles.fill}>
+      <LinearGradient colors={colors.bgGradient} style={styles.fill}>
         <HeaderBar title={route?.params?.branchName || t("workScheduleTitle")} onBack={() => navigation.goBack()} showThemeToggle={false} />
-        <NoBranchNotice />
-      </View>
+        <View style={styles.centerFill}>
+          <ActivityIndicator size="large" color={colors.accent} />
+        </View>
+      </LinearGradient>
     );
   }
 
@@ -132,7 +162,11 @@ export default function WorkScheduleScreen({ route, navigation }) {
   return (
     <View style={[styles.fill, { backgroundColor: colors.bgGradient[0] }]}>
       <HeaderBar title={route?.params?.branchName || t("workScheduleTitle")} onBack={() => navigation.goBack()} showThemeToggle={false} />
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets
+      >
         <Text style={[styles.sub, { color: colors.text2 }]}>{t("workScheduleSub")}</Text>
 
         <GlassCard style={styles.card}>
@@ -257,6 +291,7 @@ export default function WorkScheduleScreen({ route, navigation }) {
 
 const styles = StyleSheet.create({
   fill: { flex: 1 },
+  centerFill: { flex: 1, alignItems: "center", justifyContent: "center" },
   content: { paddingHorizontal: 16, paddingBottom: 60 },
   sub: { fontSize: 13, marginBottom: 14, lineHeight: 18 },
   card: { paddingVertical: 4, marginBottom: 18 },

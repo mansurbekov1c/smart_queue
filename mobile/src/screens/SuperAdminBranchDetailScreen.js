@@ -160,7 +160,7 @@ export default function SuperAdminBranchDetailScreen({ route, navigation }) {
     <LinearGradient colors={colors.bgGradient} style={styles.fill}>
       <HeaderBar title={branch.name} onBack={() => navigation.goBack()} />
 
-      <ScrollView contentContainerStyle={styles.scroll}>
+      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
         <View style={styles.hero}>
           <LinearGradient colors={[colors.gradientStart, colors.gradientEnd]} style={styles.heroIcon}>
             <Ionicons name={CAT_ICONS[branch.cat] || "business"} size={26} color="#fff" />
@@ -177,7 +177,7 @@ export default function SuperAdminBranchDetailScreen({ route, navigation }) {
           <View style={styles.addressRow}>
             <Ionicons name="location-outline" size={15} color={colors.accent} style={{ marginTop: 1 }} />
             <Text style={[styles.addressText, { color: colors.text2 }]}>
-              {branch.location?.city}, {branch.location?.district}, {branch.location?.address}
+              {[branch.location?.city, branch.location?.district, branch.location?.address].filter(Boolean).join(", ")}
             </Text>
           </View>
           <View style={styles.statusRow}>

@@ -41,7 +41,7 @@ export default function BottomSheetModal({ visible, onClose, children, scrollabl
         <KeyboardAvoidingView
           style={styles.kav}
           pointerEvents="box-none"
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          behavior="padding"
         >
           <View style={[styles.sheet, styles.sheetScrollable, { backgroundColor: colors.modalSheetBg }]}>
             <View style={[styles.handle, { backgroundColor: colors.inputBorder }]} />
@@ -53,7 +53,7 @@ export default function BottomSheetModal({ visible, onClose, children, scrollabl
                 showsVerticalScrollIndicator={false}
                 nestedScrollEnabled
                 automaticallyAdjustKeyboardInsets
-                contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 18) + 40 }}
+                contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 18) + 140 }}
               >
                 {children}
               </ScrollView>

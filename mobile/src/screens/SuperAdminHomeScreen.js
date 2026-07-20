@@ -23,6 +23,7 @@ import PrimaryButton from "../components/PrimaryButton";
 import SecondaryButton from "../components/SecondaryButton";
 import BottomSheetModal, { BottomSheetScrollContext } from "../components/BottomSheetModal";
 import ManageableCategoryPicker from "../components/ManageableCategoryPicker";
+import BranchMapPreview from "../components/BranchMapPreview";
 import PickerOverlay from "../components/PickerOverlay";
 import { CAT_ICONS } from "../data/categoryIcons";
 import { fetchBranches } from "../api/branches";
@@ -362,8 +363,13 @@ function AddBranchModal({ visible, onClose, onCreated }) {
   };
 
   const onSubmit = async () => {
-    if (!name.trim() || !city.trim() || !district.trim() || !address.trim() || !category) {
+    // #2 — shahar VA tuman emas, kamida BITTASI to'ldirilgan bo'lsa yetarli
+    if (!name.trim() || !address.trim() || !category) {
       showToast(t("saFillAllFields", "Barcha maydonlarni to'ldiring"));
+      return;
+    }
+    if (!city.trim() && !district.trim()) {
+      showToast(t("saCityOrDistrictRequired", "Shahar yoki tumandan birini kiriting"));
       return;
     }
     if (!isLatinName(name)) {
@@ -407,6 +413,11 @@ function AddBranchModal({ visible, onClose, onCreated }) {
         <ScrollAwareField label={t("labelLat")} value={latText} onChangeText={setLatText} keyboardType="numbers-and-punctuation" style={styles.locInput} />
         <ScrollAwareField label={t("labelLng")} value={lngText} onChangeText={setLngText} keyboardType="numbers-and-punctuation" style={styles.locInput} />
       </View>
+      <BranchMapPreview
+        lat={latText.trim() ? parseFloat(latText) : null}
+        lng={lngText.trim() ? parseFloat(lngText) : null}
+        style={styles.mapPreview}
+      />
 
       <Text style={[styles.catLabel, { color: colors.text2 }]}>{t("saCategory", "Kategoriya")}</Text>
       <ManageableCategoryPicker
@@ -519,9 +530,13 @@ function AddAdminModal({ visible, branches, onClose, onCreated }) {
     }
   };
 
-  const pickerItems = branches
-    .filter((b) => b.name.toLowerCase().includes(pickerSearch.trim().toLowerCase()))
-    .map((b) => ({ id: b.id, label: b.name, sublabel: b.location?.city, icon: CAT_ICONS[b.cat] || "business" }));
+  const pickerItems = [
+    // "Biriktirmaslik" — tanlovni bekor qilib, hech qaysi filialga biriktirmaslik
+    { id: "__none__", label: t("saUnassigned", "Biriktirilmagan"), sublabel: t("saNoAssignHint", "Filialga biriktirmaslik"), icon: "close-circle-outline" },
+    ...branches
+      .filter((b) => b.name.toLowerCase().includes(pickerSearch.trim().toLowerCase()))
+      .map((b) => ({ id: b.id, label: b.name, sublabel: b.location?.city, icon: CAT_ICONS[b.cat] || "business" })),
+  ];
 
   return (
     <BottomSheetModal visible={visible} onClose={handleClose} scrollable>
@@ -548,16 +563,27 @@ function AddAdminModal({ visible, branches, onClose, onCreated }) {
       />
 
       <Text style={[styles.catLabel, { color: colors.text2 }]}>{t("saAssignBranch", "Filialga biriktirish")}</Text>
-      <TouchableOpacity
-        onPress={() => setPickerOpen(true)}
-        style={[styles.branchPickBtn, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder }]}
-      >
-        <Ionicons name="business-outline" size={16} color={colors.accent} />
-        <Text style={{ color: selectedBranch ? colors.text : colors.placeholder, fontSize: 13, fontFamily: fonts.medium, flex: 1, marginLeft: 8 }} numberOfLines={1}>
-          {selectedBranch ? selectedBranch.name : t("saUnassigned", "Biriktirilmagan")}
-        </Text>
-        <Ionicons name="chevron-forward" size={15} color={colors.text3} />
-      </TouchableOpacity>
+      <View style={styles.branchPickRow}>
+        <TouchableOpacity
+          onPress={() => setPickerOpen(true)}
+          style={[styles.branchPickBtn, { flex: 1, backgroundColor: colors.inputBg, borderColor: colors.inputBorder }]}
+        >
+          <Ionicons name="business-outline" size={16} color={colors.accent} />
+          <Text style={{ color: selectedBranch ? colors.text : colors.placeholder, fontSize: 13, fontFamily: fonts.medium, flex: 1, marginLeft: 8 }} numberOfLines={1}>
+            {selectedBranch ? selectedBranch.name : t("saUnassigned", "Biriktirilmagan")}
+          </Text>
+          <Ionicons name="chevron-forward" size={15} color={colors.text3} />
+        </TouchableOpacity>
+        {branchId ? (
+          <TouchableOpacity
+            onPress={() => setBranchId(null)}
+            style={[styles.branchClearBtn, { backgroundColor: colors.dangerSoft, borderColor: colors.dangerBorder }]}
+            hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+          >
+            <Ionicons name="close" size={16} color={colors.danger} />
+          </TouchableOpacity>
+        ) : null}
+      </View>
 
       <PrimaryButton
         label={t("save", "Saqlash")}
@@ -582,7 +608,7 @@ function AddAdminModal({ visible, branches, onClose, onCreated }) {
         search={pickerSearch}
         onSearchChange={setPickerSearch}
         onSelect={(item) => {
-          setBranchId(item.id);
+          setBranchId(item.id === "__none__" ? null : item.id);
           setPickerOpen(false);
           setPickerSearch("");
         }}
@@ -643,6 +669,7 @@ const styles = StyleSheet.create({
   catLabel: { fontSize: 12.5, fontWeight: "700", marginBottom: 8 },
   submitBtn: { marginBottom: 4, marginTop: 18 },
   clearBtn: { marginTop: 10, opacity: 0.9 },
+  mapPreview: { marginTop: 4, marginBottom: 4 },
   branchPickBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -650,5 +677,14 @@ const styles = StyleSheet.create({
     paddingVertical: 13,
     borderRadius: radius.md,
     borderWidth: 1,
+  },
+  branchPickRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  branchClearBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

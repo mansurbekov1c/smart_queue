@@ -136,7 +136,7 @@ export default function PlaceDetailScreen({ route, navigation }) {
               <Ionicons name="location" size={19} color={colors.accent} />
             </View>
             <View style={styles.locInfo}>
-              <Text style={[styles.locTitle, { color: colors.text, fontFamily: fonts.bold }]}>{place.location.district}</Text>
+              <Text style={[styles.locTitle, { color: colors.text, fontFamily: fonts.bold }]}>{place.location.district || place.location.city}</Text>
               <Text style={[styles.locSub, { color: colors.text3 }]}>{place.location.address}</Text>
             </View>
             {place.location.coords?.lat != null ? (

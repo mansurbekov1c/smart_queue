@@ -39,9 +39,10 @@ export default function SearchScreen({ navigation }) {
       const q = query.trim().toLowerCase();
       list = list.filter(
         (p) =>
-          p.name.toLowerCase().includes(q) ||
-          p.location.district.toLowerCase().includes(q) ||
-          p.location.address.toLowerCase().includes(q),
+          (p.name || "").toLowerCase().includes(q) ||
+          (p.location?.city || "").toLowerCase().includes(q) ||
+          (p.location?.district || "").toLowerCase().includes(q) ||
+          (p.location?.address || "").toLowerCase().includes(q),
       );
     }
     return list;

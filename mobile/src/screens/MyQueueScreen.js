@@ -124,7 +124,7 @@ export default function MyQueueScreen({ navigation }) {
                       </View>
                       <View style={styles.flex1}>
                         <Text style={[styles.placeName, { color: colors.text, fontFamily: fonts.bold }]}>{place.name}</Text>
-                        <Text style={[styles.placeMeta, { color: colors.text2 }]}>{place.location.district}</Text>
+                        <Text style={[styles.placeMeta, { color: colors.text2 }]}>{place.location.district || place.location.city}</Text>
                         <Text style={[styles.placeMeta, { color: colors.text2 }]}>{place.hours}</Text>
                       </View>
                       <Ionicons name="chevron-forward" size={18} color={colors.text3} />

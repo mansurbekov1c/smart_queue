@@ -49,14 +49,23 @@ export async function createAdmin({ firstName, lastName, email, password, branch
   });
 
   if (error) {
-    // Edge Function 4xx/5xx qaytarsa — javob tanasidagi aniq xabarni chiqaramiz
-    let message = error.message;
-    try {
-      const body = await error.context?.json?.();
-      if (body?.error) message = body.error;
-    } catch (_) {
-      // javob tanasini o'qib bo'lmadi — asl xabar qoladi
+    // Edge Function 4xx/5xx qaytarsa — javob tanasidan aniq xabarni chiqaramiz
+    let message = error?.message || "Amal bajarilmadi";
+    const ctx = error?.context;
+    if (ctx && typeof ctx.text === "function") {
+      try {
+        const raw = await ctx.text();
+        try {
+          const body = JSON.parse(raw);
+          if (body?.error) message = body.error;
+        } catch (_) {
+          if (raw) message = raw; // JSON emas — xom matnni ko'rsatamiz
+        }
+      } catch (_) {
+        // javob tanasini o'qib bo'lmadi
+      }
     }
+    console.error("createAdmin Edge Function xatosi:", message, error);
     throw new Error(message);
   }
   if (data?.error) throw new Error(data.error);

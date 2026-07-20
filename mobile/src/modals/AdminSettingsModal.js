@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import InputField from "../components/InputField";
 import PrimaryButton from "../components/PrimaryButton";
@@ -81,6 +81,7 @@ export default function AdminSettingsModal({ visible, onClose }) {
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={handleClose}>
       <Pressable style={[styles.overlay, { backgroundColor: colors.modalOverlay }]} onPress={handleClose}>
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.kav}>
         <Pressable style={[styles.sheet, { backgroundColor: colors.modalSheetBg }]} onPress={() => {}}>
           <View style={[styles.handle, { backgroundColor: colors.inputBorder }]} />
 
@@ -214,6 +215,7 @@ export default function AdminSettingsModal({ visible, onClose }) {
             </>
           )}
         </Pressable>
+        </KeyboardAvoidingView>
       </Pressable>
     </Modal>
   );
@@ -221,6 +223,7 @@ export default function AdminSettingsModal({ visible, onClose }) {
 
 const styles = StyleSheet.create({
   overlay: { flex: 1, justifyContent: "flex-end" },
+  kav: { width: "100%" },
   sheet: {
     borderTopLeftRadius: radius.xl,
     borderTopRightRadius: radius.xl,
